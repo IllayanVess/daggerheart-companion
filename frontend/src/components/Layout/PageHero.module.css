@@ -1,0 +1,72 @@
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: clamp(1.25rem, 2vw, 2rem);
+  border: 1px solid var(--border-strong);
+  border-radius: 1.75rem;
+  background:
+    linear-gradient(145deg, rgba(224, 224, 224, 0.12), transparent 58%),
+    linear-gradient(180deg, rgba(47, 47, 47, 0.92), rgba(0, 0, 0, 0.96));
+  box-shadow: 0 1.5rem 4.5rem rgba(0, 0, 0, 0.26);
+}
+
+.heroContent {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+
+.heroCopy {
+  display: grid;
+  gap: 0.85rem;
+  max-width: 42rem;
+}
+
+.heroCopy h1 {
+  margin: 0;
+  color: var(--color-surface);
+  font-size: clamp(2.2rem, 5vw, 4.25rem);
+  line-height: 0.92;
+}
+
+.heroCopy p {
+  margin: 0;
+  color: var(--text-soft-on-dark);
+  font-size: 1rem;
+}
+
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  color: var(--text-soft-on-dark);
+}
+
+.linkButton {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.linkButton:hover {
+  color: var(--color-accent-light);
+}
+
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .heroCopy h1 {
+    max-width: 12ch;
+  }
+}

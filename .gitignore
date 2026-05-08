@@ -1,0 +1,41 @@
+# Python
+backend/.venv/
+backend/__pycache__/
+backend/app/__pycache__/
+backend/app/routers/__pycache__/
+backend/app/schemas/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# Local environment
+frontend/.env.local
+*.env.local
+*.env
+*.log
+
+# Generated build and database artifacts
+*.db.bak
+*.tsbuildinfo
+frontend/vite-dev.log
+frontend/vite-dev.err.log
+
+# Database and editor files
+# Ignore generated SQLite database files, not the folder itself
+backend/database/*.db
+backend/database/*.db-shm
+backend/database/*.db-wal
+backend/unused_archive/
+backend/unused_archive/database/
+.vscode/
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+prompt.md

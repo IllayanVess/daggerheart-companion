@@ -1,0 +1,86 @@
+.levelUpBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.levelUpModal {
+  width: min(100%, 64rem);
+  max-height: calc(100vh - 3rem);
+  overflow: auto;
+  padding: 1.5rem;
+  border: 1px solid rgba(139, 0, 0, 0.32);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at top, rgba(139, 0, 0, 0.2), transparent 35%),
+    linear-gradient(180deg, rgba(22, 12, 12, 0.98), rgba(7, 4, 4, 0.98));
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.45);
+}
+
+.levelUpModal h2,
+.levelUpModal h3,
+.levelUpModal h4,
+.levelUpModal p {
+  margin-top: 0;
+}
+
+.levelUpGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.levelUpCard {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 1rem;
+  background: rgba(224, 224, 224, 0.05);
+}
+
+.levelUpCard label {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.levelUpCard input,
+.levelUpCard select,
+.levelUpCard textarea {
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.9rem;
+  background: rgba(224, 224, 224, 0.05);
+  color: var(--color-surface);
+}
+
+.levelUpTwoColumn {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.levelUpSummary {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--text-soft-on-dark);
+}
+
+.levelUpActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 900px) {
+  .levelUpTwoColumn {
+    grid-template-columns: 1fr;
+  }
+}

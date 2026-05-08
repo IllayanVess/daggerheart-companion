@@ -1,0 +1,208 @@
+/* components/DiceRoller/DiceRoller.module.css */
+
+/* Main container - ensure it fills the panel */
+.diceRollerLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* Left side - Roller controls */
+.diceRollerMain {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Formula input area */
+.diceFormulaLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.diceFormulaLabel label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(224, 224, 224, 0.66);
+}
+
+.diceFormulaRow {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.diceFormulaRow input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  background: rgba(224, 224, 224, 0.04);
+  color: var(--color-surface);
+  font-size: 1rem;
+}
+
+.diceFormulaRow input:focus {
+  outline: 2px solid rgba(123, 72, 36, 0.3);
+  outline-offset: 2px;
+}
+
+/* Quick roll buttons grid */
+.diceQuickRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.75rem;
+}
+
+.diceQuickRow button {
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: rgba(224, 224, 224, 0.05);
+  color: var(--color-surface);
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.diceQuickRow button:hover {
+  transform: translateY(-1px);
+  background: rgba(224, 224, 224, 0.08);
+}
+
+/* Result card */
+.diceResultCard {
+  margin-top: 0.5rem;
+}
+
+.diceResultCard h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(224, 224, 224, 0.66);
+}
+
+.diceResultTotal {
+  font-size: 3rem;
+  font-weight: 800;
+  text-align: center;
+  margin: 1rem 0;
+  color: var(--color-surface);
+}
+
+@media (min-width: 640px) {
+  .diceResultTotal {
+    font-size: 4rem;
+  }
+}
+
+.diceResultDetails {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.diceGroups {
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  background: rgba(224, 224, 224, 0.05);
+  padding: 0.75rem;
+  border-radius: 12px;
+  margin: 0.5rem 0;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+.hopeFearBadge {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.hopeFearDetails {
+  margin: 0.75rem 0;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+/* History section - make it scrollable on desktop */
+.diceRollerLayout > :last-child {
+  background: rgba(224, 224, 224, 0.05);
+  border-radius: 18px;
+  padding: 1rem;
+  border: 1px solid var(--border-soft);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.diceRollerLayout > :last-child h4 {
+  margin: 0 0 1rem 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(224, 224, 224, 0.66);
+}
+
+/* Animation */
+.pulse {
+  animation: pulse 0.5s ease-in-out 3;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+/* Desktop layout - two columns */
+@media (min-width: 768px) {
+  .diceRollerLayout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 1.5rem;
+  }
+  
+  .diceRollerMain {
+    position: sticky;
+    top: 1rem;
+  }
+  
+  .diceRollerLayout > :last-child {
+    max-height: 500px;
+    position: sticky;
+    top: 1rem;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .diceFormulaRow {
+    flex-direction: column;
+  }
+  
+  .diceFormulaRow button {
+    width: 100%;
+  }
+  
+  .diceQuickRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Small text utility */
+.small {
+  font-size: 0.75rem;
+}

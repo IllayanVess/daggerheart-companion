@@ -1,0 +1,44 @@
+.homeHero {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: clamp(1.5rem, 2vw, 2.25rem);
+  border: 1px solid var(--border-strong);
+  border-radius: 1.75rem;
+  background:
+    radial-gradient(circle at top right, rgba(75, 0, 130, 0.18), transparent 36%),
+    linear-gradient(180deg, rgba(47, 47, 47, 0.95), rgba(0, 0, 0, 0.96));
+  box-shadow: var(--shadow-panel);
+}
+
+.homeHeroCopy {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.homeHeroCopy p {
+  margin: 0;
+}
+
+.homeHeroCopy h1 {
+  max-width: 13ch;
+  margin: 0;
+  font-size: clamp(2.4rem, 6vw, 5rem);
+  line-height: 0.92;
+}
+
+.homeHeroLead {
+  max-width: 56rem;
+  color: var(--text-soft-on-dark);
+}
+
+@media (max-width: 900px) {
+  .homeHero {
+    padding: 1.2rem;
+  }
+
+  .homeHeroCopy h1 {
+    max-width: 11ch;
+  }
+}

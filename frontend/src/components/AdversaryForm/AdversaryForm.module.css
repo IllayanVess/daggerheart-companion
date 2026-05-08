@@ -1,0 +1,111 @@
+.adversaryBuilderLayout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+
+.adversaryBuilderLayout form {
+  flex: 1 1 34rem;
+}
+
+.structuredGroup {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 1rem;
+  background: rgba(224, 224, 224, 0.04);
+}
+
+.structuredHeader {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.structuredHeader h3,
+.adversaryPreviewName {
+  margin: 0;
+}
+
+.experienceList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.featureEntryList {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.featureEntryCard {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.9rem;
+  background: rgba(224, 224, 224, 0.03);
+}
+
+.experienceRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.experienceRow input:first-child {
+  flex: 1 1 16rem;
+}
+
+.experienceRow input:nth-child(2) {
+  flex: 0 0 6rem;
+}
+
+.adversaryPreviewCard {
+  flex: 1 1 20rem;
+  align-self: start;
+  padding: 1.25rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 1.2rem;
+  background:
+    radial-gradient(circle at top, rgba(139, 0, 0, 0.22), transparent 34%),
+    linear-gradient(180deg, rgba(47, 47, 47, 0.96), rgba(0, 0, 0, 0.94));
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.2);
+}
+
+.adversaryPreviewName {
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.adversaryPreviewTier {
+  margin: 0.3rem 0 0.8rem;
+  font-weight: 700;
+}
+
+.adversaryPreviewDescription,
+.adversaryPreviewCard p {
+  margin: 0.5rem 0;
+}
+
+.adversaryPreviewSectionTitle {
+  margin-top: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.adversaryPreviewFeatures {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.adversaryPreviewNotes {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-soft);
+}

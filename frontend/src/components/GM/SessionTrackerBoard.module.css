@@ -1,0 +1,254 @@
+.layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.board {
+  flex: 2 1 42rem;
+  display: grid;
+  gap: 1rem;
+  align-content: flex-start;
+}
+
+.fearSection {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.2rem;
+  border: 1px solid rgba(139, 0, 0, 0.36);
+  border-radius: 1.3rem;
+  background:
+    radial-gradient(circle at top, rgba(139, 0, 0, 0.28), transparent 45%),
+    linear-gradient(180deg, rgba(43, 12, 12, 0.95), rgba(12, 4, 4, 0.96));
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.28);
+}
+
+.fearHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.fearValue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 4.25rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 94, 94, 0.28);
+  background: rgba(139, 0, 0, 0.3);
+  color: #ffd6d6;
+}
+
+.pcColumn {
+  min-width: 0;
+}
+
+.secondaryColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.column {
+  flex: 1 1 18rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.columnHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 1.1rem;
+  background: rgba(224, 224, 224, 0.04);
+}
+
+.columnHeader h3,
+.stackCard h3 {
+  margin: 0;
+}
+
+.stackCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 1.25rem;
+  background: rgba(224, 224, 224, 0.06);
+}
+
+.stackCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.stackCardHeader p {
+  margin: 0.25rem 0 0;
+}
+
+.removeButton {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: rgba(224, 224, 224, 0.08);
+  color: var(--color-surface);
+  cursor: pointer;
+}
+
+.trackerGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.trackerGroup label {
+  margin: 0;
+  color: var(--text-soft-on-dark);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.trackerRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.trackerDot {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(224, 224, 224, 0.34);
+  background: transparent;
+  cursor: pointer;
+}
+
+.trackerDotActive {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-danger));
+  border-color: rgba(139, 0, 0, 0.72);
+}
+
+.environmentArt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 7rem;
+  border: 1px dashed rgba(224, 224, 224, 0.34);
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at top, rgba(75, 0, 130, 0.22), transparent 55%),
+    rgba(224, 224, 224, 0.04);
+  color: var(--text-soft-on-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+}
+
+.environmentImage {
+  width: 100%;
+  min-height: 7rem;
+  max-height: 12rem;
+  object-fit: cover;
+  border-radius: 1rem;
+  border: 1px solid var(--border-soft);
+}
+
+.library {
+  flex: 1 1 20rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.librarySection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 1.25rem;
+  background: rgba(224, 224, 224, 0.04);
+}
+
+.librarySection h3,
+.librarySection p {
+  margin: 0;
+}
+
+.libraryList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.libraryCard {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: flex-start;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 1rem;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.libraryCard p {
+  margin: 0.3rem 0 0;
+  color: var(--text-soft-on-dark);
+}
+
+.libraryCard button {
+  white-space: nowrap;
+}
+
+.emptyState {
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px dashed var(--border-soft);
+  color: var(--text-soft-on-dark);
+}
+
+@media (max-width: 900px) {
+  .layout,
+  .board {
+    flex-direction: column;
+  }
+
+  .column,
+  .library,
+  .board {
+    flex-basis: auto;
+  }
+
+  .secondaryColumns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.librarySearch {
+  width: 100%;
+  padding: 0.375rem 0.625rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.875rem;
+}
+
+.librarySearch::placeholder {
+  color: var(--text-muted);
+}

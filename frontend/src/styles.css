@@ -1,0 +1,230 @@
+:root {
+  color-scheme: dark;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --color-accent: #4b0082;
+  --color-ink: #000000;
+  --color-danger: #8b0000;
+  --color-panel: #2f2f2f;
+  --color-surface: #e0e0e0;
+  --color-accent-light: rgba(75, 0, 130, 0.45);
+  --bg-page:
+    radial-gradient(circle at top, rgba(75, 0, 130, 0.18), transparent 28%),
+    linear-gradient(180deg, #131313 0%, #000000 100%);
+  --panel-bg: linear-gradient(180deg, rgba(47, 47, 47, 0.96), rgba(0, 0, 0, 0.92));
+  --panel-soft: rgba(224, 224, 224, 0.05);
+  --border-strong: rgba(224, 224, 224, 0.18);
+  --border-soft: rgba(224, 224, 224, 0.12);
+  --text-muted: rgba(224, 224, 224, 0.72);
+  --text-soft-on-dark: rgba(224, 224, 224, 0.82);
+  --shadow-panel: 0 1.5rem 4.25rem rgba(0, 0, 0, 0.28);
+  --sheet-ink: #e0e0e0;
+  --sheet-banner: #4b0082;
+  --sheet-banner-accent: #e0e0e0;
+  --sheet-card-bg-top: rgba(47, 47, 47, 0.98);
+  --sheet-card-bg-bottom: rgba(16, 16, 16, 0.96);
+  --sheet-soft: rgba(224, 224, 224, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  color: var(--color-surface);
+  background: var(--bg-page);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+input,
+select,
+textarea,
+a {
+  transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid rgba(224, 224, 224, 0.4);
+  outline-offset: 2px;
+}
+
+.app-shell {
+  width: min(100%, 86rem);
+  margin: 0 auto;
+  padding: 1.5rem clamp(1rem, 2vw, 1.5rem) 3rem;
+}
+
+.panel h2,
+.record-card h3 {
+  margin: 0;
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  color: rgba(224, 224, 224, 0.66);
+}
+
+.content-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+
+.content-grid > * {
+  flex: 1 1 24rem;
+}
+
+.builder-page,
+.roster-page,
+.sheet-view-page,
+.single-tool-page {
+  width: min(100%, 74rem);
+  margin: 0 auto;
+}
+
+.panel {
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  border: 1px solid var(--border-soft);
+  background: var(--panel-bg);
+  box-shadow: var(--shadow-panel);
+}
+
+.loading-panel {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+}
+
+.panel-header,
+.record-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.panel-header h2 {
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+}
+
+.status,
+.muted,
+.empty-state {
+  color: var(--text-muted);
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-top: 1.1rem;
+}
+
+.record-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1rem;
+  border-radius: 1.1rem;
+  border: 1px solid var(--border-soft);
+  background: rgba(224, 224, 224, 0.05);
+}
+
+.record-card p {
+  margin: 0;
+}
+
+.detail-card {
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-soft);
+  background: rgba(224, 224, 224, 0.05);
+}
+
+.sheet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sheet-entry {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.9rem;
+  background: rgba(224, 224, 224, 0.04);
+}
+
+.small {
+  font-size: 0.75rem;
+}
+
+.primary-button,
+.secondary-button {
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.primary-button {
+  padding: 0.8rem 1.2rem;
+  border: 0;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-danger));
+  color: var(--color-surface);
+}
+
+.primary-button:hover,
+.secondary-button:hover {
+  transform: translateY(-1px);
+}
+
+.secondary-button {
+  padding: 0.75rem 1.1rem;
+  border: 1px solid var(--border-strong);
+  background: rgba(224, 224, 224, 0.06);
+  color: var(--color-surface);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(75, 0, 130, 0.28);
+  color: var(--color-surface);
+}
+
+@media (max-width: 900px) {
+  .panel {
+    padding: 1.2rem;
+  }
+}

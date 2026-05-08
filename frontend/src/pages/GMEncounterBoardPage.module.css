@@ -1,0 +1,58 @@
+.encounterBoardPage {
+  width: min(100%, 96rem);
+}
+
+.dicePopupBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: clamp(1rem, 3vw, 2rem);
+  background: rgba(0, 0, 0, 0.54);
+}
+
+.dicePopup {
+  width: min(42rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  border: 1px solid var(--border-strong);
+  border-radius: 1rem;
+  background: var(--panel-bg);
+  box-shadow: var(--shadow-panel);
+}
+
+.dicePopup :global(.panel) {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.dicePopupHeader {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-soft);
+  background: rgba(12, 12, 12, 0.96);
+}
+
+.dicePopupHeader button {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: rgba(224, 224, 224, 0.07);
+  color: var(--color-surface);
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .dicePopupBackdrop {
+    justify-content: center;
+  }
+}

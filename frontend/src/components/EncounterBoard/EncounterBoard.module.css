@@ -1,0 +1,581 @@
+.boardHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.boardHeader h2,
+.boardHeader p,
+.paletteHeader h3,
+.detailPanel h3,
+.detailPanel h4 {
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 1rem;
+  background: rgba(224, 224, 224, 0.04);
+}
+
+.inputBase {
+  border: 1px solid var(--border-soft);
+  border-radius: 0.65rem;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--color-surface);
+}
+
+.fieldControl {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+}
+
+.textAreaControl {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.toolbarSelect {
+  min-height: 2.55rem;
+  padding: 0 0.75rem;
+}
+
+.environmentControl {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.environmentControl label {
+  display: grid;
+  gap: 0.3rem;
+  color: var(--text-soft-on-dark);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.environmentPicker {
+  position: absolute;
+  z-index: 8;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  min-width: 17rem;
+  padding: 0.65rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.85rem;
+  background: rgba(17, 17, 17, 0.98);
+  box-shadow: var(--shadow-panel);
+}
+
+.environmentPicker select {
+  width: 100%;
+}
+
+.paintControl {
+  display: inline-flex;
+  gap: 0.45rem;
+  align-items: center;
+  min-height: 2.55rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  color: var(--text-soft-on-dark);
+  background: rgba(224, 224, 224, 0.04);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.libraryStatus {
+  margin: -0.35rem 0 0.9rem;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.gridViewport {
+  --grid-size: 30;
+  --cell-size: 48px;
+  overflow: auto;
+  max-height: 72vh;
+  border: 1px solid var(--border-soft);
+  border-radius: 1rem;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-size), var(--cell-size));
+  grid-template-rows: repeat(var(--grid-size), var(--cell-size));
+  width: calc(var(--grid-size) * var(--cell-size));
+  min-height: calc(var(--grid-size) * var(--cell-size));
+}
+
+.cell {
+  position: relative;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-right: 1px solid rgba(224, 224, 224, 0.09);
+  border-bottom: 1px solid rgba(224, 224, 224, 0.09);
+  color: var(--color-surface);
+  cursor: pointer;
+}
+
+.cell:hover,
+.cell[data-selected="true"] {
+  outline: 2px solid rgba(224, 224, 224, 0.62);
+  outline-offset: -2px;
+  z-index: 2;
+}
+
+.cellRejected {
+  animation: rejectShake 340ms ease;
+}
+
+.environmentLabel {
+  position: absolute;
+  inset: 0.18rem;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.26);
+  font-size: 0.42rem;
+  line-height: 1.1;
+  text-align: left;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.token {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 0.35rem 0.8rem rgba(0, 0, 0, 0.28);
+  cursor: move;
+}
+
+.token img,
+.detailPortrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.creatureToken {
+  z-index: 3;
+  top: 4px;
+  left: 4px;
+  width: 40px;
+  height: 40px;
+  font-size: 0.75rem;
+  border: 2px solid var(--border-strong);
+}
+
+.objectStack {
+  position: absolute;
+  z-index: 4;
+  right: 2px;
+  bottom: 2px;
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: flex-end;
+  width: 42px;
+  gap: 0;
+}
+
+.objectToken {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-left: -4px;
+  font-size: 0.48rem;
+  border: 2px solid #9b9b9b;
+}
+
+.objectOverflowBadge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: -4px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.82);
+  color: #ffffff;
+  font-size: 0.55rem;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.tokenPc {
+  border-color: #4b8dff;
+}
+
+.tokenAdversary {
+  border-color: #ff5555;
+}
+
+.tokenNpc {
+  border-color: #e1c542;
+}
+
+.tokenObject {
+  border-color: #a8a8a8;
+}
+
+.selectedToken {
+  box-shadow: 0 0 0 2px #ffffff, 0 0.35rem 0.8rem rgba(0, 0, 0, 0.28);
+}
+
+.palette {
+  display: grid;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 1rem;
+  background: rgba(224, 224, 224, 0.04);
+}
+
+.paletteCompact {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.paletteHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.paletteStatus {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.paletteHeaderActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.paletteTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.paletteTabs button,
+.detailActions button,
+.sectionHeader button,
+.rollActions button,
+.popoverHeader button,
+.contextMenu button,
+.trackerControls button {
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: rgba(224, 224, 224, 0.07);
+  color: var(--color-surface);
+  cursor: pointer;
+}
+
+.paletteTabs button {
+  padding: 0.45rem 0.75rem;
+}
+
+.paletteTabs .activeTab {
+  border-color: rgba(224, 224, 224, 0.36);
+  background: rgba(75, 0, 130, 0.4);
+}
+
+.paletteList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.55rem;
+  max-height: 9rem;
+  overflow: auto;
+}
+
+.paletteCompact .paletteList {
+  grid-template-columns: 1fr;
+  max-height: 12rem;
+}
+
+.paletteItem {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.75rem;
+  background: rgba(0, 0, 0, 0.24);
+  color: var(--color-surface);
+  text-align: left;
+  cursor: grab;
+}
+
+.paletteItem span {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.paletteItem em {
+  color: rgba(224, 224, 224, 0.58);
+  font-size: 0.72rem;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.paletteSearch {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.65rem;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--color-surface);
+}
+
+.paletteEmpty {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.9rem;
+  border: 1px dashed var(--border-soft);
+  border-radius: 0.75rem;
+  color: var(--text-muted);
+}
+
+.paletteEmpty p {
+  margin: 0;
+}
+
+.adhocForm {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.adhocNumbers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.adhocNumbers label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--text-soft-on-dark);
+  font-size: 0.8rem;
+}
+
+.detailPanel {
+  position: sticky;
+  top: 1rem;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: min(28rem, 72vh);
+  max-height: 72vh;
+  overflow: auto;
+  padding: 1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 1rem;
+  background: rgba(224, 224, 224, 0.04);
+}
+
+.emptyPanel {
+  display: grid;
+  gap: 0.6rem;
+  align-content: center;
+  min-height: 18rem;
+}
+
+.detailHeader {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.detailPortrait {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 4rem;
+  width: 4rem;
+  height: 4rem;
+  overflow: hidden;
+  border: 2px solid var(--border-strong);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.38);
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+}
+
+.typeBadge {
+  display: inline-flex;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.detailActions,
+.sectionHeader,
+.rollActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.detailActions button,
+.sectionHeader button,
+.rollActions button,
+.popoverHeader button,
+.trackerControls button {
+  padding: 0.45rem 0.7rem;
+}
+
+.detailSection,
+.namedRolls,
+.objectDetails {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.trackerEditor {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.trackerEditor label {
+  color: var(--text-soft-on-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+}
+
+.trackerControls {
+  display: grid;
+  grid-template-columns: 2.1rem minmax(0, 1fr) auto minmax(0, 1fr) 2.1rem;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.trackerControls input {
+  min-width: 0;
+  padding: 0.45rem 0.5rem;
+}
+
+.rollEntry {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.6rem;
+  border-radius: 0.65rem;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.rollList,
+.rollForm {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.rollEntry > div:first-child {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.rollEntry span,
+.rollEntry em {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.popover,
+.contextMenu {
+  position: fixed;
+  z-index: 20;
+  width: min(20rem, calc(100vw - 2rem));
+  padding: 0.85rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.9rem;
+  background: rgba(15, 15, 15, 0.98);
+  box-shadow: var(--shadow-panel);
+}
+
+.popoverHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.contextMenu {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.contextMenu button {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.65rem;
+  text-align: left;
+}
+
+@keyframes rejectShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .detailPanel {
+    position: static;
+    max-height: none;
+  }
+}
