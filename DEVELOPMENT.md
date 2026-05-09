@@ -8,18 +8,28 @@ This project is free to use and each user runs their own local backend instance.
 
 Before starting, make sure you have the following installed:
 
-| Tool       | Version             | Download                          |
-| ---------- | ------------------- | --------------------------------- |
-| Python     | 3.10+               | https://python.org/downloads      |
-| Node.js    | 18+ LTS             | https://nodejs.org                |
-| PowerShell | Built-in on Windows | Search "PowerShell" in Start menu |
+| Tool    | Version | Download                     |
+| ------- | ------- | ---------------------------- |
+| Python  | 3.10+   | https://python.org/downloads |
+| Node.js | 18+ LTS | https://nodejs.org           |
 
-> ⚠️ **All scripts must be run in PowerShell or Command Prompt — not Git Bash.**
+> ⚠️ **Windows users: run scripts in PowerShell or Command Prompt — not Git Bash.**
+> **Mac/Linux users: run scripts in Terminal.**
 
-Verify your installs by opening PowerShell and running:
+Verify your installs:
+
+**Windows:**
 
 ```powershell
 python --version
+node --version
+npm --version
+```
+
+**Mac/Linux:**
+
+```bash
+python3 --version
 node --version
 npm --version
 ```
@@ -30,22 +40,39 @@ If any return "command not found", install that tool before continuing.
 
 ## Backend
 
+**Windows:**
+
 1. Open PowerShell or Command Prompt.
 2. `cd backend`
 3. `python -m venv .venv`
 4. `.\.venv\Scripts\activate`
-   - On macOS/Linux use `source .venv/bin/activate` instead.
 5. `python -m pip install -r requirements.txt`
+
+**Mac/Linux:**
+
+1. Open Terminal.
+2. `cd backend`
+3. `python3 -m venv .venv`
+4. `source .venv/bin/activate`
+5. `pip install -r requirements.txt`
 
 ### Start backend
 
 Run from the project root:
 
+Windows:
+
 ```bat
 .\start-backend.bat
 ```
 
-Or double-click `start-backend.bat` in Windows Explorer.
+Mac/Linux:
+
+```bash
+./start-backend.sh
+```
+
+Or double-click `start-backend.bat` on Windows.
 
 - The API will be available at `http://localhost:8000`
 - The frontend expects `VITE_API_BASE_URL=http://localhost:8000/api`
@@ -60,20 +87,38 @@ Or double-click `start-backend.bat` in Windows Explorer.
 
 ## Frontend
 
+**Windows:**
+
 1. Open a second PowerShell or Command Prompt window.
 2. `cd frontend`
 3. `npm install`
-4. Copy `frontend/.env.example` to `frontend/.env.local`
-5. Set the API URL in `.env.local`:
+4. Copy `frontend\.env.example` to `frontend\.env.local`
+
+**Mac/Linux:**
+
+1. Open a second Terminal window.
+2. `cd frontend`
+3. `npm install`
+4. `cp frontend/.env.example frontend/.env.local`
+
+Set the API URL in `.env.local`:
 
 ```text
 VITE_API_BASE_URL=http://localhost:8000/api
 ```
 
-6. Run from the project root:
+Run from the project root:
+
+Windows:
 
 ```bat
 .\start-frontend.bat
+```
+
+Mac/Linux:
+
+```bash
+./start-frontend.sh
 ```
 
 The frontend runs at `http://localhost:5173`.
@@ -97,12 +142,15 @@ This repository includes a CI workflow that installs dependencies and verifies t
 
 ## Troubleshooting
 
-| Problem                                         | Solution                                                                                                                                                                |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Set-Location: command not found`               | You are in Git Bash. Open PowerShell or Command Prompt instead.                                                                                                         |
-| `start-backend.bat` not recognized              | Add `.\` before the filename: `.\start-backend.bat`                                                                                                                     |
-| `npm: command not found`                        | Install Node.js from https://nodejs.org                                                                                                                                 |
-| `python: command not found`                     | Install Python from https://python.org/downloads                                                                                                                        |
-| `.venv\Scripts\activate` gives a security error | Run `Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force` in the same PowerShell window, then try again. Or use `.\setup.bat` which avoids this entirely. |
-| Frontend shows blank page or API errors         | Confirm `frontend/.env.local` exists and contains `VITE_API_BASE_URL=http://localhost:8000/api`                                                                         |
-| Backend won't start                             | Confirm the virtual environment is activated: `.\.venv\Scripts\activate`                                                                                                |
+| Problem                                         | Solution                                                                                                                                             |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Set-Location: command not found`               | You are in Git Bash. Open PowerShell or Command Prompt instead.                                                                                      |
+| `start-backend.bat` not recognized              | Add `.\` before the filename: `.\start-backend.bat`                                                                                                  |
+| `npm: command not found`                        | Install Node.js from https://nodejs.org                                                                                                              |
+| `python: command not found` on Windows          | Install Python from https://python.org/downloads                                                                                                     |
+| `python: command not found` on Mac              | Use `python3` instead of `python`                                                                                                                    |
+| `.venv\Scripts\activate` gives a security error | Run `Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force` in the same PowerShell window, then try again. Or use `.\setup.bat` instead. |
+| `permission denied: ./setup.sh` on Mac/Linux    | Run `chmod +x setup.sh start-backend.sh start-frontend.sh` once, then try again.                                                                     |
+| Frontend shows blank page or API errors         | Confirm `frontend/.env.local` exists and contains `VITE_API_BASE_URL=http://localhost:8000/api`                                                      |
+| Backend won't start                             | Confirm the virtual environment is activated before starting.                                                                                        |
+| Characters not showing                          | Make sure both the backend and frontend terminals are running at the same time.                                                                      |
