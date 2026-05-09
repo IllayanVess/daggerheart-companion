@@ -14,7 +14,7 @@ Before starting, make sure you have the following installed:
 | Node.js    | 18+ LTS             | https://nodejs.org                |
 | PowerShell | Built-in on Windows | Search "PowerShell" in Start menu |
 
-> ⚠️ **All `.bat` scripts must be run in PowerShell or Command Prompt — not Git Bash.**
+> ⚠️ **All scripts must be run in PowerShell or Command Prompt — not Git Bash.**
 
 Verify your installs by opening PowerShell and running:
 
@@ -42,7 +42,7 @@ If any return "command not found", install that tool before continuing.
 Run from the project root:
 
 ```bat
-start-backend.bat
+.\start-backend.bat
 ```
 
 Or double-click `start-backend.bat` in Windows Explorer.
@@ -73,7 +73,7 @@ VITE_API_BASE_URL=http://localhost:8000/api
 6. Run from the project root:
 
 ```bat
-start-frontend.bat
+.\start-frontend.bat
 ```
 
 The frontend runs at `http://localhost:5173`.
@@ -97,11 +97,12 @@ This repository includes a CI workflow that installs dependencies and verifies t
 
 ## Troubleshooting
 
-| Problem                                         | Solution                                                                                                                                                              |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Set-Location: command not found`               | You are in Git Bash. Open PowerShell or Command Prompt instead.                                                                                                       |
-| `npm: command not found`                        | Install Node.js from https://nodejs.org                                                                                                                               |
-| `python: command not found`                     | Install Python from https://python.org/downloads                                                                                                                      |
-| `.venv\Scripts\activate` gives a security error | Run `Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force` in the same PowerShell window, then try again. Or use `setup.bat` which avoids this entirely. |
-| Frontend shows blank page or API errors         | Confirm `frontend/.env.local` exists and contains `VITE_API_BASE_URL=http://localhost:8000/api`                                                                       |
-| Backend won't start                             | Confirm the virtual environment is activated: `.\.venv\Scripts\activate`                                                                                              |
+| Problem                                         | Solution                                                                                                                                                                |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Set-Location: command not found`               | You are in Git Bash. Open PowerShell or Command Prompt instead.                                                                                                         |
+| `start-backend.bat` not recognized              | Add `.\` before the filename: `.\start-backend.bat`                                                                                                                     |
+| `npm: command not found`                        | Install Node.js from https://nodejs.org                                                                                                                                 |
+| `python: command not found`                     | Install Python from https://python.org/downloads                                                                                                                        |
+| `.venv\Scripts\activate` gives a security error | Run `Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force` in the same PowerShell window, then try again. Or use `.\setup.bat` which avoids this entirely. |
+| Frontend shows blank page or API errors         | Confirm `frontend/.env.local` exists and contains `VITE_API_BASE_URL=http://localhost:8000/api`                                                                         |
+| Backend won't start                             | Confirm the virtual environment is activated: `.\.venv\Scripts\activate`                                                                                                |
