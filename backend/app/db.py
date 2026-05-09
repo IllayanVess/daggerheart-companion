@@ -32,6 +32,31 @@ def initialize_app_tables() -> None:
     with get_connection() as connection:
         connection.executescript(
             """
+            CREATE TABLE IF NOT EXISTS Equipment (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                item_name TEXT NOT NULL UNIQUE,
+                category TEXT,
+                subcategory TEXT,
+                description_text TEXT NOT NULL,
+                source_url TEXT
+            );
+
+            CREATE TABLE IF NOT EXISTS DomainCards (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                card_name TEXT NOT NULL UNIQUE,
+                domain_name TEXT,
+                card_level INTEGER,
+                card_type TEXT,
+                description_text TEXT
+            );
+
+            CREATE TABLE IF NOT EXISTS Classes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                class_name TEXT NOT NULL,
+                subclass_name TEXT,
+                data_json TEXT NOT NULL DEFAULT '{}'
+            );
+
             CREATE TABLE IF NOT EXISTS characters (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -309,7 +334,9 @@ def _migrate_legacy_adversaries(connection: sqlite3.Connection) -> None:
         updates: dict[str, Any] = {}
         attack_parts = [row["attack_name"], row["attack_range"], row["attack_damage"]]
         if row["attack_standard"] is None and any(isinstance(part, str) and part.strip() for part in attack_parts):
-            updates["attack_standard"] = " | ".join(part.strip() for part in attack_parts if isinstance(part, str) and part.strip())
+            updates["attack_standard"] = " | ".join(
+                part.strip() for part in attack_parts if isinstance(part, str) and part.strip()
+            )
         if row["attack_modifier"] is None and "attack_bonus" in columns and row["attack_bonus"] is not None:
             updates["attack_modifier"] = row["attack_bonus"]
         if row["role"] is None:
@@ -504,8 +531,28 @@ def _migrate_legacy_character_payloads(connection: sqlite3.Connection) -> None:
 
 
 def _seed_inventory_content_tables(connection: sqlite3.Connection) -> None:
-    item_count = connection.execute("SELECT COUNT(*) AS count_value FROM Items").fetchone()["count_value"]
-    consumable_count = connection.execute("SELECT COUNT(*) AS count_value FROM Consumables").fetchone()["count_value"]
+    # Seed Equipment from SQL file if table is empty
+    equipment_count = connection.execute(
+        "SELECT COUNT(*) AS count_value FROM Equipment"
+    ).fetchone()["count_value"]
+
+    if equipment_count == 0:
+        sql_files = [
+            "Equipment.sql",
+            "Consumables.sql",
+            "Items.sql",
+            "DomainCards.sql",
+            "Classes.sql",
+        ]
+        for sql_file in sql_files:
+            sql_path = DATABASE_DIR / sql_file
+            if sql_path.exists():
+                connection.executescript(sql_path.read_text(encoding="utf-8"))
+
+    # Seed Items from Equipment if empty
+    item_count = connection.execute(
+        "SELECT COUNT(*) AS count_value FROM Items"
+    ).fetchone()["count_value"]
 
     if item_count == 0:
         connection.execute(
@@ -517,6 +564,11 @@ def _seed_inventory_content_tables(connection: sqlite3.Connection) -> None:
             ORDER BY item_name
             """
         )
+
+    # Seed Consumables from Equipment if empty
+    consumable_count = connection.execute(
+        "SELECT COUNT(*) AS count_value FROM Consumables"
+    ).fetchone()["count_value"]
 
     if consumable_count == 0:
         connection.execute(
