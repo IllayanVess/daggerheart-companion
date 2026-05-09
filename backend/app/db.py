@@ -52,9 +52,11 @@ def initialize_app_tables() -> None:
 
             CREATE TABLE IF NOT EXISTS Classes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                class_name TEXT NOT NULL,
-                subclass_name TEXT,
-                data_json TEXT NOT NULL DEFAULT '{}'
+                class_name TEXT NOT NULL UNIQUE,
+                subclass1_name TEXT,
+                subclass1_description TEXT,
+                subclass2_name TEXT,
+                subclass2_description TEXT
             );
 
             CREATE TABLE IF NOT EXISTS characters (
@@ -531,7 +533,7 @@ def _migrate_legacy_character_payloads(connection: sqlite3.Connection) -> None:
 
 
 def _seed_inventory_content_tables(connection: sqlite3.Connection) -> None:
-    # Seed Equipment from SQL file if table is empty
+    # Seed Equipment, DomainCards and Classes from SQL files if Equipment is empty
     equipment_count = connection.execute(
         "SELECT COUNT(*) AS count_value FROM Equipment"
     ).fetchone()["count_value"]
@@ -539,8 +541,6 @@ def _seed_inventory_content_tables(connection: sqlite3.Connection) -> None:
     if equipment_count == 0:
         sql_files = [
             "Equipment.sql",
-            "Consumables.sql",
-            "Items.sql",
             "DomainCards.sql",
             "Classes.sql",
         ]
