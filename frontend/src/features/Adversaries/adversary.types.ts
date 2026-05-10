@@ -22,10 +22,12 @@ export type Adversary = {
   fear_features: string | null;
   feature_groups?: Record<string, string[]>;
   experiences_list: Array<{ name: string; modifier: number }>;
-  features: string | null;
+  /** @deprecated Use the typed feature group fields instead (passive_features, action_features, etc.) */
+  features?: string | null;
   experiences: string | null;
   notes: string | null;
-  data_json: Record<string, unknown>;
+  /** @deprecated Use feature_groups instead. */
+  data_json?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 };

@@ -7,6 +7,10 @@ import { AdversaryPreview } from "./AdversaryPreview";
 import formStyles from "../../styles/forms.module.css";
 import styles from "./AdversaryForm.module.css";
 
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
 const ADVERSARY_TYPES = [
   "Standard",
   "Bruiser",
@@ -20,7 +24,19 @@ const ADVERSARY_TYPES = [
   "Support",
 ] as const;
 
+const FEATURE_GROUP_LABELS: Record<string, string> = {
+  passive: "Passive",
+  action: "Action",
+  reaction: "Reaction",
+  fear: "Fear",
+};
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
 type ExperienceEntry = {
+  id: string;
   name: string;
   modifier: number;
 };
@@ -32,20 +48,34 @@ type FeatureEntry = {
 
 type FeatureGroupState = Record<string, FeatureEntry[]>;
 
-const DEFAULT_EXPERIENCE: ExperienceEntry = { name: "", modifier: 2 };
-const FEATURE_GROUP_LABELS: Record<string, string> = {
-  passive: "Passive",
-  action: "Action",
-  reaction: "Reaction",
-  fear: "Fear",
-};
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function uid(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function createExperienceEntry(): ExperienceEntry {
+  return { id: uid(), name: "", modifier: 2 };
+}
 
 function createFeatureEntry(): FeatureEntry {
+  return { id: uid(), text: "" };
+}
+
+function createInitialFeatureGroups(): FeatureGroupState {
   return {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    text: "",
+    passive: [createFeatureEntry()],
+    action: [createFeatureEntry()],
+    reaction: [createFeatureEntry()],
+    fear: [createFeatureEntry()],
   };
 }
+
+// ---------------------------------------------------------------------------
+// Form state
+// ---------------------------------------------------------------------------
 
 const INITIAL_FORM_STATE = {
   name: "",
@@ -66,83 +96,192 @@ const INITIAL_FORM_STATE = {
   notes: "",
 };
 
+type FormState = typeof INITIAL_FORM_STATE;
+
+// ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
+
+function validateForm(formState: FormState): string | null {
+  if (!formState.name.trim()) {
+    return "Name is required.";
+  }
+  if (!formState.attack_name.trim() || !formState.attack_range.trim() || !formState.attack_damage.trim()) {
+    return "Complete the standard attack name, range, and damage.";
+  }
+  const tier = formState.tier;
+  if (!Number.isInteger(tier) || tier < 1 || tier > 4) {
+    return "Tier must be between 1 and 4.";
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Payload builder — pure function, single source of truth
+// ---------------------------------------------------------------------------
+
+function buildPayload(
+  formState: FormState,
+  experiences: ExperienceEntry[],
+  featureGroups: FeatureGroupState,
+): AdversaryCreatePayload {
+  const toNumber = (value: string): number | null => {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    const parsed = Number(trimmed);
+    return Number.isNaN(parsed) ? null : parsed;
+  };
+
+  const normalizedFeatureGroups = Object.fromEntries(
+    Object.entries(featureGroups).map(([group, entries]) => [
+      group,
+      entries.map((e) => e.text.trim()).filter(Boolean),
+    ]),
+  ) as Record<string, string[]>;
+
+  const joinGroup = (group: string): string | null =>
+    normalizedFeatureGroups[group]?.join("\n\n") || null;
+
+  // NOTE: attack_standard is a denormalized field derived from three stored columns.
+  // Consider computing this on the backend instead to avoid stale values on edits.
+  const attackParts = [formState.attack_name, formState.attack_range, formState.attack_damage]
+    .map((v) => v.trim())
+    .filter(Boolean);
+
+  const formattedExperiences = experiences.map(
+    (e) => `${e.name.trim()} ${e.modifier >= 0 ? "+" : ""}${e.modifier}`,
+  );
+
+  return {
+    name: formState.name.trim(),
+    tier: formState.tier,
+    role: formState.role,
+    description: formState.description.trim() || null,
+    motives: formState.motives.trim() || null,
+    tactics: formState.tactics.trim() || null,
+    difficulty: toNumber(formState.difficulty),
+    thresholds_major: toNumber(formState.thresholds_major),
+    thresholds_severe: toNumber(formState.thresholds_severe),
+    hit_points: toNumber(formState.hit_points),
+    stress: toNumber(formState.stress),
+    attack_name: formState.attack_name.trim() || null,
+    attack_range: formState.attack_range.trim() || null,
+    attack_damage: formState.attack_damage.trim() || null,
+    attack_standard: attackParts.length > 0 ? attackParts.join(" | ") : null,
+    attack_modifier: toNumber(formState.attack_modifier),
+    passive_features: joinGroup("passive"),
+    action_features: joinGroup("action"),
+    reaction_features: joinGroup("reaction"),
+    fear_features: joinGroup("fear"),
+    feature_groups: normalizedFeatureGroups,
+    experiences_list: experiences,
+    experiences: formattedExperiences.length > 0 ? formattedExperiences.join(", ") : null,
+    notes: formState.notes.trim() || null,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
 export function AdversaryForm({ onSaved }: AdversaryFormProps) {
   const [status, setStatus] = useState("Ready to create a new adversary.");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [experiences, setExperiences] = useState<ExperienceEntry[]>([
-    { name: "", modifier: 2 },
-  ]);
-  const [featureGroups, setFeatureGroups] = useState<FeatureGroupState>({
-    passive: [createFeatureEntry()],
-    action: [createFeatureEntry()],
-    reaction: [createFeatureEntry()],
-    fear: [createFeatureEntry()],
-  });
-  const [formState, setFormState] = useState(INITIAL_FORM_STATE);
+  const [formState, setFormState] = useState<FormState>(INITIAL_FORM_STATE);
+  const [experiences, setExperiences] = useState<ExperienceEntry[]>([createExperienceEntry()]);
+  const [featureGroups, setFeatureGroups] = useState<FeatureGroupState>(createInitialFeatureGroups);
 
-  const previewPayload = useMemo<Omit<Adversary, "id" | "created_at" | "updated_at">>(() => {
-    const cleanExperiences = experiences.filter((entry) => entry.name.trim());
-    return buildPayload(formState, cleanExperiences, featureGroups);
-  }, [formState, experiences, featureGroups]);
+  // Clean experiences (non-empty names) are shared between preview and submit
+  // to guarantee they always see the same filtered data.
+  const cleanExperiences = useMemo(
+    () => experiences.filter((e) => e.name.trim()),
+    [experiences],
+  );
 
-  function updateField<K extends keyof typeof INITIAL_FORM_STATE>(field: K, value: (typeof INITIAL_FORM_STATE)[K]) {
+  const previewPayload = useMemo<Omit<Adversary, "id" | "created_at" | "updated_at">>(
+    () => buildPayload(formState, cleanExperiences, featureGroups),
+    [formState, cleanExperiences, featureGroups],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Reset
+  // ---------------------------------------------------------------------------
+
+  function resetForm(): void {
+    setFormState(INITIAL_FORM_STATE);
+    setExperiences([createExperienceEntry()]);
+    setFeatureGroups(createInitialFeatureGroups());
+    setStatus("Ready to create a new adversary.");
+  }
+
+  // ---------------------------------------------------------------------------
+  // Field updaters
+  // ---------------------------------------------------------------------------
+
+  function updateField<K extends keyof FormState>(field: K, value: FormState[K]): void {
     setFormState((current) => ({ ...current, [field]: value }));
   }
 
-  function updateExperience(index: number, nextValue: Partial<ExperienceEntry>) {
+  // ---------------------------------------------------------------------------
+  // Experience updaters
+  // ---------------------------------------------------------------------------
+
+  function addExperience(): void {
+    setExperiences((current) => [...current, createExperienceEntry()]);
+  }
+
+  function updateExperience(id: string, next: Partial<Omit<ExperienceEntry, "id">>): void {
     setExperiences((current) =>
-      current.map((entry, currentIndex) => (currentIndex === index ? { ...entry, ...nextValue } : entry)),
+      current.map((e) => (e.id === id ? { ...e, ...next } : e)),
     );
   }
 
-  function addExperience() {
-    setExperiences((current) => [...current, { ...DEFAULT_EXPERIENCE }]);
+  function removeExperience(id: string): void {
+    setExperiences((current) => {
+      if (current.length === 1) return current;
+      return current.filter((e) => e.id !== id);
+    });
   }
 
-  function removeExperience(index: number) {
-    setExperiences((current) => (current.length === 1 ? current : current.filter((_, currentIndex) => currentIndex !== index)));
-  }
+  // ---------------------------------------------------------------------------
+  // Feature updaters
+  // ---------------------------------------------------------------------------
 
-  function addFeatureEntry(group: string) {
+  function addFeatureEntry(group: string): void {
     setFeatureGroups((current) => ({
       ...current,
       [group]: [...(current[group] ?? []), createFeatureEntry()],
     }));
   }
 
-  function updateFeatureEntry(group: string, entryId: string, text: string) {
+  function updateFeatureEntry(group: string, entryId: string, text: string): void {
     setFeatureGroups((current) => ({
       ...current,
-      [group]: (current[group] ?? []).map((entry) => (entry.id === entryId ? { ...entry, text } : entry)),
+      [group]: (current[group] ?? []).map((e) =>
+        e.id === entryId ? { ...e, text } : e,
+      ),
     }));
   }
 
-  function removeFeatureEntry(group: string, entryId: string) {
+  function removeFeatureEntry(group: string, entryId: string): void {
     setFeatureGroups((current) => {
-      const currentEntries = current[group] ?? [];
-      const nextEntries = currentEntries.filter((entry) => entry.id !== entryId);
+      const next = (current[group] ?? []).filter((e) => e.id !== entryId);
       return {
         ...current,
-        [group]: nextEntries.length > 0 ? nextEntries : [createFeatureEntry()],
+        [group]: next.length > 0 ? next : [createFeatureEntry()],
       };
     });
   }
 
-  const validateForm = (): string | null => {
-    if (!formState.name.trim()) {
-      return "Name is required";
-    }
-    if (!formState.attack_name.trim() || !formState.attack_range.trim() || !formState.attack_damage.trim()) {
-      return "Complete the standard attack name, range, and damage.";
-    }
-    return null;
-  };
+  // ---------------------------------------------------------------------------
+  // Submit
+  // ---------------------------------------------------------------------------
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     if (isSubmitting) return;
 
-    const validationError = validateForm();
+    const validationError = validateForm(formState);
     if (validationError) {
       setStatus(validationError);
       return;
@@ -152,25 +291,24 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
     setStatus("Saving...");
 
     try {
-      const payload = buildPayload(formState, experiences.filter((entry) => entry.name.trim()), featureGroups);
+      // Reuse the same cleanExperiences already computed for the preview —
+      // preview and saved data are guaranteed to match.
+      const payload = buildPayload(formState, cleanExperiences, featureGroups);
       const saved = await createAdversary(payload);
-      setStatus(`Saved ${saved.name}.`);
-      setFormState(INITIAL_FORM_STATE);
-      setExperiences([{ ...DEFAULT_EXPERIENCE }]);
-      setFeatureGroups({
-        passive: [createFeatureEntry()],
-        action: [createFeatureEntry()],
-        reaction: [createFeatureEntry()],
-        fear: [createFeatureEntry()],
-      });
       onSaved(saved);
+      resetForm();
+      setStatus(`Saved ${saved.name}.`);
     } catch (error) {
       console.error("Submission error:", error);
-      setStatus("Adversary save failed.");
+      setStatus("Adversary save failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
 
   return (
     <section className="panel">
@@ -186,6 +324,8 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
 
       <div className={styles.adversaryBuilderLayout}>
         <form className={formStyles.formGrid} onSubmit={handleSubmit}>
+
+          {/* ── Core identity ── */}
           <label>
             Name
             <input
@@ -193,7 +333,7 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
               placeholder="Ashen Warden"
               required
               value={formState.name}
-              onChange={(event) => updateField("name", event.target.value)}
+              onChange={(e) => updateField("name", e.target.value)}
             />
           </label>
 
@@ -205,13 +345,17 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
               min="1"
               max="4"
               value={formState.tier}
-              onChange={(event) => updateField("tier", Number(event.target.value) || 1)}
+              onChange={(e) => updateField("tier", Number(e.target.value) || 1)}
             />
           </label>
 
           <label>
             Type
-            <select name="role" value={formState.role} onChange={(event) => updateField("role", event.target.value)}>
+            <select
+              name="role"
+              value={formState.role}
+              onChange={(e) => updateField("role", e.target.value)}
+            >
               {ADVERSARY_TYPES.map((role) => (
                 <option key={role} value={role}>
                   {role}
@@ -220,6 +364,7 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
             </select>
           </label>
 
+          {/* ── Description ── */}
           <label className={formStyles.wide}>
             Description
             <textarea
@@ -227,7 +372,7 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
               rows={2}
               placeholder="Physical description and appearance..."
               value={formState.description}
-              onChange={(event) => updateField("description", event.target.value)}
+              onChange={(e) => updateField("description", e.target.value)}
             />
           </label>
 
@@ -237,7 +382,7 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
               name="motives"
               placeholder="Escape, profit, steal"
               value={formState.motives}
-              onChange={(event) => updateField("motives", event.target.value)}
+              onChange={(e) => updateField("motives", e.target.value)}
             />
           </label>
 
@@ -247,18 +392,20 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
               name="tactics"
               placeholder="Throw smoke, ambush"
               value={formState.tactics}
-              onChange={(event) => updateField("tactics", event.target.value)}
+              onChange={(e) => updateField("tactics", e.target.value)}
             />
           </label>
 
+          {/* ── Combat stats ── */}
           <label>
             Difficulty
             <input
               name="difficulty"
               type="number"
+              min="0"
               placeholder="12"
               value={formState.difficulty}
-              onChange={(event) => updateField("difficulty", event.target.value)}
+              onChange={(e) => updateField("difficulty", e.target.value)}
             />
           </label>
 
@@ -270,7 +417,7 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
               min="0"
               placeholder="8"
               value={formState.thresholds_major}
-              onChange={(event) => updateField("thresholds_major", event.target.value)}
+              onChange={(e) => updateField("thresholds_major", e.target.value)}
             />
           </label>
 
@@ -282,7 +429,7 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
               min="0"
               placeholder="14"
               value={formState.thresholds_severe}
-              onChange={(event) => updateField("thresholds_severe", event.target.value)}
+              onChange={(e) => updateField("thresholds_severe", e.target.value)}
             />
           </label>
 
@@ -293,7 +440,7 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
               type="number"
               min="0"
               value={formState.hit_points}
-              onChange={(event) => updateField("hit_points", event.target.value)}
+              onChange={(e) => updateField("hit_points", e.target.value)}
             />
           </label>
 
@@ -304,17 +451,18 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
               type="number"
               min="0"
               value={formState.stress}
-              onChange={(event) => updateField("stress", event.target.value)}
+              onChange={(e) => updateField("stress", e.target.value)}
             />
           </label>
 
+          {/* ── Attack ── */}
           <label>
             Attack Name
             <input
               name="attack_name"
               placeholder="Daggers"
               value={formState.attack_name}
-              onChange={(event) => updateField("attack_name", event.target.value)}
+              onChange={(e) => updateField("attack_name", e.target.value)}
             />
           </label>
 
@@ -324,7 +472,7 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
               name="attack_range"
               placeholder="Melee"
               value={formState.attack_range}
-              onChange={(event) => updateField("attack_range", event.target.value)}
+              onChange={(e) => updateField("attack_range", e.target.value)}
             />
           </label>
 
@@ -334,7 +482,7 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
               name="attack_damage"
               placeholder="1d8+1 phy"
               value={formState.attack_damage}
-              onChange={(event) => updateField("attack_damage", event.target.value)}
+              onChange={(e) => updateField("attack_damage", e.target.value)}
             />
           </label>
 
@@ -345,10 +493,11 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
               type="number"
               placeholder="1"
               value={formState.attack_modifier}
-              onChange={(event) => updateField("attack_modifier", event.target.value)}
+              onChange={(e) => updateField("attack_modifier", e.target.value)}
             />
           </label>
 
+          {/* ── Experiences ── */}
           <div className={`${formStyles.wide} ${styles.structuredGroup}`}>
             <div className={styles.structuredHeader}>
               <div>
@@ -359,20 +508,27 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
                 Add Experience
               </button>
             </div>
+
             <div className={styles.experienceList}>
-              {experiences.map((experience, index) => (
-                <div key={`experience-${index}`} className={styles.experienceRow}>
+              {experiences.map((experience) => (
+                <div key={experience.id} className={styles.experienceRow}>
                   <input
                     placeholder="Thief"
                     value={experience.name}
-                    onChange={(event) => updateExperience(index, { name: event.target.value })}
+                    onChange={(e) => updateExperience(experience.id, { name: e.target.value })}
                   />
                   <input
                     type="number"
                     value={experience.modifier}
-                    onChange={(event) => updateExperience(index, { modifier: Number(event.target.value) || 0 })}
+                    onChange={(e) =>
+                      updateExperience(experience.id, { modifier: Number(e.target.value) || 0 })
+                    }
                   />
-                  <button className="secondary-button" type="button" onClick={() => removeExperience(index)}>
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={() => removeExperience(experience.id)}
+                  >
                     Remove
                   </button>
                 </div>
@@ -380,6 +536,7 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
             </div>
           </div>
 
+          {/* ── Feature groups ── */}
           {Object.entries(FEATURE_GROUP_LABELS).map(([groupKey, label]) => (
             <div key={groupKey} className={`${formStyles.wide} ${styles.structuredGroup}`}>
               <div className={styles.structuredHeader}>
@@ -387,10 +544,15 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
                   <p className="eyebrow">Features</p>
                   <h3>{label}</h3>
                 </div>
-                <button className="secondary-button" type="button" onClick={() => addFeatureEntry(groupKey)}>
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={() => addFeatureEntry(groupKey)}
+                >
                   Add {label}
                 </button>
               </div>
+
               <div className={styles.featureEntryList}>
                 {(featureGroups[groupKey] ?? []).map((entry, index) => (
                   <div key={entry.id} className={styles.featureEntryCard}>
@@ -400,10 +562,14 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
                         rows={3}
                         placeholder={`${label} feature text`}
                         value={entry.text}
-                        onChange={(event) => updateFeatureEntry(groupKey, entry.id, event.target.value)}
+                        onChange={(e) => updateFeatureEntry(groupKey, entry.id, e.target.value)}
                       />
                     </label>
-                    <button className="secondary-button" type="button" onClick={() => removeFeatureEntry(groupKey, entry.id)}>
+                    <button
+                      className="secondary-button"
+                      type="button"
+                      onClick={() => removeFeatureEntry(groupKey, entry.id)}
+                    >
                       Remove
                     </button>
                   </div>
@@ -412,6 +578,7 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
             </div>
           ))}
 
+          {/* ── Notes ── */}
           <label className={formStyles.wide}>
             Notes
             <textarea
@@ -419,7 +586,7 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
               rows={3}
               placeholder="Encounter notes, fear triggers, countdowns, or summoning reminders."
               value={formState.notes}
-              onChange={(event) => updateField("notes", event.target.value)}
+              onChange={(e) => updateField("notes", e.target.value)}
             />
           </label>
 
@@ -432,63 +599,4 @@ export function AdversaryForm({ onSaved }: AdversaryFormProps) {
       </div>
     </section>
   );
-}
-
-function buildPayload(
-  formState: typeof INITIAL_FORM_STATE,
-  experiences: ExperienceEntry[],
-  featureGroups: FeatureGroupState,
-): AdversaryCreatePayload {
-  const getNumber = (value: string): number | null => {
-    if (!value.trim()) {
-      return null;
-    }
-    const parsed = Number(value);
-    return Number.isNaN(parsed) ? null : parsed;
-  };
-
-  const normalizedFeatureGroups = Object.fromEntries(
-    Object.entries(featureGroups).map(([group, entries]) => [
-      group,
-      entries.map((entry) => entry.text.trim()).filter(Boolean),
-    ]),
-  ) as Record<string, string[]>;
-  const joinGroup = (group: string) => normalizedFeatureGroups[group]?.join("\n\n") || null;
-
-  return {
-    name: formState.name.trim(),
-    tier: formState.tier,
-    role: formState.role,
-    description: formState.description.trim() || null,
-    motives: formState.motives.trim() || null,
-    tactics: formState.tactics.trim() || null,
-    difficulty: getNumber(formState.difficulty),
-    thresholds_major: getNumber(formState.thresholds_major),
-    thresholds_severe: getNumber(formState.thresholds_severe),
-    hit_points: getNumber(formState.hit_points),
-    stress: getNumber(formState.stress),
-    attack_name: formState.attack_name.trim() || null,
-    attack_range: formState.attack_range.trim() || null,
-    attack_damage: formState.attack_damage.trim() || null,
-    attack_standard: [formState.attack_name, formState.attack_range, formState.attack_damage]
-      .map((value) => value.trim())
-      .filter(Boolean)
-      .join(" | ") || null,
-    attack_modifier: getNumber(formState.attack_modifier),
-    passive_features: joinGroup("passive"),
-    action_features: joinGroup("action"),
-    reaction_features: joinGroup("reaction"),
-    fear_features: joinGroup("fear"),
-    feature_groups: normalizedFeatureGroups,
-    features: null,
-    experiences_list: experiences,
-    experiences:
-      experiences.length > 0
-        ? experiences.map((entry) => `${entry.name.trim()} ${entry.modifier >= 0 ? "+" : ""}${entry.modifier}`).join(", ")
-        : null,
-    notes: formState.notes.trim() || null,
-    data_json: {
-      feature_groups: normalizedFeatureGroups,
-    },
-  };
 }
