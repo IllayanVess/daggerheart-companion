@@ -25,6 +25,10 @@ import type {
 } from "../../types";
 import styles from "./CharacterForm.module.css";
 
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
 type CharacterFormProps = {
   onSaved: (character: Character) => void;
   focusMode?: boolean;
@@ -32,6 +36,10 @@ type CharacterFormProps = {
   onCancel?: () => void;
   submitLabel?: string;
 };
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
 
 const STEPS = [
   "Class",
@@ -49,6 +57,19 @@ const TRAITS = ["Agility", "Strength", "Finesse", "Instinct", "Presence", "Knowl
 const TRAIT_MODIFIER_OPTIONS = ["+2", "+1", "+1", "+0", "+0", "-1"] as const;
 
 type TraitName = (typeof TRAITS)[number];
+
+// Precomputed — the modifier pool never changes at runtime.
+const MODIFIER_TOTALS: Record<string, number> = TRAIT_MODIFIER_OPTIONS.reduce<Record<string, number>>(
+  (acc, modifier) => {
+    acc[modifier] = (acc[modifier] ?? 0) + 1;
+    return acc;
+  },
+  {},
+);
+
+// ---------------------------------------------------------------------------
+// Builder state
+// ---------------------------------------------------------------------------
 
 type BuilderState = {
   name: string;
@@ -125,32 +146,23 @@ const INITIAL_STATE: BuilderState = {
   connectionNotes: "",
 };
 
+// ---------------------------------------------------------------------------
+// Pure utilities
+// ---------------------------------------------------------------------------
+
 function titleCase(value: string): string {
-  return value.toLowerCase().replace(/\b\w/g, (character) => character.toUpperCase());
+  return value.toLowerCase().replace(/\b\w/g, (ch) => ch.toUpperCase());
 }
 
-function buildModifierInventory(traits: Record<TraitName, string>) {
-  return TRAIT_MODIFIER_OPTIONS.reduce<Record<string, { total: number; used: number; remaining: number }>>((accumulator, modifier) => {
-    const total = TRAIT_MODIFIER_OPTIONS.filter((value) => value === modifier).length;
-    const used = Object.values(traits).filter((value) => value === modifier).length;
-    accumulator[modifier] = {
-      total,
-      used,
-      remaining: Math.max(0, total - used),
-    };
-    return accumulator;
-  }, {});
-}
-
-function asString(value: unknown) {
+function asString(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
 
-function asNumber(value: unknown, fallback: number) {
+function asNumber(value: unknown, fallback: number): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
-function asExperiences(value: unknown) {
+function asExperiences(value: unknown): Array<{ name: string; modifier: number }> {
   return Array.isArray(value)
     ? value.filter(
         (entry): entry is { name: string; modifier: number } =>
@@ -162,9 +174,39 @@ function asExperiences(value: unknown) {
     : [];
 }
 
-function asDomainCards(value: unknown) {
-  return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
+function asDomainCards(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
 }
+
+/** Derive armor fields from a selected equipment option and the current level. */
+function deriveArmorFields(
+  armor: EquipmentOption | null,
+  level: number,
+): Pick<BuilderState, "armorScore" | "armorThresholdMajor" | "armorThresholdSevere"> {
+  if (!armor) {
+    return { armorScore: "", armorThresholdMajor: "", armorThresholdSevere: "" };
+  }
+  return {
+    armorScore: armor.base_score ? String(armor.base_score) : "",
+    armorThresholdMajor: armor.thresholds_major ? String(armor.thresholds_major + level) : "",
+    armorThresholdSevere: armor.thresholds_severe ? String(armor.thresholds_severe + level) : "",
+  };
+}
+
+function buildModifierInventory(traits: Record<TraitName, string>) {
+  return Object.fromEntries(
+    Object.entries(MODIFIER_TOTALS).map(([modifier, total]) => {
+      const used = Object.values(traits).filter((v) => v === modifier).length;
+      return [modifier, { total, used, remaining: Math.max(0, total - used) }];
+    }),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// State hydration / payload builders
+// ---------------------------------------------------------------------------
 
 function buildStateFromCharacter(character: Character): BuilderState {
   const payload = character.data_json ?? {};
@@ -195,7 +237,8 @@ function buildStateFromCharacter(character: Character): BuilderState {
     stress: getCharacterMaxStress(character),
     hope: character.hope ?? 2,
     proficiency: asNumber(payload.proficiency, 1),
-    armorScore: character.armor !== null && character.armor !== undefined ? String(character.armor) : "",
+    armorScore:
+      character.armor !== null && character.armor !== undefined ? String(character.armor) : "",
     armorName: asString(payload.armor_name),
     armorThresholdMajor: asString(payload.armor_threshold_major),
     armorThresholdSevere: asString(payload.armor_threshold_severe),
@@ -223,7 +266,10 @@ function buildCharacterPayload(
   const existingPayload = currentCharacter?.data_json ?? {};
   const existingExperiences = asExperiences(existingPayload.experiences);
   const existingDomainCards = asDomainCards(existingPayload.domain_cards);
-  const experienceModifierMap = new Map(existingExperiences.map((entry) => [entry.name, entry.modifier]));
+  const experienceModifierMap = new Map(
+    existingExperiences.map((entry) => [entry.name, entry.modifier]),
+  );
+
   return {
     name: builder.name.trim(),
     class_name: builder.className,
@@ -279,6 +325,10 @@ function buildCharacterPayload(
   };
 }
 
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
 export function CharacterForm({
   onSaved,
   focusMode = false,
@@ -287,7 +337,10 @@ export function CharacterForm({
   submitLabel,
 }: CharacterFormProps) {
   const isEditing = Boolean(initialCharacter);
-  const [builder, setBuilder] = useState<BuilderState>(INITIAL_STATE);
+
+  const [builder, setBuilder] = useState<BuilderState>(
+    initialCharacter ? buildStateFromCharacter(initialCharacter) : INITIAL_STATE,
+  );
   const [classOptions, setClassOptions] = useState<ClassOption[]>([]);
   const [ancestries, setAncestries] = useState<AncestryOption[]>([]);
   const [communities, setCommunities] = useState<CommunityOption[]>([]);
@@ -299,18 +352,29 @@ export function CharacterForm({
   const [armorOptions, setArmorOptions] = useState<EquipmentOption[]>([]);
   const [potionOptions, setPotionOptions] = useState<EquipmentOption[]>([]);
   const [activeStep, setActiveStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState(
-    isEditing ? "Update any step, then save the revised sheet." : "Choose a class to begin the official Daggerheart flow.",
+    isEditing
+      ? "Update any step, then save the revised sheet."
+      : "Choose a class to begin the official Daggerheart flow.",
   );
 
+  // ---------------------------------------------------------------------------
+  // Effects
+  // ---------------------------------------------------------------------------
+
+  // Sync when a different character is passed in from the parent.
   useEffect(() => {
     setBuilder(initialCharacter ? buildStateFromCharacter(initialCharacter) : INITIAL_STATE);
     setActiveStep(0);
     setStatus(
-      initialCharacter ? "Update any step, then save the revised sheet." : "Choose a class to begin the official Daggerheart flow.",
+      initialCharacter
+        ? "Update any step, then save the revised sheet."
+        : "Choose a class to begin the official Daggerheart flow.",
     );
   }, [initialCharacter]);
 
+  // Load all static lookup data once on mount.
   useEffect(() => {
     Promise.all([
       fetchClasses(),
@@ -331,9 +395,9 @@ export function CharacterForm({
           loadedArmor,
           loadedConsumables,
         ]) => {
-        setClassOptions(loadedClasses);
-        setAncestries(loadedAncestries);
-        setCommunities(loadedCommunities);
+          setClassOptions(loadedClasses);
+          setAncestries(loadedAncestries);
+          setCommunities(loadedCommunities);
           setPrimaryWeapons(loadedPrimaryWeapons);
           setSecondaryWeapons(loadedSecondaryWeapons);
           setArmorOptions(loadedArmor);
@@ -349,6 +413,7 @@ export function CharacterForm({
       });
   }, []);
 
+  // Load class detail and domain cards when class changes.
   useEffect(() => {
     if (!builder.className) {
       setClassDetail(null);
@@ -370,8 +435,9 @@ export function CharacterForm({
       .catch(() => {
         setStatus("Could not load the selected class details or domain cards.");
       });
-  }, [builder.className]);
+  }, [builder.className]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Load subclass detail when subclass changes.
   useEffect(() => {
     if (!builder.subclassName) {
       setSubclassDetail(null);
@@ -385,59 +451,93 @@ export function CharacterForm({
       });
   }, [builder.subclassName]);
 
+  // Recompute armor derived fields when level changes while armor is already selected.
+  // This is the single source of truth for armor derivation — the armor onChange
+  // handler calls deriveArmorFields directly so this effect only needs to handle
+  // the level-change case.
   useEffect(() => {
-    if (!builder.armorName) {
-      return;
-    }
+    if (!builder.armorName) return;
 
-    const armor = armorOptions.find((item) => item.item_name === builder.armorName);
-    if (!armor) {
-      return;
-    }
+    const armor = armorOptions.find((item) => item.item_name === builder.armorName) ?? null;
+    if (!armor) return;
 
     setBuilder((current) => ({
       ...current,
-      armorScore: armor.base_score ? String(armor.base_score) : "",
-      armorThresholdMajor: armor.thresholds_major ? String(armor.thresholds_major + current.level) : "",
-      armorThresholdSevere: armor.thresholds_severe ? String(armor.thresholds_severe + current.level) : "",
+      ...deriveArmorFields(armor, current.level),
     }));
-  }, [builder.armorName, builder.level, armorOptions]);
+  }, [builder.level, builder.armorName, armorOptions]);
+
+  // ---------------------------------------------------------------------------
+  // Derived values (memoized)
+  // ---------------------------------------------------------------------------
 
   const activeClass = useMemo(
     () => classOptions.find((option) => option.class_name === builder.className) ?? null,
     [builder.className, classOptions],
   );
-  const selectedDomainCardOne =
-    domainCards.find((card) => card.card_name === builder.domainCardOne) ?? null;
-  const selectedDomainCardTwo =
-    domainCards.find((card) => card.card_name === builder.domainCardTwo) ?? null;
-  const selectedPrimaryWeapon =
-    primaryWeapons.find((item) => item.item_name === builder.primaryWeapon) ?? null;
-  const selectedSecondaryWeapon =
-    secondaryWeapons.find((item) => item.item_name === builder.secondaryWeapon) ?? null;
-  const selectedArmor = armorOptions.find((item) => item.item_name === builder.armorName) ?? null;
-  const selectedPotion = potionOptions.find((item) => item.item_name === builder.potionChoice) ?? null;
-  const activeAncestry = ancestries.find((option) => option.ancestry_name === builder.ancestry) ?? null;
-  const activeCommunity = communities.find((option) => option.community_name === builder.community) ?? null;
-  const classItemOptions = classDetail?.class_items.filter(Boolean) ?? [];
 
-  const usedTraitModifiers = Object.values(builder.traits).filter(Boolean);
-  const modifierInventory = buildModifierInventory(builder.traits);
-  const traitAssignmentValid = TRAITS.every((trait) => builder.traits[trait] !== "") && [
-    "+2",
-    "+1",
-    "+1",
-    "+0",
-    "+0",
-    "-1",
-  ].every(
-    (modifier) =>
-      usedTraitModifiers.filter((value) => value === modifier).length ===
-      TRAIT_MODIFIER_OPTIONS.filter((value) => value === modifier).length,
+  const selectedDomainCardOne = useMemo(
+    () => domainCards.find((card) => card.card_name === builder.domainCardOne) ?? null,
+    [domainCards, builder.domainCardOne],
+  );
+
+  const selectedDomainCardTwo = useMemo(
+    () => domainCards.find((card) => card.card_name === builder.domainCardTwo) ?? null,
+    [domainCards, builder.domainCardTwo],
+  );
+
+  const selectedPrimaryWeapon = useMemo(
+    () => primaryWeapons.find((item) => item.item_name === builder.primaryWeapon) ?? null,
+    [primaryWeapons, builder.primaryWeapon],
+  );
+
+  const selectedSecondaryWeapon = useMemo(
+    () => secondaryWeapons.find((item) => item.item_name === builder.secondaryWeapon) ?? null,
+    [secondaryWeapons, builder.secondaryWeapon],
+  );
+
+  const selectedArmor = useMemo(
+    () => armorOptions.find((item) => item.item_name === builder.armorName) ?? null,
+    [armorOptions, builder.armorName],
+  );
+
+  const selectedPotion = useMemo(
+    () => potionOptions.find((item) => item.item_name === builder.potionChoice) ?? null,
+    [potionOptions, builder.potionChoice],
+  );
+
+  const activeAncestry = useMemo(
+    () => ancestries.find((option) => option.ancestry_name === builder.ancestry) ?? null,
+    [ancestries, builder.ancestry],
+  );
+
+  const activeCommunity = useMemo(
+    () => communities.find((option) => option.community_name === builder.community) ?? null,
+    [communities, builder.community],
+  );
+
+  const classItemOptions = useMemo(
+    () => classDetail?.class_items.filter(Boolean) ?? [],
+    [classDetail],
+  );
+
+  const modifierInventory = useMemo(
+    () => buildModifierInventory(builder.traits),
+    [builder.traits],
   );
 
   const builderCompletion = useMemo(() => {
     const missing: string[] = [];
+
+    // Trait validation lives here so builderCompletion always reflects current traits.
+    const usedTraitModifiers = Object.values(builder.traits).filter(Boolean);
+    const traitAssignmentValid =
+      TRAITS.every((trait) => builder.traits[trait] !== "") &&
+      TRAIT_MODIFIER_OPTIONS.every(
+        (modifier) =>
+          usedTraitModifiers.filter((v) => v === modifier).length ===
+          TRAIT_MODIFIER_OPTIONS.filter((v) => v === modifier).length,
+      );
 
     if (!builder.name.trim()) missing.push("character name");
     if (!builder.className) missing.push("class");
@@ -456,62 +556,107 @@ export function CharacterForm({
     if (!builder.domainCardTwo) missing.push("domain card two");
     if (!builder.connectionNotes.trim()) missing.push("connection notes");
 
-    return {
-      complete: missing.length === 0,
-      missing,
-    };
-  }, [builder, traitAssignmentValid]);
+    return { complete: missing.length === 0, missing, traitAssignmentValid };
+  }, [builder]);
 
-  function updateField<K extends keyof BuilderState>(field: K, value: BuilderState[K]) {
+  // ---------------------------------------------------------------------------
+  // Updaters
+  // ---------------------------------------------------------------------------
+
+  function updateField<K extends keyof BuilderState>(field: K, value: BuilderState[K]): void {
     setBuilder((current) => ({ ...current, [field]: value }));
   }
 
-  function updateTrait(trait: TraitName, value: string) {
+  function updateTrait(trait: TraitName, value: string): void {
     setBuilder((current) => ({
       ...current,
-      traits: {
-        ...current.traits,
-        [trait]: value,
-      },
+      traits: { ...current.traits, [trait]: value },
     }));
   }
 
-  async function handleSave() {
+  /** Handle class selection: reset all class-dependent choices. */
+  function handleClassChange(nextClass: string): void {
+    setBuilder((current) => ({
+      ...current,
+      className: nextClass,
+      subclassName: "",
+      domainCardOne: "",
+      domainCardTwo: "",
+      classItemChoice: "",
+    }));
+  }
+
+  /** Handle armor selection: derive all armor fields in one update. */
+  function handleArmorChange(armorName: string): void {
+    const armor = armorOptions.find((item) => item.item_name === armorName) ?? null;
+    setBuilder((current) => ({
+      ...current,
+      armorName,
+      ...deriveArmorFields(armor, current.level),
+    }));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Save
+  // ---------------------------------------------------------------------------
+
+  async function handleSave(): Promise<void> {
+    if (isSubmitting) return;
+
     if (activeStep !== STEPS.length - 1) {
       setStatus("You can only save at the end of the builder.");
       return;
     }
 
     if (!builderCompletion.complete) {
-      setStatus(`Finish these required choices before saving: ${builderCompletion.missing.join(", ")}.`);
+      setStatus(
+        `Finish these required choices before saving: ${builderCompletion.missing.join(", ")}.`,
+      );
       return;
     }
+
+    setIsSubmitting(true);
 
     const payload = buildCharacterPayload(builder, classDetail, subclassDetail, initialCharacter);
 
     try {
-      const saved = initialCharacter ? await updateCharacter(initialCharacter.id, payload) : await createCharacter(payload);
+      const saved = initialCharacter
+        ? await updateCharacter(initialCharacter.id, payload)
+        : await createCharacter(payload);
+
       setStatus(initialCharacter ? `Updated ${saved.name}.` : `Saved ${saved.name}.`);
+
       if (!initialCharacter) {
         setBuilder(INITIAL_STATE);
         setClassDetail(null);
         setSubclassDetail(null);
         setActiveStep(0);
       }
+
       onSaved(saved);
     } catch {
       setStatus(initialCharacter ? "Character update failed." : "Character save failed.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
+
   return (
-    <section className={`panel character-form ${styles.characterFormScope} ${focusMode ? "builder-focus-panel" : ""}`}>
+    <section
+      className={`panel character-form ${styles.characterFormScope} ${focusMode ? "builder-focus-panel" : ""}`}
+    >
       <div className="panel-header">
         <div>
           <p className="eyebrow">Character Builder</p>
           <h2>Follow the official creation flow</h2>
         </div>
-        <p className="status">{status}</p>
+        <p className="status" aria-live="polite">
+          {status}
+        </p>
       </div>
 
       {focusMode ? (
@@ -542,7 +687,9 @@ export function CharacterForm({
 
       <section className={`builder-shell ${focusMode ? "builder-shell-focused" : ""}`}>
         <div className="builder-main">
-         {activeStep === 0 ? (
+
+          {/* ── Step 1: Class ── */}
+          {activeStep === 0 ? (
             <div className="step-section">
               <h3>Step 1: Choose a Class and Subclass</h3>
               <p className="muted">
@@ -552,12 +699,18 @@ export function CharacterForm({
               <div className="grid-form">
                 <label>
                   Name
-                  <input value={builder.name} onChange={(event) => updateField("name", event.target.value)} />
+                  <input
+                    value={builder.name}
+                    onChange={(e) => updateField("name", e.target.value)}
+                  />
                 </label>
 
                 <label>
                   Pronouns
-                  <input value={builder.pronouns} onChange={(event) => updateField("pronouns", event.target.value)} />
+                  <input
+                    value={builder.pronouns}
+                    onChange={(e) => updateField("pronouns", e.target.value)}
+                  />
                 </label>
 
                 <label className="wide">
@@ -565,7 +718,7 @@ export function CharacterForm({
                   <textarea
                     rows={3}
                     value={builder.description}
-                    onChange={(event) => updateField("description", event.target.value)}
+                    onChange={(e) => updateField("description", e.target.value)}
                   />
                 </label>
 
@@ -573,11 +726,7 @@ export function CharacterForm({
                   Class
                   <select
                     value={builder.className}
-                    onChange={(event) => {
-                      const nextClass = event.target.value;
-                      updateField("className", nextClass);
-                      updateField("subclassName", "");
-                    }}
+                    onChange={(e) => handleClassChange(e.target.value)}
                   >
                     <option value="">Choose a class</option>
                     {classOptions.map((option) => (
@@ -593,7 +742,7 @@ export function CharacterForm({
                   <select
                     disabled={!builder.className}
                     value={builder.subclassName}
-                    onChange={(event) => updateField("subclassName", event.target.value)}
+                    onChange={(e) => updateField("subclassName", e.target.value)}
                   >
                     <option value="">Choose a subclass</option>
                     {[activeClass?.subclass1_name, activeClass?.subclass2_name]
@@ -611,8 +760,8 @@ export function CharacterForm({
                 <article className="detail-card">
                   <h4>{classDetail.class_name}</h4>
                   <p>
-                    Domains: {classDetail.domains.join(" / ")} | Starting Evasion: {classDetail.starting_evasion} |
-                    Starting HP: {classDetail.starting_hit_points}
+                    Domains: {classDetail.domains.join(" / ")} | Starting Evasion:{" "}
+                    {classDetail.starting_evasion} | Starting HP: {classDetail.starting_hit_points}
                   </p>
                   <p className="muted">Class Items: {classDetail.class_items.join(" or ")}</p>
                   <p>{classDetail.hope_feature}</p>
@@ -630,13 +779,17 @@ export function CharacterForm({
             </div>
           ) : null}
 
+          {/* ── Step 2: Heritage ── */}
           {activeStep === 1 ? (
             <div className="step-section">
               <h3>Step 2: Choose Your Heritage</h3>
               <div className="grid-form">
                 <label>
                   Ancestry
-                  <select value={builder.ancestry} onChange={(event) => updateField("ancestry", event.target.value)}>
+                  <select
+                    value={builder.ancestry}
+                    onChange={(e) => updateField("ancestry", e.target.value)}
+                  >
                     <option value="">Choose an ancestry</option>
                     {ancestries.map((option) => (
                       <option key={option.ancestry_name} value={option.ancestry_name}>
@@ -648,7 +801,10 @@ export function CharacterForm({
 
                 <label>
                   Community
-                  <select value={builder.community} onChange={(event) => updateField("community", event.target.value)}>
+                  <select
+                    value={builder.community}
+                    onChange={(e) => updateField("community", e.target.value)}
+                  >
                     <option value="">Choose a community</option>
                     {communities.map((option) => (
                       <option key={option.community_name} value={option.community_name}>
@@ -663,7 +819,7 @@ export function CharacterForm({
                   <textarea
                     rows={3}
                     value={builder.heritageNotes}
-                    onChange={(event) => updateField("heritageNotes", event.target.value)}
+                    onChange={(e) => updateField("heritageNotes", e.target.value)}
                     placeholder="Use this for mixed ancestry notes or narrative heritage details."
                   />
                 </label>
@@ -686,11 +842,13 @@ export function CharacterForm({
             </div>
           ) : null}
 
+          {/* ── Step 3: Traits ── */}
           {activeStep === 2 ? (
             <div className="step-section">
               <h3>Step 3: Assign Character Traits</h3>
               <p className="muted">
-                You must use each modifier a limited number of times: one `+2`, two `+1`s, two `+0`s, and one `-1`.
+                You must use each modifier a limited number of times: one `+2`, two `+1`s, two
+                `+0`s, and one `-1`.
               </p>
               <article className="traitHelpCard">
                 <h4>Available Modifiers</h4>
@@ -706,7 +864,10 @@ export function CharacterForm({
                 {TRAITS.map((trait) => (
                   <label key={trait} className="trait-row">
                     <span>{trait}</span>
-                    <select value={builder.traits[trait]} onChange={(event) => updateTrait(trait, event.target.value)}>
+                    <select
+                      value={builder.traits[trait]}
+                      onChange={(e) => updateTrait(trait, e.target.value)}
+                    >
                       <option value="">Assign modifier</option>
                       {TRAIT_MODIFIER_OPTIONS.map((modifier, index) => (
                         <option
@@ -724,12 +885,17 @@ export function CharacterForm({
                   </label>
                 ))}
               </div>
-              <p className={`status ${traitAssignmentValid ? "success-text" : ""}`}>
-                {traitAssignmentValid ? "Trait spread is valid." : "Finish assigning all six modifiers."}
+              <p
+                className={`status ${builderCompletion.traitAssignmentValid ? "success-text" : ""}`}
+              >
+                {builderCompletion.traitAssignmentValid
+                  ? "Trait spread is valid."
+                  : "Finish assigning all six modifiers."}
               </p>
             </div>
           ) : null}
 
+          {/* ── Step 4: Core Stats ── */}
           {activeStep === 3 ? (
             <div className="step-section">
               <h3>Step 4: Record Additional Character Information</h3>
@@ -740,7 +906,7 @@ export function CharacterForm({
                     type="number"
                     min="1"
                     value={builder.level}
-                    onChange={(event) => updateField("level", Number(event.target.value) || 1)}
+                    onChange={(e) => updateField("level", Number(e.target.value) || 1)}
                   />
                 </label>
                 <label>
@@ -749,7 +915,7 @@ export function CharacterForm({
                     type="number"
                     min="0"
                     value={builder.evasion}
-                    onChange={(event) => updateField("evasion", Number(event.target.value) || 0)}
+                    onChange={(e) => updateField("evasion", Number(e.target.value) || 0)}
                   />
                 </label>
                 <label>
@@ -758,7 +924,7 @@ export function CharacterForm({
                     type="number"
                     min="0"
                     value={builder.hitPoints}
-                    onChange={(event) => updateField("hitPoints", Number(event.target.value) || 0)}
+                    onChange={(e) => updateField("hitPoints", Number(e.target.value) || 0)}
                   />
                 </label>
                 <label>
@@ -767,7 +933,7 @@ export function CharacterForm({
                     type="number"
                     min="0"
                     value={builder.stress}
-                    onChange={(event) => updateField("stress", Number(event.target.value) || 0)}
+                    onChange={(e) => updateField("stress", Number(e.target.value) || 0)}
                   />
                 </label>
                 <label>
@@ -776,7 +942,7 @@ export function CharacterForm({
                     type="number"
                     min="0"
                     value={builder.hope}
-                    onChange={(event) => updateField("hope", Number(event.target.value) || 0)}
+                    onChange={(e) => updateField("hope", Number(e.target.value) || 0)}
                   />
                 </label>
                 <label>
@@ -785,13 +951,14 @@ export function CharacterForm({
                     type="number"
                     min="1"
                     value={builder.proficiency}
-                    onChange={(event) => updateField("proficiency", Number(event.target.value) || 1)}
+                    onChange={(e) => updateField("proficiency", Number(e.target.value) || 1)}
                   />
                 </label>
               </div>
             </div>
           ) : null}
 
+          {/* ── Step 5: Equipment ── */}
           {activeStep === 4 ? (
             <div className="step-section">
               <h3>Step 5: Choose Your Starting Equipment</h3>
@@ -800,76 +967,81 @@ export function CharacterForm({
                   Primary Weapon
                   <select
                     value={builder.primaryWeapon}
-                    onChange={(event) => updateField("primaryWeapon", event.target.value)}
+                    onChange={(e) => updateField("primaryWeapon", e.target.value)}
                   >
                     <option value="">Choose a tier 1 primary weapon</option>
                     {primaryWeapons.map((item) => (
                       <option key={item.item_name} value={item.item_name}>
-                        {item.item_name} ({item.trait_name} / {item.range_name} / {item.damage_text})
+                        {item.item_name} ({item.trait_name} / {item.range_name} /{" "}
+                        {item.damage_text})
                       </option>
                     ))}
                   </select>
                 </label>
+
                 <label>
                   Secondary Weapon
                   <select
                     value={builder.secondaryWeapon}
-                    onChange={(event) => updateField("secondaryWeapon", event.target.value)}
+                    onChange={(e) => updateField("secondaryWeapon", e.target.value)}
                   >
                     <option value="">Choose an optional tier 1 secondary weapon</option>
                     {secondaryWeapons.map((item) => (
                       <option key={item.item_name} value={item.item_name}>
-                        {item.item_name} ({item.trait_name} / {item.range_name} / {item.damage_text})
+                        {item.item_name} ({item.trait_name} / {item.range_name} /{" "}
+                        {item.damage_text})
                       </option>
                     ))}
                   </select>
                 </label>
+
                 <label>
                   Armor
                   <select
                     value={builder.armorName}
-                    onChange={(event) => {
-                      const armorName = event.target.value;
-                      const armor = armorOptions.find((item) => item.item_name === armorName) ?? null;
-                      updateField("armorName", armorName);
-                      updateField("armorScore", armor?.base_score ? String(armor.base_score) : "");
-                      updateField("armorThresholdMajor", armor?.thresholds_major ? String(armor.thresholds_major + builder.level) : "");
-                      updateField("armorThresholdSevere", armor?.thresholds_severe ? String(armor.thresholds_severe + builder.level) : "");
-                    }}
+                    onChange={(e) => handleArmorChange(e.target.value)}
                   >
                     <option value="">Choose tier 1 armor</option>
                     {armorOptions.map((item) => (
                       <option key={item.item_name} value={item.item_name}>
-                        {item.item_name} (Score {item.base_score} / {item.thresholds_major}-{item.thresholds_severe})
+                        {item.item_name} (Score {item.base_score} / {item.thresholds_major}-
+                        {item.thresholds_severe})
                       </option>
                     ))}
                   </select>
                 </label>
+
                 <label>
                   Armor Score
                   <input
                     value={builder.armorScore}
-                    onChange={(event) => updateField("armorScore", event.target.value)}
+                    onChange={(e) => updateField("armorScore", e.target.value)}
                     placeholder="Base score plus permanent bonuses"
                   />
                 </label>
+
                 <label>
                   Armor Threshold 1
                   <input
                     value={builder.armorThresholdMajor}
-                    onChange={(event) => updateField("armorThresholdMajor", event.target.value)}
+                    onChange={(e) => updateField("armorThresholdMajor", e.target.value)}
                   />
                 </label>
+
                 <label>
                   Armor Threshold 2
                   <input
                     value={builder.armorThresholdSevere}
-                    onChange={(event) => updateField("armorThresholdSevere", event.target.value)}
+                    onChange={(e) => updateField("armorThresholdSevere", e.target.value)}
                   />
                 </label>
+
                 <label>
                   Potion
-                  <select value={builder.potionChoice} onChange={(event) => updateField("potionChoice", event.target.value)}>
+                  <select
+                    value={builder.potionChoice}
+                    onChange={(e) => updateField("potionChoice", e.target.value)}
+                  >
                     <option value="">Choose a potion</option>
                     {potionOptions.map((item) => (
                       <option key={item.item_name} value={item.item_name}>
@@ -878,11 +1050,12 @@ export function CharacterForm({
                     ))}
                   </select>
                 </label>
+
                 <label>
                   Class-Specific Item
                   <select
                     value={builder.classItemChoice}
-                    onChange={(event) => updateField("classItemChoice", event.target.value)}
+                    onChange={(e) => updateField("classItemChoice", e.target.value)}
                     disabled={classItemOptions.length === 0}
                   >
                     <option value="">Choose a class item</option>
@@ -893,60 +1066,72 @@ export function CharacterForm({
                     ))}
                   </select>
                 </label>
+
                 <label className="wide">
                   Weapon and Damage Notes
                   <textarea
                     rows={3}
                     value={builder.weaponNotes}
-                    onChange={(event) => updateField("weaponNotes", event.target.value)}
+                    onChange={(e) => updateField("weaponNotes", e.target.value)}
                     placeholder="Record damage dice, equipped weapon setup, and any tier 1 notes."
                   />
                 </label>
+
                 <label className="wide">
                   Inventory
                   <textarea
                     rows={3}
                     value={builder.inventoryNotes}
-                    onChange={(event) => updateField("inventoryNotes", event.target.value)}
+                    onChange={(e) => updateField("inventoryNotes", e.target.value)}
                   />
                 </label>
               </div>
+
               {selectedPrimaryWeapon ? (
                 <article className="detail-card">
                   <h4>{selectedPrimaryWeapon.item_name}</h4>
                   <p className="muted">
-                    {selectedPrimaryWeapon.trait_name} | {selectedPrimaryWeapon.range_name} | {selectedPrimaryWeapon.damage_text}{" "}
-                    {selectedPrimaryWeapon.damage_type ?? ""}
+                    {selectedPrimaryWeapon.trait_name} | {selectedPrimaryWeapon.range_name} |{" "}
+                    {selectedPrimaryWeapon.damage_text} {selectedPrimaryWeapon.damage_type ?? ""}
                   </p>
                   <p>{selectedPrimaryWeapon.feature_text ?? selectedPrimaryWeapon.description_text}</p>
                 </article>
               ) : null}
+
               {selectedSecondaryWeapon ? (
                 <article className="detail-card">
                   <h4>{selectedSecondaryWeapon.item_name}</h4>
                   <p className="muted">
-                    {selectedSecondaryWeapon.trait_name} | {selectedSecondaryWeapon.range_name} | {selectedSecondaryWeapon.damage_text}{" "}
+                    {selectedSecondaryWeapon.trait_name} | {selectedSecondaryWeapon.range_name} |{" "}
+                    {selectedSecondaryWeapon.damage_text}{" "}
                     {selectedSecondaryWeapon.damage_type ?? ""}
                   </p>
-                  <p>{selectedSecondaryWeapon.feature_text ?? selectedSecondaryWeapon.description_text}</p>
+                  <p>
+                    {selectedSecondaryWeapon.feature_text ??
+                      selectedSecondaryWeapon.description_text}
+                  </p>
                 </article>
               ) : null}
+
               {selectedArmor ? (
                 <article className="detail-card">
                   <h4>{selectedArmor.item_name}</h4>
                   <p className="muted">
-                    Base Score {selectedArmor.base_score ?? "-"} | Thresholds {selectedArmor.thresholds_major ?? "-"} /{" "}
+                    Base Score {selectedArmor.base_score ?? "-"} | Thresholds{" "}
+                    {selectedArmor.thresholds_major ?? "-"} /{" "}
                     {selectedArmor.thresholds_severe ?? "-"}
                   </p>
                   <p>{selectedArmor.feature_text ?? selectedArmor.description_text}</p>
                 </article>
               ) : null}
+
               {selectedPotion ? (
                 <article className="detail-card">
                   <h4>{titleCase(selectedPotion.item_name)}</h4>
                   <p>{selectedPotion.description_text}</p>
                 </article>
               ) : null}
+
               {builder.classItemChoice ? (
                 <article className="detail-card">
                   <h4>Chosen Class Item</h4>
@@ -956,6 +1141,7 @@ export function CharacterForm({
             </div>
           ) : null}
 
+          {/* ── Step 6: Background ── */}
           {activeStep === 5 ? (
             <div className="step-section">
               <h3>Step 6: Create Your Background</h3>
@@ -963,12 +1149,13 @@ export function CharacterForm({
                 className="full-textarea"
                 rows={8}
                 value={builder.background}
-                onChange={(event) => updateField("background", event.target.value)}
+                onChange={(e) => updateField("background", e.target.value)}
                 placeholder="Answer class-guide background questions or write the character's backstory."
               />
             </div>
           ) : null}
 
+          {/* ── Step 7: Experiences ── */}
           {activeStep === 6 ? (
             <div className="step-section">
               <h3>Step 7: Create Your Experiences</h3>
@@ -977,7 +1164,7 @@ export function CharacterForm({
                   Experience One (+2)
                   <input
                     value={builder.experienceOne}
-                    onChange={(event) => updateField("experienceOne", event.target.value)}
+                    onChange={(e) => updateField("experienceOne", e.target.value)}
                     placeholder="Scholar"
                   />
                 </label>
@@ -985,7 +1172,7 @@ export function CharacterForm({
                   Experience Two (+2)
                   <input
                     value={builder.experienceTwo}
-                    onChange={(event) => updateField("experienceTwo", event.target.value)}
+                    onChange={(e) => updateField("experienceTwo", e.target.value)}
                     placeholder="Catch Me If You Can"
                   />
                 </label>
@@ -993,6 +1180,7 @@ export function CharacterForm({
             </div>
           ) : null}
 
+          {/* ── Step 8: Domain Cards ── */}
           {activeStep === 7 ? (
             <div className="step-section">
               <h3>Step 8: Choose Domain Cards</h3>
@@ -1008,12 +1196,15 @@ export function CharacterForm({
                   Domain Card One
                   <select
                     value={builder.domainCardOne}
-                    onChange={(event) => updateField("domainCardOne", event.target.value)}
+                    onChange={(e) => updateField("domainCardOne", e.target.value)}
                     disabled={!builder.className}
                   >
                     <option value="">Choose first card</option>
                     {domainCards.map((card) => (
-                      <option key={`${card.domain_name}-${card.card_name}`} value={card.card_name}>
+                      <option
+                        key={`${card.domain_name}-${card.card_name}`}
+                        value={card.card_name}
+                      >
                         {card.card_name} ({card.domain_name} L{card.card_level})
                       </option>
                     ))}
@@ -1023,34 +1214,40 @@ export function CharacterForm({
                   Domain Card Two
                   <select
                     value={builder.domainCardTwo}
-                    onChange={(event) => updateField("domainCardTwo", event.target.value)}
+                    onChange={(e) => updateField("domainCardTwo", e.target.value)}
                     disabled={!builder.className}
                   >
                     <option value="">Choose second card</option>
                     {domainCards.map((card) => (
-                      <option key={`${card.domain_name}-${card.card_name}-two`} value={card.card_name}>
+                      <option
+                        key={`${card.domain_name}-${card.card_name}-two`}
+                        value={card.card_name}
+                      >
                         {card.card_name} ({card.domain_name} L{card.card_level})
                       </option>
                     ))}
                   </select>
                 </label>
               </div>
+
               {selectedDomainCardOne ? (
                 <article className="detail-card">
                   <h4>{selectedDomainCardOne.card_name}</h4>
                   <p className="muted">
-                    {selectedDomainCardOne.domain_name} | {selectedDomainCardOne.card_type} | Recall Cost{" "}
-                    {selectedDomainCardOne.recall_cost ?? "-"}
+                    {selectedDomainCardOne.domain_name} | {selectedDomainCardOne.card_type} |
+                    Recall Cost {selectedDomainCardOne.recall_cost ?? "-"}
                   </p>
                   <p>{selectedDomainCardOne.card_text}</p>
                 </article>
               ) : null}
-              {selectedDomainCardTwo && selectedDomainCardTwo.card_name !== selectedDomainCardOne?.card_name ? (
+
+              {selectedDomainCardTwo &&
+              selectedDomainCardTwo.card_name !== selectedDomainCardOne?.card_name ? (
                 <article className="detail-card">
                   <h4>{selectedDomainCardTwo.card_name}</h4>
                   <p className="muted">
-                    {selectedDomainCardTwo.domain_name} | {selectedDomainCardTwo.card_type} | Recall Cost{" "}
-                    {selectedDomainCardTwo.recall_cost ?? "-"}
+                    {selectedDomainCardTwo.domain_name} | {selectedDomainCardTwo.card_type} |
+                    Recall Cost {selectedDomainCardTwo.recall_cost ?? "-"}
                   </p>
                   <p>{selectedDomainCardTwo.card_text}</p>
                 </article>
@@ -1058,6 +1255,7 @@ export function CharacterForm({
             </div>
           ) : null}
 
+          {/* ── Step 9: Connections ── */}
           {activeStep === 8 ? (
             <div className="step-section">
               <h3>Step 9: Create Your Connections</h3>
@@ -1065,12 +1263,13 @@ export function CharacterForm({
                 className="full-textarea"
                 rows={8}
                 value={builder.connectionNotes}
-                onChange={(event) => updateField("connectionNotes", event.target.value)}
+                onChange={(e) => updateField("connectionNotes", e.target.value)}
                 placeholder="Record proposed PC connections, accepted ties, and table notes."
               />
             </div>
           ) : null}
 
+          {/* ── Navigation ── */}
           <div className="builder-actions">
             <button
               className="secondary-button"
@@ -1097,17 +1296,20 @@ export function CharacterForm({
                 ) : null}
                 <button
                   className="primary-button"
-                  disabled={!builderCompletion.complete}
+                  disabled={!builderCompletion.complete || isSubmitting}
                   onClick={handleSave}
                   type="button"
                 >
-                  {submitLabel ?? (initialCharacter ? "Save Changes" : "Save Character")}
+                  {isSubmitting
+                    ? "Saving..."
+                    : (submitLabel ?? (initialCharacter ? "Save Changes" : "Save Character"))}
                 </button>
               </>
             ) : null}
           </div>
         </div>
 
+        {/* ── Sidebar ── */}
         <aside className={`builder-sidebar ${focusMode ? "builder-sidebar-focused" : ""}`}>
           <article className="detail-card">
             <h4>Current Summary</h4>
@@ -1116,21 +1318,25 @@ export function CharacterForm({
               {builder.pronouns ? ` (${builder.pronouns})` : ""}
             </p>
             <p>
-              {builder.className || "No class"} {builder.subclassName ? `/ ${builder.subclassName}` : ""}
+              {builder.className || "No class"}{" "}
+              {builder.subclassName ? `/ ${builder.subclassName}` : ""}
             </p>
             <p>
-              {builder.ancestry || "No ancestry"} {builder.community ? `/ ${titleCase(builder.community)}` : ""}
+              {builder.ancestry || "No ancestry"}{" "}
+              {builder.community ? `/ ${titleCase(builder.community)}` : ""}
             </p>
             <p>
-              Level {builder.level} | Evasion {builder.evasion || "-"} | HP 0/{builder.hitPoints || "-"} | Stress 0/
-              {builder.stress} | Hope {builder.hope}
+              Level {builder.level} | Evasion {builder.evasion || "-"} | HP 0/
+              {builder.hitPoints || "-"} | Stress 0/{builder.stress} | Hope {builder.hope}
             </p>
           </article>
 
           <article className="detail-card">
             <h4>Save Requirements</h4>
             {builderCompletion.complete ? (
-              <p className="success-text">All required builder choices are complete. Save unlocks on Step 9.</p>
+              <p className="success-text">
+                All required builder choices are complete. Save unlocks on Step 9.
+              </p>
             ) : (
               <p className="muted">Still needed: {builderCompletion.missing.join(", ")}.</p>
             )}
