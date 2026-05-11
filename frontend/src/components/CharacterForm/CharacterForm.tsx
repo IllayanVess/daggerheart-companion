@@ -64,7 +64,6 @@ const TRAIT_MODIFIER_OPTIONS = ["+2", "+1", "+1", "+0", "+0", "-1"] as const;
 
 type TraitName = (typeof TRAITS)[number];
 
-// Precomputed — the modifier pool never changes at runtime.
 const MODIFIER_TOTALS: Record<string, number> = TRAIT_MODIFIER_OPTIONS.reduce<Record<string, number>>(
   (acc, modifier) => {
     acc[modifier] = (acc[modifier] ?? 0) + 1;
@@ -186,7 +185,6 @@ function asDomainCards(value: unknown): string[] {
     : [];
 }
 
-/** Derive armor fields from a selected equipment option and the current level. */
 function deriveArmorFields(
   armor: EquipmentOption | null,
   level: number,
@@ -369,7 +367,6 @@ export function CharacterForm({
   // Effects
   // ---------------------------------------------------------------------------
 
-  // Sync when a different character is passed in from the parent.
   useEffect(() => {
     setBuilder(initialCharacter ? buildStateFromCharacter(initialCharacter) : INITIAL_STATE);
     setActiveStep(0);
@@ -380,7 +377,6 @@ export function CharacterForm({
     );
   }, [initialCharacter]);
 
-  // Load all static lookup data once on mount.
   useEffect(() => {
     Promise.all([
       fetchClasses(),
@@ -419,7 +415,6 @@ export function CharacterForm({
       });
   }, []);
 
-  // Load class detail and domain cards when class changes.
   useEffect(() => {
     if (!builder.className) {
       setClassDetail(null);
@@ -443,7 +438,6 @@ export function CharacterForm({
       });
   }, [builder.className]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Load subclass detail when subclass changes.
   useEffect(() => {
     if (!builder.subclassName) {
       setSubclassDetail(null);
@@ -457,10 +451,6 @@ export function CharacterForm({
       });
   }, [builder.subclassName]);
 
-  // Recompute armor derived fields when level changes while armor is already selected.
-  // This is the single source of truth for armor derivation — the armor onChange
-  // handler calls deriveArmorFields directly so this effect only needs to handle
-  // the level-change case.
   useEffect(() => {
     if (!builder.armorName) return;
 
@@ -474,7 +464,7 @@ export function CharacterForm({
   }, [builder.level, builder.armorName, armorOptions]);
 
   // ---------------------------------------------------------------------------
-  // Derived values (memoized)
+  // Derived values
   // ---------------------------------------------------------------------------
 
   const activeClass = useMemo(
@@ -535,7 +525,6 @@ export function CharacterForm({
   const builderCompletion = useMemo(() => {
     const missing: string[] = [];
 
-    // Trait validation lives here so builderCompletion always reflects current traits.
     const usedTraitModifiers = Object.values(builder.traits).filter(Boolean);
     const traitAssignmentValid =
       TRAITS.every((trait) => builder.traits[trait] !== "") &&
@@ -580,7 +569,6 @@ export function CharacterForm({
     }));
   }
 
-  /** Handle class selection: reset all class-dependent choices. */
   function handleClassChange(nextClass: string): void {
     setBuilder((current) => ({
       ...current,
@@ -592,7 +580,6 @@ export function CharacterForm({
     }));
   }
 
-  /** Handle armor selection: derive all armor fields in one update. */
   function handleArmorChange(armorName: string): void {
     const armor = armorOptions.find((item) => item.item_name === armorName) ?? null;
     setBuilder((current) => ({
@@ -652,9 +639,7 @@ export function CharacterForm({
   // ---------------------------------------------------------------------------
 
   return (
-    <section
-      className={`panel character-form ${styles.characterFormScope} ${focusMode ? "builder-focus-panel" : ""}`}
-    >
+    <section className={`panel ${styles.root} ${focusMode ? styles.focus : ""}`}>
       <div className="panel-header">
         <div>
           <p className="eyebrow">Character Builder</p>
@@ -666,23 +651,23 @@ export function CharacterForm({
       </div>
 
       {focusMode ? (
-        <section className="builder-intro-card">
+        <section className={styles.introCard}>
           <div>
             <p className="eyebrow">Focused Creation</p>
             <h3>Build one hero at a time.</h3>
           </div>
-          <p className="muted">
+          <p className={styles.muted}>
             This screen is reserved for the character builder so you can stay inside the official
             Daggerheart flow without the roster competing for attention.
           </p>
         </section>
       ) : null}
 
-      <div className="stepper">
+      <div className={styles.stepper}>
         {STEPS.map((step, index) => (
           <button
             key={step}
-            className={`step-chip ${index === activeStep ? "active" : ""}`}
+            className={`${styles.stepChip} ${index === activeStep ? styles.activeChip : ""}`}
             onClick={() => setActiveStep(index)}
             type="button"
           >
@@ -691,18 +676,18 @@ export function CharacterForm({
         ))}
       </div>
 
-      <section className={`builder-shell ${focusMode ? "builder-shell-focused" : ""}`}>
-        <div className="builder-main">
+      <section className={styles.builderShell}>
+        <div className={styles.builderMain}>
 
           {/* ── Step 1: Class ── */}
           {activeStep === 0 ? (
-            <div className="step-section">
+            <div className={styles.stepSection}>
               <h3>Step 1: Choose a Class and Subclass</h3>
-              <p className="muted">
+              <p className={styles.muted}>
                 Start with class, subclass, and identity details. Pronouns and description are optional.
               </p>
 
-              <div className="grid-form">
+              <div className={styles.gridForm}>
                 <label>
                   Name
                   <input
@@ -719,7 +704,7 @@ export function CharacterForm({
                   />
                 </label>
 
-                <label className="wide">
+                <label className={styles.wide}>
                   Character Description (Optional)
                   <textarea
                     rows={3}
@@ -763,22 +748,22 @@ export function CharacterForm({
               </div>
 
               {classDetail ? (
-                <article className="detail-card">
+                <article className={styles.detailCard}>
                   <h4>{classDetail.class_name}</h4>
                   <p>
                     Domains: {classDetail.domains.join(" / ")} | Starting Evasion:{" "}
                     {classDetail.starting_evasion} | Starting HP: {classDetail.starting_hit_points}
                   </p>
-                  <p className="muted">Class Items: {classDetail.class_items.join(" or ")}</p>
+                  <p className={styles.muted}>Class Items: {classDetail.class_items.join(" or ")}</p>
                   <p>{classDetail.hope_feature}</p>
                   <p>{classDetail.class_feature}</p>
                 </article>
               ) : null}
 
               {subclassDetail ? (
-                <article className="detail-card">
+                <article className={styles.detailCard}>
                   <h4>{subclassDetail.subclass_name}</h4>
-                  <p className="muted">Spellcast Trait: {subclassDetail.spellcast_trait_type}</p>
+                  <p className={styles.muted}>Spellcast Trait: {subclassDetail.spellcast_trait_type}</p>
                   <p>{subclassDetail.foundation_feature}</p>
                 </article>
               ) : null}
@@ -787,9 +772,9 @@ export function CharacterForm({
 
           {/* ── Step 2: Heritage ── */}
           {activeStep === 1 ? (
-            <div className="step-section">
+            <div className={styles.stepSection}>
               <h3>Step 2: Choose Your Heritage</h3>
-              <div className="grid-form">
+              <div className={styles.gridForm}>
                 <label>
                   Ancestry
                   <select
@@ -820,7 +805,7 @@ export function CharacterForm({
                   </select>
                 </label>
 
-                <label className="wide">
+                <label className={styles.wide}>
                   Heritage Notes
                   <textarea
                     rows={3}
@@ -832,7 +817,7 @@ export function CharacterForm({
               </div>
 
               {activeAncestry ? (
-                <article className="detail-card">
+                <article className={styles.detailCard}>
                   <h4>{activeAncestry.ancestry_name}</h4>
                   <p>{activeAncestry.ancestry_feature1}</p>
                   <p>{activeAncestry.ancestry_feature2}</p>
@@ -840,7 +825,7 @@ export function CharacterForm({
               ) : null}
 
               {activeCommunity ? (
-                <article className="detail-card">
+                <article className={styles.detailCard}>
                   <h4>{titleCase(activeCommunity.community_name)}</h4>
                   <p>{activeCommunity.community_feature}</p>
                 </article>
@@ -850,15 +835,15 @@ export function CharacterForm({
 
           {/* ── Step 3: Traits ── */}
           {activeStep === 2 ? (
-            <div className="step-section">
+            <div className={styles.stepSection}>
               <h3>Step 3: Assign Character Traits</h3>
-              <p className="muted">
+              <p className={styles.muted}>
                 You must use each modifier a limited number of times: one `+2`, two `+1`s, two
                 `+0`s, and one `-1`.
               </p>
-              <article className="traitHelpCard">
+              <article className={styles.traitHelpCard}>
                 <h4>Available Modifiers</h4>
-                <div className="traitCounterList">
+                <div className={styles.traitCounterList}>
                   {Object.entries(modifierInventory).map(([modifier, summary]) => (
                     <p key={modifier}>
                       <strong>{modifier}</strong>: {summary.remaining} remaining of {summary.total}
@@ -866,9 +851,9 @@ export function CharacterForm({
                   ))}
                 </div>
               </article>
-              <div className="trait-grid">
+              <div className={styles.traitGrid}>
                 {TRAITS.map((trait) => (
-                  <label key={trait} className="trait-row">
+                  <label key={trait} className={styles.traitRow}>
                     <span>{trait}</span>
                     <select
                       value={builder.traits[trait]}
@@ -892,7 +877,7 @@ export function CharacterForm({
                 ))}
               </div>
               <p
-                className={`status ${builderCompletion.traitAssignmentValid ? "success-text" : ""}`}
+                className={`status ${builderCompletion.traitAssignmentValid ? styles.successText : ""}`}
               >
                 {builderCompletion.traitAssignmentValid
                   ? "Trait spread is valid."
@@ -903,9 +888,9 @@ export function CharacterForm({
 
           {/* ── Step 4: Core Stats ── */}
           {activeStep === 3 ? (
-            <div className="step-section">
+            <div className={styles.stepSection}>
               <h3>Step 4: Record Additional Character Information</h3>
-              <div className="grid-form">
+              <div className={styles.gridForm}>
                 <label>
                   Level
                   <input
@@ -966,9 +951,9 @@ export function CharacterForm({
 
           {/* ── Step 5: Equipment ── */}
           {activeStep === 4 ? (
-            <div className="step-section">
+            <div className={styles.stepSection}>
               <h3>Step 5: Choose Your Starting Equipment</h3>
-              <div className="grid-form">
+              <div className={styles.gridForm}>
                 <label>
                   Primary Weapon
                   <select
@@ -1073,7 +1058,7 @@ export function CharacterForm({
                   </select>
                 </label>
 
-                <label className="wide">
+                <label className={styles.wide}>
                   Weapon and Damage Notes
                   <textarea
                     rows={3}
@@ -1083,7 +1068,7 @@ export function CharacterForm({
                   />
                 </label>
 
-                <label className="wide">
+                <label className={styles.wide}>
                   Inventory
                   <textarea
                     rows={3}
@@ -1094,9 +1079,9 @@ export function CharacterForm({
               </div>
 
               {selectedPrimaryWeapon ? (
-                <article className="detail-card">
+                <article className={styles.detailCard}>
                   <h4>{selectedPrimaryWeapon.item_name}</h4>
-                  <p className="muted">
+                  <p className={styles.muted}>
                     {selectedPrimaryWeapon.trait_name} | {selectedPrimaryWeapon.range_name} |{" "}
                     {selectedPrimaryWeapon.damage_text} {selectedPrimaryWeapon.damage_type ?? ""}
                   </p>
@@ -1105,9 +1090,9 @@ export function CharacterForm({
               ) : null}
 
               {selectedSecondaryWeapon ? (
-                <article className="detail-card">
+                <article className={styles.detailCard}>
                   <h4>{selectedSecondaryWeapon.item_name}</h4>
-                  <p className="muted">
+                  <p className={styles.muted}>
                     {selectedSecondaryWeapon.trait_name} | {selectedSecondaryWeapon.range_name} |{" "}
                     {selectedSecondaryWeapon.damage_text}{" "}
                     {selectedSecondaryWeapon.damage_type ?? ""}
@@ -1120,9 +1105,9 @@ export function CharacterForm({
               ) : null}
 
               {selectedArmor ? (
-                <article className="detail-card">
+                <article className={styles.detailCard}>
                   <h4>{selectedArmor.item_name}</h4>
-                  <p className="muted">
+                  <p className={styles.muted}>
                     Base Score {selectedArmor.base_score ?? "-"} | Thresholds{" "}
                     {selectedArmor.thresholds_major ?? "-"} /{" "}
                     {selectedArmor.thresholds_severe ?? "-"}
@@ -1132,14 +1117,14 @@ export function CharacterForm({
               ) : null}
 
               {selectedPotion ? (
-                <article className="detail-card">
+                <article className={styles.detailCard}>
                   <h4>{titleCase(selectedPotion.item_name)}</h4>
                   <p>{selectedPotion.description_text}</p>
                 </article>
               ) : null}
 
               {builder.classItemChoice ? (
-                <article className="detail-card">
+                <article className={styles.detailCard}>
                   <h4>Chosen Class Item</h4>
                   <p>{builder.classItemChoice}</p>
                 </article>
@@ -1149,10 +1134,10 @@ export function CharacterForm({
 
           {/* ── Step 6: Background ── */}
           {activeStep === 5 ? (
-            <div className="step-section">
+            <div className={styles.stepSection}>
               <h3>Step 6: Create Your Background</h3>
               <textarea
-                className="full-textarea"
+                className={styles.fullTextarea}
                 rows={8}
                 value={builder.background}
                 onChange={(e) => updateField("background", e.target.value)}
@@ -1163,9 +1148,9 @@ export function CharacterForm({
 
           {/* ── Step 7: Experiences ── */}
           {activeStep === 6 ? (
-            <div className="step-section">
+            <div className={styles.stepSection}>
               <h3>Step 7: Create Your Experiences</h3>
-              <div className="grid-form">
+              <div className={styles.gridForm}>
                 <label>
                   Experience One (+2)
                   <input
@@ -1188,16 +1173,16 @@ export function CharacterForm({
 
           {/* ── Step 8: Domain Cards ── */}
           {activeStep === 7 ? (
-            <div className="step-section">
+            <div className={styles.stepSection}>
               <h3>Step 8: Choose Domain Cards</h3>
-              <p className="muted">
+              <p className={styles.muted}>
                 These are real level 1 domain cards filtered from SQL by the selected class domains.
               </p>
-              <article className="detail-card">
+              <article className={styles.detailCard}>
                 <h4>{builder.className || "Class domains"}</h4>
                 <p>{classDetail ? classDetail.domains.join(" / ") : "Choose a class first."}</p>
               </article>
-              <div className="grid-form">
+              <div className={styles.gridForm}>
                 <label>
                   Domain Card One
                   <select
@@ -1237,9 +1222,9 @@ export function CharacterForm({
               </div>
 
               {selectedDomainCardOne ? (
-                <article className="detail-card">
+                <article className={styles.detailCard}>
                   <h4>{selectedDomainCardOne.card_name}</h4>
-                  <p className="muted">
+                  <p className={styles.muted}>
                     {selectedDomainCardOne.domain_name} | {selectedDomainCardOne.card_type} |
                     Recall Cost {selectedDomainCardOne.recall_cost ?? "-"}
                   </p>
@@ -1249,9 +1234,9 @@ export function CharacterForm({
 
               {selectedDomainCardTwo &&
               selectedDomainCardTwo.card_name !== selectedDomainCardOne?.card_name ? (
-                <article className="detail-card">
+                <article className={styles.detailCard}>
                   <h4>{selectedDomainCardTwo.card_name}</h4>
-                  <p className="muted">
+                  <p className={styles.muted}>
                     {selectedDomainCardTwo.domain_name} | {selectedDomainCardTwo.card_type} |
                     Recall Cost {selectedDomainCardTwo.recall_cost ?? "-"}
                   </p>
@@ -1263,10 +1248,10 @@ export function CharacterForm({
 
           {/* ── Step 9: Connections ── */}
           {activeStep === 8 ? (
-            <div className="step-section">
+            <div className={styles.stepSection}>
               <h3>Step 9: Create Your Connections</h3>
               <textarea
-                className="full-textarea"
+                className={styles.fullTextarea}
                 rows={8}
                 value={builder.connectionNotes}
                 onChange={(e) => updateField("connectionNotes", e.target.value)}
@@ -1276,7 +1261,7 @@ export function CharacterForm({
           ) : null}
 
           {/* ── Navigation ── */}
-          <div className="builder-actions">
+          <div className={styles.builderActions}>
             <button
               className="secondary-button"
               disabled={activeStep === 0}
@@ -1316,8 +1301,8 @@ export function CharacterForm({
         </div>
 
         {/* ── Sidebar ── */}
-        <aside className={`builder-sidebar ${focusMode ? "builder-sidebar-focused" : ""}`}>
-          <article className="detail-card">
+        <aside className={styles.builderSidebar}>
+          <article className={styles.detailCard}>
             <h4>Current Summary</h4>
             <p>
               {builder.name || "Unnamed Hero"}
@@ -1337,29 +1322,29 @@ export function CharacterForm({
             </p>
           </article>
 
-          <article className="detail-card">
+          <article className={styles.detailCard}>
             <h4>Save Requirements</h4>
             {builderCompletion.complete ? (
-              <p className="success-text">
+              <p className={styles.successText}>
                 All required builder choices are complete. Save unlocks on Step 9.
               </p>
             ) : (
-              <p className="muted">Still needed: {builderCompletion.missing.join(", ")}.</p>
+              <p className={styles.muted}>Still needed: {builderCompletion.missing.join(", ")}.</p>
             )}
           </article>
 
           {classDetail ? (
-            <article className="detail-card">
+            <article className={styles.detailCard}>
               <h4>Class Reference</h4>
-              <p className="muted">Domains: {classDetail.domains.join(" / ")}</p>
+              <p className={styles.muted}>Domains: {classDetail.domains.join(" / ")}</p>
               <p>{classDetail.hope_feature}</p>
             </article>
           ) : null}
 
           {subclassDetail ? (
-            <article className="detail-card">
+            <article className={styles.detailCard}>
               <h4>Subclass Reference</h4>
-              <p className="muted">Spellcast Trait: {subclassDetail.spellcast_trait_type}</p>
+              <p className={styles.muted}>Spellcast Trait: {subclassDetail.spellcast_trait_type}</p>
               <p>{subclassDetail.foundation_feature}</p>
             </article>
           ) : null}

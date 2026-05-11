@@ -42,18 +42,6 @@ type FeatureSection = {
   body: string;
 };
 
-const CLASS_THEME_MAP: Record<string, string> = {
-  bard: "sheet-theme-bard",
-  druid: "sheet-theme-druid",
-  guardian: "sheet-theme-guardian",
-  ranger: "sheet-theme-ranger",
-  rogue: "sheet-theme-rogue",
-  seraph: "sheet-theme-seraph",
-  sorcerer: "sheet-theme-sorcerer",
-  warrior: "sheet-theme-warrior",
-  wizard: "sheet-theme-wizard",
-};
-
 function asStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
@@ -103,13 +91,13 @@ function asSourceList(value: unknown): string[] {
 
 function renderBoxes(count: number, activeCount: number, onToggle: (index: number) => void) {
   return (
-    <div className="tracker-row">
+    <div className={styles.trackerRow}>
       {Array.from({ length: count }, (_, index) => {
         const checked = index < activeCount;
         return (
           <button
             key={index}
-            className={`tracker-box ${checked ? "checked" : ""}`}
+            className={`${styles.trackerBox} ${checked ? styles.checked : ""}`}
             onClick={() => onToggle(index)}
             type="button"
           />
@@ -193,13 +181,13 @@ function splitFeatureSections(text: string): FeatureSection[] {
 
 function renderFeatureBoxes(count: number, activeCount: number, onToggle: (index: number) => void, circle = false) {
   return (
-    <div className={`tracker-row ${circle ? "circle-tracker-row" : ""}`}>
+    <div className={`${styles.trackerRow} ${circle ? styles.circleTrackerRow : ""}`}>
       {Array.from({ length: count }, (_, index) => {
         const checked = index < activeCount;
         return (
           <button
             key={index}
-            className={`tracker-box ${checked ? "checked" : ""} ${circle ? "circle-box" : ""}`}
+            className={`${styles.trackerBox} ${checked ? styles.checked : ""} ${circle ? styles.circleBox : ""}`}
             onClick={() => onToggle(index)}
             type="button"
           />
@@ -502,7 +490,7 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
 
   if (!character) {
     return (
-      <section className={`panel sheet-panel ${styles.characterSheetScope}`} ref={sheetRef}>
+      <section className={`panel ${styles.root}`} ref={sheetRef}>
         <div className="panel-header">
           <div>
             <p className="eyebrow">Character Sheet</p>
@@ -531,7 +519,6 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
   const domainCards = asStringArray(payload.domain_cards);
   const classItems = asStringArray(payload.class_items);
   const normalizedClassName = character.class_name.toLowerCase();
-  const themeClass = CLASS_THEME_MAP[normalizedClassName] ?? "sheet-theme-default";
   const classDomains = domains.length ? domains.join(" & ") : "Class Domains";
   const classFeature = typeof payload.class_feature === "string" ? payload.class_feature : "";
   const hopeFeature = typeof payload.hope_feature === "string" ? payload.hope_feature : "";
@@ -546,8 +533,8 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
 
     if (normalizedClass === "seraph") {
       return (
-        <article className="sheet-card class-special-card">
-          <p className="sheet-label">Prayer Dice</p>
+        <article className={`${styles.card} ${styles.classSpecialCard}`}>
+          <p className={styles.sheetLabel}>Prayer Dice</p>
           {renderFeatureBoxes(
             6,
             prayerDice,
@@ -564,8 +551,8 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
 
     if (normalizedClass === "guardian") {
       return (
-        <article className="sheet-card class-special-card">
-          <p className="sheet-label">Unstoppable Die</p>
+        <article className={`${styles.card} ${styles.classSpecialCard}`}>
+          <p className={styles.sheetLabel}>Unstoppable Die</p>
           {renderFeatureBoxes(
             6,
             unstoppableValue,
@@ -582,9 +569,9 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
 
     if (normalizedClass === "bard") {
       return (
-        <article className="sheet-card class-special-card">
-          <p className="sheet-label">Rally Die</p>
-          <div className="grid-form inventory-compact-grid">
+        <article className={`${styles.card} ${styles.classSpecialCard}`}>
+          <p className={styles.sheetLabel}>Rally Die</p>
+          <div className={`${styles.gridForm} ${styles.inventoryCompactGrid}`}>
             <label>
               Rally Die
               <select value={rallyDieValue} onChange={(event) => setRallyDieValue(event.target.value)}>
@@ -594,7 +581,7 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
                 <option value="d10">d10</option>
               </select>
             </label>
-            <label className="wide">
+            <label className={styles.wide}>
               Rally Notes
               <textarea rows={4} value={rallyNotes} onChange={(event) => setRallyNotes(event.target.value)} />
             </label>
@@ -608,10 +595,10 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
 
     if (normalizedClass === "warrior") {
       return (
-        <article className="sheet-card class-special-card">
-          <p className="sheet-label">Combat Notes</p>
+        <article className={`${styles.card} ${styles.classSpecialCard}`}>
+          <p className={styles.sheetLabel}>Combat Notes</p>
           <textarea
-            className="sheet-textarea"
+            className={styles.sheetTextarea}
             rows={6}
             value={warriorNotes}
             onChange={(event) => setWarriorNotes(event.target.value)}
@@ -626,9 +613,9 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
 
     if (normalizedClass === "ranger") {
       return (
-        <article className="sheet-card class-special-card ranger-companion-card">
-          <p className="sheet-label">Companion</p>
-          <div className="grid-form inventory-compact-grid">
+        <article className={`${styles.card} ${styles.classSpecialCard} ${styles.rangerCompanionCard}`}>
+          <p className={styles.sheetLabel}>Companion</p>
+          <div className={`${styles.gridForm} ${styles.inventoryCompactGrid}`}>
             <label>
               Companion Name
               <input value={companionName} onChange={(event) => setCompanionName(event.target.value)} />
@@ -642,11 +629,11 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
                 onChange={(event) => setCompanionEvasion(Number(event.target.value) || 0)}
               />
             </label>
-            <label className="wide">
+            <label className={styles.wide}>
               Companion Notes
               <textarea rows={4} value={companionNotes} onChange={(event) => setCompanionNotes(event.target.value)} />
             </label>
-            <label className="wide">
+            <label className={styles.wide}>
               Companion Experiences
               <textarea
                 rows={3}
@@ -668,433 +655,437 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
 
   return (
     <>
-      <section className={`panel sheet-panel ${styles.characterSheetScope} ${themeClass}`} ref={sheetRef}>
-        <section className="sheet-banner">
-        <div className="sheet-banner-main">
-          <p className="sheet-banner-class">{character.class_name}</p>
-          <p className="sheet-banner-domains">{classDomains}</p>
-        </div>
-        <div className="sheet-banner-details">
-          <div>
-            <p className="sheet-label">Character</p>
-            <h2>{character.name}</h2>
+      <section
+        className={`panel ${styles.root}`}
+        data-sheet-theme={normalizedClassName}
+        ref={sheetRef}
+      >
+        <section className={styles.banner}>
+          <div className={styles.bannerMain}>
+            <p className={styles.bannerClass}>{character.class_name}</p>
+            <p className={styles.bannerDomains}>{classDomains}</p>
           </div>
-          <div className="sheet-banner-actions">
-            <span className="pill">Level {character.level}</span>
-            <button className="secondary-button" onClick={() => setActiveDialog("edit")} type="button">
-              Edit Sheet
-            </button>
-            <button className="secondary-button sheet-danger-button" onClick={() => setActiveDialog("level-up")} type="button">
-              Level Up
-            </button>
+          <div className={styles.bannerDetails}>
+            <div>
+              <p className={styles.sheetLabel}>Character</p>
+              <h2>{character.name}</h2>
+            </div>
+            <div className={styles.bannerActions}>
+              <span className="pill">Level {character.level}</span>
+              <button className="secondary-button" onClick={() => setActiveDialog("edit")} type="button">
+                Edit Sheet
+              </button>
+              <button className={`secondary-button ${styles.sheetDangerButton}`} onClick={() => setActiveDialog("level-up")} type="button">
+                Level Up
+              </button>
+            </div>
           </div>
-        </div>
         </section>
 
-        <section className="sheet-grid">
-        <article className="sheet-card identity-card">
-          <div className="sheet-topline">
-            <div>
-              <p className="sheet-label">Class</p>
-              <h3>
-                {character.class_name}
-                {character.subclass_name ? ` / ${character.subclass_name}` : ""}
-              </h3>
-            </div>
-            <div>
-              <p className="sheet-label">Pronouns</p>
-              <p>{typeof payload.pronouns === "string" && payload.pronouns ? payload.pronouns : "-"}</p>
-            </div>
-          </div>
-          <div className="sheet-meta">
-            <div>
-              <p className="sheet-label">Heritage</p>
-              <p>
-                {character.ancestry ?? "-"} / {character.community ?? "-"}
-              </p>
-            </div>
-            <div>
-              <p className="sheet-label">Description</p>
-              <p>{typeof payload.description === "string" && payload.description ? payload.description : "-"}</p>
-            </div>
-          </div>
-        </article>
-
-        <article className="sheet-card tracker-card">
-          <div className="stat-badges">
-            <div className="stat-badge">
-              <span>Evasion</span>
-              <strong>{displayedEvasion}</strong>
-            </div>
-            <div className="stat-badge">
-              <span>Armor</span>
-              <strong>{character.armor ?? "-"}</strong>
-            </div>
-            <div className="stat-badge">
-              <span>Prof.</span>
-              <strong>{typeof payload.proficiency === "number" ? payload.proficiency : 1}</strong>
-            </div>
-          </div>
-          {evasionSources.length > 0 ? (
-            <div className="derived-source-block">
-              <p className="sheet-label">Evasion Sources</p>
-              <div className="source-pill-row">
-                {evasionSources.map((source) => (
-                  <span key={source} className="source-pill">
-                    {source}
-                  </span>
-                ))}
+        <section className={styles.sheetGrid}>
+          <article className={`${styles.card} ${styles.identityCard}`}>
+            <div className={styles.topline}>
+              <div>
+                <p className={styles.sheetLabel}>Class</p>
+                <h3>
+                  {character.class_name}
+                  {character.subclass_name ? ` / ${character.subclass_name}` : ""}
+                </h3>
+              </div>
+              <div>
+                <p className={styles.sheetLabel}>Pronouns</p>
+                <p>{typeof payload.pronouns === "string" && payload.pronouns ? payload.pronouns : "-"}</p>
               </div>
             </div>
-          ) : null}
-          <div className="tracker-block">
-            <p className="sheet-label">HP ({trackerState.hp}/{maxHitPoints})</p>
-            {renderBoxes(maxHitPoints, clampTracker(trackerState.hp, maxHitPoints), (index) => {
-              const hp = getNextMarkedValue(trackerState.hp, index);
-              void persistTrackers({ ...trackerState, hp });
-            })}
-          </div>
-
-          <div className="tracker-block">
-            <p className="sheet-label">Stress ({trackerState.stress}/{maxStress})</p>
-            {renderBoxes(maxStress, clampTracker(trackerState.stress, maxStress), (index) => {
-              const stress = getNextMarkedValue(trackerState.stress, index);
-              void persistTrackers({ ...trackerState, stress });
-            })}
-          </div>
-
-          <div className="tracker-block">
-            <p className="sheet-label">Hope</p>
-            {renderBoxes(6, trackerState.hope, (index) => {
-              const hope = getNextMarkedValue(trackerState.hope, index);
-              void persistTrackers({ ...trackerState, hope });
-            })}
-          </div>
-          {hopeFeature ? <p className="sheet-feature-copy">{hopeFeature}</p> : null}
-        </article>
-
-        <article className="sheet-card">
-          <p className="sheet-label">Traits</p>
-          <div className="sheet-traits">
-            {Object.entries(traits).map(([trait, modifier]) => (
-              <div key={trait} className="trait-source-card">
-                <div className="trait-pill">
-                  <span>{trait}</span>
-                  <strong>{modifier}</strong>
-                </div>
-                {traitSources[trait]?.length ? (
-                  <div className="source-pill-row">
-                    {traitSources[trait].map((source) => (
-                      <span key={`${trait}-${source}`} className="source-pill">
-                        {source}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            ))}
-            {Object.keys(traits).length === 0 ? <p className="muted">No trait assignment saved yet.</p> : null}
-          </div>
-        </article>
-
-        <article className="sheet-card">
-          <p className="sheet-label">Active Weapons</p>
-          <div className="sheet-entry">
-            <span>Primary</span>
-            <strong>{typeof payload.primary_weapon === "string" && payload.primary_weapon ? payload.primary_weapon : "-"}</strong>
-          </div>
-          <div className="sheet-entry">
-            <span>Secondary</span>
-            <strong>
-              {typeof payload.secondary_weapon === "string" && payload.secondary_weapon
-                ? payload.secondary_weapon
-                : "-"}
-            </strong>
-          </div>
-          <p className="muted">
-            {typeof payload.weapon_notes === "string" && payload.weapon_notes ? payload.weapon_notes : "No weapon notes yet."}
-          </p>
-        </article>
-
-        <article className="sheet-card">
-          <p className="sheet-label">Active Armor</p>
-          <div className="sheet-entry">
-            <span>Armor</span>
-            <strong>{typeof payload.armor_name === "string" && payload.armor_name ? payload.armor_name : "-"}</strong>
-          </div>
-          <div className="sheet-entry">
-            <span>Thresholds</span>
-            <strong>
-              {typeof payload.armor_threshold_major === "string" ? payload.armor_threshold_major : "-"} /{" "}
-              {typeof payload.armor_threshold_severe === "string" ? payload.armor_threshold_severe : "-"}
-            </strong>
-          </div>
-          <div className="tracker-block">
-            <p className="sheet-label">Armor Slots</p>
-            {renderBoxes(6, trackerState.armorSlots, (index) => {
-              const armorSlots = getNextMarkedValue(trackerState.armorSlots, index);
-              void persistTrackers({ ...trackerState, armorSlots });
-            })}
-          </div>
-        </article>
-
-        <article className="sheet-card">
-          <p className="sheet-label">Experience</p>
-          <div className="sheet-list">
-            {experiences.map((experience) => (
-              <div key={experience.name} className="sheet-entry">
-                <span>{experience.name}</span>
-                <strong>+{experience.modifier}</strong>
-              </div>
-            ))}
-            {experiences.length === 0 ? <p className="muted">No experiences saved yet.</p> : null}
-          </div>
-        </article>
-
-        <article className="sheet-card">
-          <p className="sheet-label">Domains and Cards</p>
-          <p className="muted">Domains: {domains.length ? domains.join(" / ") : "No class domains saved."}</p>
-          <div className="sheet-list">
-            {domainCards.map((card) => (
-              <div key={card} className="sheet-entry">
-                <span>{card}</span>
-              </div>
-            ))}
-            {domainCards.length === 0 ? <p className="muted">No domain cards saved yet.</p> : null}
-          </div>
-        </article>
-
-        <article className="sheet-card">
-          <p className="sheet-label">Gold</p>
-          <div className="gold-tracker-grid">
-            <div className="tracker-block">
-              <p className="sheet-label">Handfuls</p>
-              {renderBoxes(10, trackerState.goldHandfuls, (index) => {
-                const goldHandfuls = getNextMarkedValue(trackerState.goldHandfuls, index);
-                void persistTrackers({ ...trackerState, ...normalizeGold(goldHandfuls, trackerState.goldBags, trackerState.goldChests) });
-              })}
-            </div>
-            <div className="tracker-block">
-              <p className="sheet-label">Bags</p>
-              {renderBoxes(10, trackerState.goldBags, (index) => {
-                const goldBags = getNextMarkedValue(trackerState.goldBags, index);
-                void persistTrackers({ ...trackerState, ...normalizeGold(trackerState.goldHandfuls, goldBags, trackerState.goldChests) });
-              })}
-            </div>
-            <div className="tracker-block">
-              <p className="sheet-label">Chest</p>
-              {renderBoxes(1, trackerState.goldChests, (index) => {
-                const goldChests = getNextMarkedValue(trackerState.goldChests, index);
-                void persistTrackers({ ...trackerState, ...normalizeGold(trackerState.goldHandfuls, trackerState.goldBags, goldChests) });
-              })}
-            </div>
-          </div>
-        </article>
-
-        <article className="sheet-card wide-sheet-card class-feature-card">
-          <p className="sheet-label">Class Feature</p>
-          <div className="feature-section-list">
-            {featureSections.length ? (
-              featureSections.map((section, index) => (
-                <article key={`${section.heading}-${index}`} className="feature-section-card">
-                  <h4>{section.heading}</h4>
-                  <p>{section.body}</p>
-                </article>
-              ))
-            ) : (
-              <p>No class feature text loaded yet.</p>
-            )}
-          </div>
-        </article>
-
-        {renderClassSpecificModule()}
-
-        <article className="sheet-card">
-          <p className="sheet-label">Inventory</p>
-          <div className="inventory-toolbar">
-            <input
-              value={inventorySearch}
-              onChange={(event) => setInventorySearch(event.target.value)}
-              placeholder="Search equipment, items, consumables"
-            />
-            {inventorySearch ? (
-              <button
-                className="secondary-button inventory-clear-button"
-                onClick={() => {
-                  setInventorySearch("");
-                  setInventoryResults([]);
-                }}
-                type="button"
-              >
-                Clear Search
-              </button>
-            ) : null}
-          </div>
-          {inventoryResults.length ? (
-            <div className="inventory-search-results">
-              {inventoryResults.map((result) => (
-                <button
-                  key={`${result.category}-${result.item_name}`}
-                  className="inventory-result-button"
-                  onClick={() => void handleAddInventory(result.item_name)}
-                  type="button"
-                >
-                  {result.item_name} {result.category ? `(${result.category})` : ""}
-                </button>
-              ))}
-            </div>
-          ) : null}
-          <div className="sheet-list">
-            {inventoryEntries.map((entry) => (
-              <div key={entry.id} className="inventory-entry-card">
-                <div className="sheet-entry">
-                  <span>{entry.item_name}</span>
-                  <strong>x{entry.quantity}</strong>
-                </div>
-                <p className="muted">
-                  {entry.category ?? "Misc"} {entry.equipped && entry.slot_name ? `| Equipped as ${entry.slot_name}` : ""}
+            <div className={styles.meta}>
+              <div>
+                <p className={styles.sheetLabel}>Heritage</p>
+                <p>
+                  {character.ancestry ?? "-"} / {character.community ?? "-"}
                 </p>
-                <div className="inventory-entry-actions">
-                  <button
-                    className="secondary-button"
-                    onClick={() =>
-                      setEditingInventoryEntryId((currentId) => (currentId === entry.id ? null : entry.id))
-                    }
-                    type="button"
-                  >
-                    {editingInventoryEntryId === entry.id ? "Close" : "Edit"}
-                  </button>
-                  <button
-                    className="secondary-button"
-                    onClick={() => {
-                      const nextEntry = {
-                        ...entry,
-                        quantity: Math.max(0, entry.quantity - 1),
-                      };
-                      updateInventoryDraft(entry.id, { quantity: nextEntry.quantity });
-                      void handleInventoryFieldSave(nextEntry);
-                    }}
-                    type="button"
-                  >
-                    -1
-                  </button>
-                  <button
-                    className="secondary-button"
-                    onClick={() => {
-                      const nextEntry = {
-                        ...entry,
-                        quantity: entry.quantity + 1,
-                      };
-                      updateInventoryDraft(entry.id, { quantity: nextEntry.quantity });
-                      void handleInventoryFieldSave(nextEntry);
-                    }}
-                    type="button"
-                  >
-                    +1
-                  </button>
-                  {entry.category === "Primary Weapon" ? (
-                    <button className="secondary-button" onClick={() => void handleToggleEquip(entry, "primary")} type="button">
-                      {entry.equipped && entry.slot_name === "primary" ? "Unequip" : "Equip Primary"}
-                    </button>
-                  ) : null}
-                  {entry.category === "Secondary Weapon" ? (
-                    <button className="secondary-button" onClick={() => void handleToggleEquip(entry, "secondary")} type="button">
-                      {entry.equipped && entry.slot_name === "secondary" ? "Unequip" : "Equip Secondary"}
-                    </button>
-                  ) : null}
-                  {entry.category === "Armor" ? (
-                    <button className="secondary-button" onClick={() => void handleToggleEquip(entry, "armor")} type="button">
-                      {entry.equipped && entry.slot_name === "armor" ? "Unequip" : "Equip Armor"}
-                    </button>
-                  ) : null}
-                  <button className="secondary-button" onClick={() => void handleInventoryFieldSave(entry)} type="button">
-                    Save Entry
-                  </button>
-                  <button className="secondary-button" onClick={() => void handleRemoveInventory(entry.id)} type="button">
-                    Remove
-                  </button>
-                </div>
-                {editingInventoryEntryId === entry.id ? (
-                  <div className="grid-form inventory-compact-grid inventory-edit-grid">
-                    <label>
-                      Quantity
-                      <input
-                        type="number"
-                        min="0"
-                        value={entry.quantity}
-                        onChange={(event) =>
-                          updateInventoryDraft(entry.id, { quantity: Math.max(0, Number(event.target.value) || 0) })
-                        }
-                        onBlur={() => void handleInventoryFieldSave(entry)}
-                      />
-                    </label>
-                    <label className="wide">
-                      Notes
-                      <textarea
-                        rows={3}
-                        value={entry.notes ?? ""}
-                        onChange={(event) => updateInventoryDraft(entry.id, { notes: event.target.value })}
-                        onBlur={() => void handleInventoryFieldSave(entry)}
-                        placeholder="Add inventory notes, usage reminders, or carry details."
-                      />
-                    </label>
-                    <div className="inventory-entry-actions wide">
-                      <button className="secondary-button" onClick={() => void handleInventoryFieldSave(entry)} type="button">
-                        Save Entry
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
               </div>
-            ))}
-            {inventoryEntries.length === 0 ? (
-              <p className="muted">No structured inventory entries yet.</p>
-            ) : null}
-          </div>
-          <label className="sheet-label inventory-notes-label">
-            Loose Inventory and Starter Supplies
-            <textarea
-              className="sheet-textarea"
-              rows={4}
-              value={inventoryNotes}
-              onChange={(event) => setInventoryNotes(event.target.value)}
-              onBlur={() => void persistCompanionDetails()}
-              placeholder="Track rope, torch, supplies, class trinkets, or anything not yet stored as a structured entry."
-            />
-          </label>
-          <p className="muted">Potion: {typeof payload.potion_choice === "string" ? payload.potion_choice : "-"}</p>
-          <p className="muted">Class Items: {classItems.length ? classItems.join(" / ") : "-"}</p>
-        </article>
+              <div>
+                <p className={styles.sheetLabel}>Description</p>
+                <p>{typeof payload.description === "string" && payload.description ? payload.description : "-"}</p>
+              </div>
+            </div>
+          </article>
 
-        <article className="sheet-card wide-sheet-card">
-          <p className="sheet-label">Background and Connections</p>
-          <p>{typeof payload.background === "string" && payload.background ? payload.background : "No background notes yet."}</p>
-          <p className="muted">
-            {typeof payload.connection_notes === "string" && payload.connection_notes
-              ? payload.connection_notes
-              : "No connection notes yet."}
-          </p>
-        </article>
-        {Array.isArray(payload.level_up_log) && payload.level_up_log.length ? (
-          <article className="sheet-card wide-sheet-card">
-            <p className="sheet-label">Level-Up Log</p>
-            <div className="sheet-list">
-              {payload.level_up_log.map((entry) =>
-                typeof entry === "string" ? (
-                  <div key={entry} className="sheet-entry">
-                    <span>{entry}</span>
+          <article className={`${styles.card} ${styles.trackerCard}`}>
+            <div className={styles.statBadges}>
+              <div className={styles.statBadge}>
+                <span>Evasion</span>
+                <strong>{displayedEvasion}</strong>
+              </div>
+              <div className={styles.statBadge}>
+                <span>Armor</span>
+                <strong>{character.armor ?? "-"}</strong>
+              </div>
+              <div className={styles.statBadge}>
+                <span>Prof.</span>
+                <strong>{typeof payload.proficiency === "number" ? payload.proficiency : 1}</strong>
+              </div>
+            </div>
+            {evasionSources.length > 0 ? (
+              <div className={styles.derivedSourceBlock}>
+                <p className={styles.sheetLabel}>Evasion Sources</p>
+                <div className={styles.sourcePillRow}>
+                  {evasionSources.map((source) => (
+                    <span key={source} className={styles.sourcePill}>
+                      {source}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            <div className={styles.trackerBlock}>
+              <p className={styles.sheetLabel}>HP ({trackerState.hp}/{maxHitPoints})</p>
+              {renderBoxes(maxHitPoints, clampTracker(trackerState.hp, maxHitPoints), (index) => {
+                const hp = getNextMarkedValue(trackerState.hp, index);
+                void persistTrackers({ ...trackerState, hp });
+              })}
+            </div>
+
+            <div className={styles.trackerBlock}>
+              <p className={styles.sheetLabel}>Stress ({trackerState.stress}/{maxStress})</p>
+              {renderBoxes(maxStress, clampTracker(trackerState.stress, maxStress), (index) => {
+                const stress = getNextMarkedValue(trackerState.stress, index);
+                void persistTrackers({ ...trackerState, stress });
+              })}
+            </div>
+
+            <div className={styles.trackerBlock}>
+              <p className={styles.sheetLabel}>Hope</p>
+              {renderBoxes(6, trackerState.hope, (index) => {
+                const hope = getNextMarkedValue(trackerState.hope, index);
+                void persistTrackers({ ...trackerState, hope });
+              })}
+            </div>
+            {hopeFeature ? <p className={styles.sheetFeatureCopy}>{hopeFeature}</p> : null}
+          </article>
+
+          <article className={styles.card}>
+            <p className={styles.sheetLabel}>Traits</p>
+            <div className={styles.sheetTraits}>
+              {Object.entries(traits).map(([trait, modifier]) => (
+                <div key={trait} className={styles.traitSourceCard}>
+                  <div className={styles.traitPill}>
+                    <span>{trait}</span>
+                    <strong>{modifier}</strong>
                   </div>
-                ) : null,
+                  {traitSources[trait]?.length ? (
+                    <div className={styles.sourcePillRow}>
+                      {traitSources[trait].map((source) => (
+                        <span key={`${trait}-${source}`} className={styles.sourcePill}>
+                          {source}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+              {Object.keys(traits).length === 0 ? <p className="muted">No trait assignment saved yet.</p> : null}
+            </div>
+          </article>
+
+          <article className={styles.card}>
+            <p className={styles.sheetLabel}>Active Weapons</p>
+            <div className="sheet-entry">
+              <span>Primary</span>
+              <strong>{typeof payload.primary_weapon === "string" && payload.primary_weapon ? payload.primary_weapon : "-"}</strong>
+            </div>
+            <div className="sheet-entry">
+              <span>Secondary</span>
+              <strong>
+                {typeof payload.secondary_weapon === "string" && payload.secondary_weapon
+                  ? payload.secondary_weapon
+                  : "-"}
+              </strong>
+            </div>
+            <p className="muted">
+              {typeof payload.weapon_notes === "string" && payload.weapon_notes ? payload.weapon_notes : "No weapon notes yet."}
+            </p>
+          </article>
+
+          <article className={styles.card}>
+            <p className={styles.sheetLabel}>Active Armor</p>
+            <div className="sheet-entry">
+              <span>Armor</span>
+              <strong>{typeof payload.armor_name === "string" && payload.armor_name ? payload.armor_name : "-"}</strong>
+            </div>
+            <div className="sheet-entry">
+              <span>Thresholds</span>
+              <strong>
+                {typeof payload.armor_threshold_major === "string" ? payload.armor_threshold_major : "-"} /{" "}
+                {typeof payload.armor_threshold_severe === "string" ? payload.armor_threshold_severe : "-"}
+              </strong>
+            </div>
+            <div className={styles.trackerBlock}>
+              <p className={styles.sheetLabel}>Armor Slots</p>
+              {renderBoxes(6, trackerState.armorSlots, (index) => {
+                const armorSlots = getNextMarkedValue(trackerState.armorSlots, index);
+                void persistTrackers({ ...trackerState, armorSlots });
+              })}
+            </div>
+          </article>
+
+          <article className={styles.card}>
+            <p className={styles.sheetLabel}>Experience</p>
+            <div className="sheet-list">
+              {experiences.map((experience) => (
+                <div key={experience.name} className="sheet-entry">
+                  <span>{experience.name}</span>
+                  <strong>+{experience.modifier}</strong>
+                </div>
+              ))}
+              {experiences.length === 0 ? <p className="muted">No experiences saved yet.</p> : null}
+            </div>
+          </article>
+
+          <article className={styles.card}>
+            <p className={styles.sheetLabel}>Domains and Cards</p>
+            <p className="muted">Domains: {domains.length ? domains.join(" / ") : "No class domains saved."}</p>
+            <div className="sheet-list">
+              {domainCards.map((card) => (
+                <div key={card} className="sheet-entry">
+                  <span>{card}</span>
+                </div>
+              ))}
+              {domainCards.length === 0 ? <p className="muted">No domain cards saved yet.</p> : null}
+            </div>
+          </article>
+
+          <article className={styles.card}>
+            <p className={styles.sheetLabel}>Gold</p>
+            <div className={styles.goldTrackerGrid}>
+              <div className={styles.trackerBlock}>
+                <p className={styles.sheetLabel}>Handfuls</p>
+                {renderBoxes(10, trackerState.goldHandfuls, (index) => {
+                  const goldHandfuls = getNextMarkedValue(trackerState.goldHandfuls, index);
+                  void persistTrackers({ ...trackerState, ...normalizeGold(goldHandfuls, trackerState.goldBags, trackerState.goldChests) });
+                })}
+              </div>
+              <div className={styles.trackerBlock}>
+                <p className={styles.sheetLabel}>Bags</p>
+                {renderBoxes(10, trackerState.goldBags, (index) => {
+                  const goldBags = getNextMarkedValue(trackerState.goldBags, index);
+                  void persistTrackers({ ...trackerState, ...normalizeGold(trackerState.goldHandfuls, goldBags, trackerState.goldChests) });
+                })}
+              </div>
+              <div className={styles.trackerBlock}>
+                <p className={styles.sheetLabel}>Chest</p>
+                {renderBoxes(1, trackerState.goldChests, (index) => {
+                  const goldChests = getNextMarkedValue(trackerState.goldChests, index);
+                  void persistTrackers({ ...trackerState, ...normalizeGold(trackerState.goldHandfuls, trackerState.goldBags, goldChests) });
+                })}
+              </div>
+            </div>
+          </article>
+
+          <article className={`${styles.card} ${styles.wideCard} ${styles.classFeatureCard}`}>
+            <p className={styles.sheetLabel}>Class Feature</p>
+            <div className={styles.featureSectionList}>
+              {featureSections.length ? (
+                featureSections.map((section, index) => (
+                  <article key={`${section.heading}-${index}`} className={styles.featureSectionCard}>
+                    <h4>{section.heading}</h4>
+                    <p>{section.body}</p>
+                  </article>
+                ))
+              ) : (
+                <p>No class feature text loaded yet.</p>
               )}
             </div>
           </article>
-        ) : null}
+
+          {renderClassSpecificModule()}
+
+          <article className={styles.card}>
+            <p className={styles.sheetLabel}>Inventory</p>
+            <div className={styles.inventoryToolbar}>
+              <input
+                value={inventorySearch}
+                onChange={(event) => setInventorySearch(event.target.value)}
+                placeholder="Search equipment, items, consumables"
+              />
+              {inventorySearch ? (
+                <button
+                  className={`secondary-button ${styles.inventoryClearButton}`}
+                  onClick={() => {
+                    setInventorySearch("");
+                    setInventoryResults([]);
+                  }}
+                  type="button"
+                >
+                  Clear Search
+                </button>
+              ) : null}
+            </div>
+            {inventoryResults.length ? (
+              <div className={styles.inventorySearchResults}>
+                {inventoryResults.map((result) => (
+                  <button
+                    key={`${result.category}-${result.item_name}`}
+                    className={styles.inventoryResultButton}
+                    onClick={() => void handleAddInventory(result.item_name)}
+                    type="button"
+                  >
+                    {result.item_name} {result.category ? `(${result.category})` : ""}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            <div className="sheet-list">
+              {inventoryEntries.map((entry) => (
+                <div key={entry.id} className={styles.inventoryEntryCard}>
+                  <div className="sheet-entry">
+                    <span>{entry.item_name}</span>
+                    <strong>x{entry.quantity}</strong>
+                  </div>
+                  <p className="muted">
+                    {entry.category ?? "Misc"} {entry.equipped && entry.slot_name ? `| Equipped as ${entry.slot_name}` : ""}
+                  </p>
+                  <div className={styles.inventoryEntryActions}>
+                    <button
+                      className="secondary-button"
+                      onClick={() =>
+                        setEditingInventoryEntryId((currentId) => (currentId === entry.id ? null : entry.id))
+                      }
+                      type="button"
+                    >
+                      {editingInventoryEntryId === entry.id ? "Close" : "Edit"}
+                    </button>
+                    <button
+                      className="secondary-button"
+                      onClick={() => {
+                        const nextEntry = {
+                          ...entry,
+                          quantity: Math.max(0, entry.quantity - 1),
+                        };
+                        updateInventoryDraft(entry.id, { quantity: nextEntry.quantity });
+                        void handleInventoryFieldSave(nextEntry);
+                      }}
+                      type="button"
+                    >
+                      -1
+                    </button>
+                    <button
+                      className="secondary-button"
+                      onClick={() => {
+                        const nextEntry = {
+                          ...entry,
+                          quantity: entry.quantity + 1,
+                        };
+                        updateInventoryDraft(entry.id, { quantity: nextEntry.quantity });
+                        void handleInventoryFieldSave(nextEntry);
+                      }}
+                      type="button"
+                    >
+                      +1
+                    </button>
+                    {entry.category === "Primary Weapon" ? (
+                      <button className="secondary-button" onClick={() => void handleToggleEquip(entry, "primary")} type="button">
+                        {entry.equipped && entry.slot_name === "primary" ? "Unequip" : "Equip Primary"}
+                      </button>
+                    ) : null}
+                    {entry.category === "Secondary Weapon" ? (
+                      <button className="secondary-button" onClick={() => void handleToggleEquip(entry, "secondary")} type="button">
+                        {entry.equipped && entry.slot_name === "secondary" ? "Unequip" : "Equip Secondary"}
+                      </button>
+                    ) : null}
+                    {entry.category === "Armor" ? (
+                      <button className="secondary-button" onClick={() => void handleToggleEquip(entry, "armor")} type="button">
+                        {entry.equipped && entry.slot_name === "armor" ? "Unequip" : "Equip Armor"}
+                      </button>
+                    ) : null}
+                    <button className="secondary-button" onClick={() => void handleInventoryFieldSave(entry)} type="button">
+                      Save Entry
+                    </button>
+                    <button className="secondary-button" onClick={() => void handleRemoveInventory(entry.id)} type="button">
+                      Remove
+                    </button>
+                  </div>
+                  {editingInventoryEntryId === entry.id ? (
+                    <div className={`${styles.gridForm} ${styles.inventoryCompactGrid} ${styles.inventoryEditGrid}`}>
+                      <label>
+                        Quantity
+                        <input
+                          type="number"
+                          min="0"
+                          value={entry.quantity}
+                          onChange={(event) =>
+                            updateInventoryDraft(entry.id, { quantity: Math.max(0, Number(event.target.value) || 0) })
+                          }
+                          onBlur={() => void handleInventoryFieldSave(entry)}
+                        />
+                      </label>
+                      <label className={styles.wide}>
+                        Notes
+                        <textarea
+                          rows={3}
+                          value={entry.notes ?? ""}
+                          onChange={(event) => updateInventoryDraft(entry.id, { notes: event.target.value })}
+                          onBlur={() => void handleInventoryFieldSave(entry)}
+                          placeholder="Add inventory notes, usage reminders, or carry details."
+                        />
+                      </label>
+                      <div className={`${styles.inventoryEntryActions} ${styles.wide}`}>
+                        <button className="secondary-button" onClick={() => void handleInventoryFieldSave(entry)} type="button">
+                          Save Entry
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+              {inventoryEntries.length === 0 ? (
+                <p className="muted">No structured inventory entries yet.</p>
+              ) : null}
+            </div>
+            <label className={`${styles.sheetLabel} ${styles.inventoryNotesLabel}`}>
+              Loose Inventory and Starter Supplies
+              <textarea
+                className={styles.sheetTextarea}
+                rows={4}
+                value={inventoryNotes}
+                onChange={(event) => setInventoryNotes(event.target.value)}
+                onBlur={() => void persistCompanionDetails()}
+                placeholder="Track rope, torch, supplies, class trinkets, or anything not yet stored as a structured entry."
+              />
+            </label>
+            <p className="muted">Potion: {typeof payload.potion_choice === "string" ? payload.potion_choice : "-"}</p>
+            <p className="muted">Class Items: {classItems.length ? classItems.join(" / ") : "-"}</p>
+          </article>
+
+          <article className={`${styles.card} ${styles.wideCard}`}>
+            <p className={styles.sheetLabel}>Background and Connections</p>
+            <p>{typeof payload.background === "string" && payload.background ? payload.background : "No background notes yet."}</p>
+            <p className="muted">
+              {typeof payload.connection_notes === "string" && payload.connection_notes
+                ? payload.connection_notes
+                : "No connection notes yet."}
+            </p>
+          </article>
+          {Array.isArray(payload.level_up_log) && payload.level_up_log.length ? (
+            <article className={`${styles.card} ${styles.wideCard}`}>
+              <p className={styles.sheetLabel}>Level-Up Log</p>
+              <div className="sheet-list">
+                {payload.level_up_log.map((entry) =>
+                  typeof entry === "string" ? (
+                    <div key={entry} className="sheet-entry">
+                      <span>{entry}</span>
+                    </div>
+                  ) : null,
+                )}
+              </div>
+            </article>
+          ) : null}
         </section>
       </section>
 
       {activeDialog === "edit" ? (
-        <div className="sheet-modal-backdrop" role="presentation">
-          <div className="sheet-modal-shell" role="dialog" aria-modal="true">
+        <div className={styles.modalBackdrop} role="presentation">
+          <div className={styles.modalShell} role="dialog" aria-modal="true">
             <CharacterForm
               initialCharacter={character}
               onCancel={() => setActiveDialog(null)}
