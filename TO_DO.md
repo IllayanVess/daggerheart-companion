@@ -7,27 +7,34 @@
 -> Get a clean database scheme. 
 
 ```
-TABLE -> USER (USER_ID (PK), Name, PASSWORD, EMAIL) ** FOR LOGIN
 
-TABLE -> SESSION (SESION_ID (PK), Name, PASSWORD) ** MAYBE
+                    ******************
+                    *    USER AUTH   *
+                    ******************
 
-TABLE -> SUB_SESSION (ID (PK), PLAYERS) ** LINK TABLE between SESSION/PLAYER ?
+TABLE -> USER (user_id            BIGSERIAL    PRIMARY KEY,
+               username      VARCHAR(50)  NOT NULL UNIQUE,
+               email         VARCHAR(255) NOT NULL UNIQUE,
+               password_hash TEXT         NOT NULL,
+               is_active     BOOLEAN      NOT NULL DEFAULT true,
+               is_verified   BOOLEAN      NOT NULL DEFAULT false,
+               role          VARCHAR(20)  NOT NULL DEFAULT 'user',
+               last_login_at TIMESTAMPTZ,
+               created_at    TIMESTAMPTZ  NOT NULL DEFAULT now(),
+               updated_at    TIMESTAMPTZ  NOT NULL DEFAULT now(),
+               metadata      JSONB)
 
-TABLE -> PLAYERS (NAME (PK), USER_ID (FK), ROLE, CLASSES, ITEM, Consumables...) ** BIG SUMMARY 
+                    ***************
+                    *   SESSION   *
+                    ***************
 
-TABLE -> Classes(CLASS_ID (PK),class_name ,subclass1_name ,
-                 subclass1_description ,subclass2_name ,
-                 subclass2_description) ** ALL CLASSES
+TABLE -> SESSION (SESION_ID     BIGSERIAL    PRIMARY KEY, 
+                  SESSION_NAME  VARCHAR(50)  NOT NULL UNIQUE, 
+                  PASSWORD      TEXT         NOT NULL) 
 
-TABLE -> adversaries(id,name,tier,role,description,motives,tactics
-                     difficulty,thresholds_major,thresholds_severe,
-                     hit_points,stress,attack_name,attack_range,
-                     attack_damage,attack_standard,attack_modifier,
-                     passive_features,action_features,reaction_features,
-                     fear_features,experiences_json,features,experiences,
-                     notes,data_json,created_at,updated_at)
 
-TABLE -> characters(id,name,class_name,subclass_name,ancestry,community,
+TABLE -> characters(id,
+                    name,class_name,subclass_name,ancestry,community,
                     level,evasion,armor,hit_points,stress,hope,notes
                     ,data_json,created_at,updated_at,pronouns,description
                     ,heritage_notes,proficiency,armor_name,armor_threshold_major
@@ -37,6 +44,20 @@ TABLE -> characters(id,name,class_name,subclass_name,ancestry,community,
                     ,gold_bags,gold_chests,prayer_dice,unstoppable_value
                     ,rally_die_value,rally_notes,warrior_notes,companion_name
                     ,companion_evasion,companion_notes)
+
+
+TABLE -> Classes(CLASS_ID (PK),class_name ,subclass1_name ,
+                 subclass1_description ,subclass2_name ,
+                 subclass2_description) ** ALL CLASSES
+
+TABLE -> adversaries(id,name,tier,role,description,motives_and_tactics
+                     difficulty,thresholds_major,thresholds_severe,
+                     hit_points,stress,attack_name,attack_range,
+                     attack_damage,attack_standard,attack_modifier,
+                     passive_features,action_features,reaction_features,
+                     fear_features,experiences_json,features,experiences,
+                     notes,data_json,created_at,updated_at)
+
 
 TABLE -> Consumables(id,item_name,subcategory,description_text,source_url)
 
