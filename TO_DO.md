@@ -27,28 +27,47 @@ TABLE -> adversaries(id,name,tier,role,description,motives,tactics
                      fear_features,experiences_json,features,experiences,
                      notes,data_json,created_at,updated_at)
 
-TABLE -> characters()
+TABLE -> characters(id,name,class_name,subclass_name,ancestry,community,
+                    level,evasion,armor,hit_points,stress,hope,notes
+                    ,data_json,created_at,updated_at,pronouns,description
+                    ,heritage_notes,proficiency,armor_name,armor_threshold_major
+                    ,armor_threshold_severe,primary_weapon,secondary_weapon
+                    ,weapon_notes,potion_choice,class_item_choice
+                    ,inventory_notes,background,connection_notes,gold_handfuls
+                    ,gold_bags,gold_chests,prayer_dice,unstoppable_value
+                    ,rally_die_value,rally_notes,warrior_notes,companion_name
+                    ,companion_evasion,companion_notes)
 
-TABLE -> Consumables()
+TABLE -> Consumables(id,item_name,subcategory,description_text,source_url)
 
-TABLE -> character_domain_cards()
+TABLE -> character_domain_cards(id,character_id,slot_number
+                                card_name,domain_name,card_level,card_type)
 
-TABLE -> encounter_boards()
+TABLE -> encounter_boards(id,state_json,created_at,updated_at)
 
-TABLE -> DomainCards()
+TABLE -> DomainCards(id,card_name,domain_name,card_level,card_type,description_text)
 
-TABLE -> character_experiences()
+TABLE -> character_experiences(id,character_id,slot_number,experience_name,modifier_value)
 
-TABLE -> environments()
+TABLE -> environments(id,name,tier,environment_type,description,impulses,
+                      difficulty,potential_adversaries,features,notes,
+                      data_json,created_at,updated_at)
 
-TABLE -> Equipment()
+TABLE -> Equipment(id,item_name,category,subcategory,description_text,source_url)
 
-TABLE -> character_inventory()
+TABLE -> character_inventory(id,character_id,item_name,category,quantity,equipped,slot_name,
+                            notes,created_at)
 
-TABLE -> npcs()
+TABLE -> npcs(id,name,tier,role,description,motives,tactics
+              ,difficulty,thresholds_major,thresholds_severe
+              ,hit_points,stress,attack_name,attack_range
+              ,attack_damage,attack_standard,attack_modifier
+              ,passive_features,action_features,reaction_features
+              ,fear_features,experiences_json,features,experiences
+              ,notes,data_json,created_at,updated_at)
 
-TABLE -> Items()
+TABLE -> Items(id,item_name,subcategory,description_text,source_url)
 
-TABLE -> character_traits()
+TABLE -> character_traits(id,character_id,trait_name,modifier_text)
 
 ```
