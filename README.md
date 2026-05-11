@@ -1,3 +1,7 @@
+> This product includes materials from the Daggerheart System Reference Document 1.0,
+> © Critical Role, LLC., used under the Darrington Press Community Gaming License.
+> [daggerheart-companion] is not affiliated with Darrington Press or Critical Role.
+
 # Daggerheart Companion
 
 ## Disclaimer
@@ -253,3 +257,10 @@ The backend exposes these endpoint groups (all under `/api`):
 - `.env.local` is excluded by `.gitignore` and must be created locally from `.env.example`.
 
 For contribution guidelines, see `CONTRIBUTING.md`.
+
+---
+
+## Legal & License
+
+- Darrington Press Community Gaming License: https://darringtonpress.com/license/
+- Daggerheart SRD source: https://daggerheartsrd.com/

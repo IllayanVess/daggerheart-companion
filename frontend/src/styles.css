@@ -1,3 +1,11 @@
+/*
+ * SPDX-License-Identifier: Proprietary (code) + DPCGL (SRD content)
+ * This code is original work by the project author.
+ * Game rules referenced from the Daggerheart SRD are used under the
+ * Darrington Press Community Gaming License.
+ * Full license: https://darringtonpress.com/license/
+ * SRD reference: https://daggerheartsrd.com/
+ */
 :root {
   color-scheme: dark;
   font-family: Georgia, "Times New Roman", serif;
@@ -73,6 +81,50 @@ textarea:focus-visible {
   width: min(100%, 86rem);
   margin: 0 auto;
   padding: 1.5rem clamp(1rem, 2vw, 1.5rem) 3rem;
+}
+
+/* DPCGL compliance: persistent, unobtrusive attribution footer on every screen. */
+.legal-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 0.75rem;
+  width: min(100%, 86rem);
+  margin: 0 auto;
+  padding: 0 1rem 1rem;
+  color: rgba(224, 224, 224, 0.68);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.legal-footer a {
+  color: var(--color-surface);
+  text-underline-offset: 0.2em;
+}
+
+/* DPCGL compliance: legal page content sections for required attribution and license summary. */
+.legal-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.legal-section {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.legal-section h2,
+.legal-section p {
+  margin: 0;
+}
+
+.legal-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.legal-list li + li {
+  margin-top: 0.45rem;
 }
 
 .panel h2,

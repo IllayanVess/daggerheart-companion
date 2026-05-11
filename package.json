@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check-compliance": "node scripts/check-compliance.js"
+  }
+}

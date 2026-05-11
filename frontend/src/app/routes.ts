@@ -1,7 +1,15 @@
+// SPDX-License-Identifier: Proprietary (code) + DPCGL (SRD content)
+// This code is original work by the project author.
+// Game rules referenced from the Daggerheart SRD are used under the
+// Darrington Press Community Gaming License.
+// Full license: https://darringtonpress.com/license/
+// SRD reference: https://daggerheartsrd.com/
 export const APP_ROUTES = {
   home: "/",
   characters: "/characters",
   builder: "/builder",
+  // DPCGL compliance: keep the legal attribution page reachable through app routing.
+  legal: "/legal",
   gmHub: "/gm-tools",
   gmAdversaries: "/gm-tools/adversaries",
   gmNpcs: "/gm-tools/npcs",
