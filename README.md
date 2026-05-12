@@ -246,7 +246,7 @@ The backend exposes these endpoint groups (all under `/api`):
 - `PUT /adversaries/{adversary_id}`
 - `DELETE /adversaries/{adversary_id}`
 
-**NPCs** (missing from current README)
+**NPCs**
 
 - `GET /npcs`
 - `GET /npcs/{npc_id}`
