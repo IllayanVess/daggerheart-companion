@@ -4,7 +4,7 @@
 // Darrington Press Community Gaming License.
 // Full license: https://darringtonpress.com/license/
 // SRD reference: https://daggerheartsrd.com/
-import { useMemo, useState, type CSSProperties, type DragEvent, type MouseEvent } from "react";
+import { useCallback, useMemo, useState, type CSSProperties, type DragEvent, type MouseEvent } from "react";
 
 import { EncounterBoardCell } from "./EncounterBoardCell";
 import { TokenDetailPanel } from "./TokenDetailPanel";
@@ -52,12 +52,12 @@ export function EncounterBoard({ headerAction }: EncounterBoardProps) {
   const indices = useMemo(() => Array.from({ length: GRID_SIZE }, (_, index) => index), []);
   const gridStyle = { "--grid-size": GRID_SIZE, "--cell-size": `${CELL_SIZE}px` } as CSSProperties;
 
-  function closeFloatingMenus() {
+  const closeFloatingMenus = useCallback(() => {
     setAddPopover(null);
     setContextMenu(null);
-  }
+  }, []);
 
-  function handleCellClick(event: MouseEvent<HTMLButtonElement>, row: number, col: number) {
+  const handleCellClick = useCallback((event: MouseEvent<HTMLButtonElement>, row: number, col: number) => {
     closeFloatingMenus();
 
     if (board.isPaintMode) {
@@ -79,13 +79,13 @@ export function EncounterBoard({ headerAction }: EncounterBoardProps) {
     }
 
     board.selectTopToken(row, col);
-  }
+  }, [board, closeFloatingMenus]);
 
-  function handleTokenContextMenu(event: MouseEvent, row: number, col: number, token: BoardToken) {
+  const handleTokenContextMenu = useCallback((event: MouseEvent, row: number, col: number, token: BoardToken) => {
     event.preventDefault();
     event.stopPropagation();
     const viewport = getViewportBounds();
-    setAddPopover(null);
+    closeFloatingMenus();
     setContextMenu({
       x: Math.min(event.clientX, viewport.width - 260),
       y: Math.min(event.clientY, viewport.height - 180),
@@ -93,23 +93,27 @@ export function EncounterBoard({ headerAction }: EncounterBoardProps) {
       col,
       token,
     });
-  }
+  }, [closeFloatingMenus]);
 
-  function handleTokenDragStart(event: DragEvent, row: number, col: number, token: BoardToken) {
+  const handleTokenDragStart = useCallback((event: DragEvent, row: number, col: number, token: BoardToken) => {
     event.stopPropagation();
     event.dataTransfer.setData("application/x-board-token", JSON.stringify({ tokenId: token.id, fromCellKey: `${row}-${col}` }));
     event.dataTransfer.effectAllowed = "move";
     board.setSelectedTokenRef({ cellKey: `${row}-${col}`, tokenId: token.id });
-  }
+  }, [board]);
 
-  function handleDropToken(row: number, col: number, payload: DragPayload) {
+  const handleDropToken = useCallback((row: number, col: number, payload: DragPayload) => {
     const token = getPaletteCollection(board.palette, payload.category).find((entry) => entry.id === payload.id);
     if (token) {
       board.placePaletteToken(row, col, token);
     }
-  }
+  }, [board]);
 
-  function placeFromPopover(token: PaletteToken) {
+  const handleMoveToken = useCallback((row: number, col: number, tokenId: string) => {
+    board.moveToken(tokenId, row, col);
+  }, [board]);
+
+  const placeFromPopover = useCallback((token: PaletteToken) => {
     if (!addPopover) {
       return;
     }
@@ -118,7 +122,10 @@ export function EncounterBoard({ headerAction }: EncounterBoardProps) {
     if (didPlace) {
       setAddPopover(null);
     }
-  }
+  }, [addPopover, board]);
+
+  const handleCloseAddPopover = useCallback(() => setAddPopover(null), []);
+  const handleCloseContextMenu = useCallback(() => setContextMenu(null), []);
 
   const selectedTokenId = board.selectedToken?.id ?? null;
 
@@ -193,7 +200,7 @@ export function EncounterBoard({ headerAction }: EncounterBoardProps) {
       />
 
       <div className={styles.layout}>
-        <div className={styles.gridViewport} style={gridStyle} onClick={() => setContextMenu(null)}>
+        <div className={styles.gridViewport} style={gridStyle} onClick={handleCloseContextMenu}>
           <div className={styles.grid} role="grid" aria-label="Encounter board">
             {indices.map((row) =>
               indices.map((col) => {
@@ -212,7 +219,7 @@ export function EncounterBoard({ headerAction }: EncounterBoardProps) {
                     selectedTokenId={selectedTokenId}
                     onClick={handleCellClick}
                     onDropToken={handleDropToken}
-                    onMoveToken={(targetRow, targetCol, tokenId) => board.moveToken(tokenId, targetRow, targetCol)}
+                    onMoveToken={handleMoveToken}
                     onTokenDragStart={handleTokenDragStart}
                     onTokenContextMenu={handleTokenContextMenu}
                   />
@@ -236,7 +243,7 @@ export function EncounterBoard({ headerAction }: EncounterBoardProps) {
         <div className={styles.popover} style={{ left: addPopover.x, top: addPopover.y }}>
           <div className={styles.popoverHeader}>
             <strong>Add Token</strong>
-            <button type="button" onClick={() => setAddPopover(null)}>
+            <button type="button" onClick={handleCloseAddPopover}>
               X
             </button>
           </div>

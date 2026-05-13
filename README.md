@@ -85,16 +85,18 @@ If you prefer to set up manually, follow the steps below.
 
 ## Current app features
 
-| Route                        | Screen                              |
-| ---------------------------- | ----------------------------------- |
-| `#/`                         | Home                                |
-| `#/characters`               | Character roster + character editor |
-| `#/builder`                  | Character builder                   |
-| `#/gm-tools`                 | GM tools hub                        |
-| `#/gm-tools/adversaries`     | Adversary library and builder       |
-| `#/gm-tools/environments`    | Environment library and builder     |
-| `#/gm-tools/dice`            | Dice roller                         |
-| `#/gm-tools/session-tracker` | Encounter/session tracker           |
+| Route                        | Screen                                | Key Components                                           |
+| ---------------------------- | ------------------------------------- | -------------------------------------------------------- |
+| `#/`                         | Home                                  | `Layout/`, `Navigation/`, `PageHero/`, `ActionCardGrid/` |
+| `#/characters`               | Character roster + sheet              | `Characters/` (roster), `CharacterSheet/` (detail view)  |
+| `#/builder`                  | Character builder (9-step flow)       | `CharacterForm/`                                         |
+| `#/gm-tools`                 | GM tools hub                          | `GM/GmToolsHub.tsx`                                      |
+| `#/gm-tools/adversaries`     | Adversary library + builder           | `AdversaryForm/`                                         |
+| `#/gm-tools/npcs`            | NPC library + builder                 | `NpcForm/`                                               |
+| `#/gm-tools/environments`    | Environment library + builder         | `EnvironmentForm/`                                       |
+| `#/gm-tools/encounter-board` | 30x30 tactical encounter grid         | `EncounterBoard/` (900 cells, drag-drop tokens)          |
+| `#/gm-tools/dice`            | Dice roller (supports 2d12 Hope/Fear) | `DiceRoller/`                                            |
+| `#/gm-tools/session-tracker` | Session tracker (Fear, HP, Stress)    | `GM/SessionTrackerBoard/`                                |
 
 ---
 
@@ -204,31 +206,66 @@ npm run build
 
 The backend exposes these endpoint groups (all under `/api`):
 
-- `GET /api/` — root health endpoint
-- `GET /api/health` — health check
-- `GET /api/lookup/...` — class/subclass reference data
-- `GET /api/characters`
-- `GET /api/characters/{character_id}`
-- `POST /api/characters`
-- `PUT /api/characters/{character_id}`
-- `PATCH /api/characters/{character_id}/trackers`
-- `PATCH /api/characters/{character_id}/sheet-details`
-- `GET /api/characters/{character_id}/inventory`
-- `POST /api/characters/{character_id}/inventory`
-- `PATCH /api/characters/{character_id}/inventory/{entry_id}`
-- `DELETE /api/characters/{character_id}/inventory/{entry_id}`
-- `GET /api/adversaries`
-- `GET /api/adversaries/{adversary_id}`
-- `POST /api/adversaries`
-- `PUT /api/adversaries/{adversary_id}`
-- `DELETE /api/adversaries/{adversary_id}`
-- `GET /api/environments`
-- `GET /api/environments/{environment_id}`
-- `POST /api/environments`
-- `PUT /api/environments/{environment_id}`
-- `DELETE /api/environments/{environment_id}`
-- `GET /api/encounter-board`
-- `PUT /api/encounter-board`
+**Health & Root**
+
+- `GET /` — root welcome message
+- `GET /health` — health check
+
+**Lookup / Reference Data**
+
+- `GET /lookup/classes`
+- `GET /lookup/class/{class_name}`
+- `GET /lookup/subclass/{subclass_name}`
+- `GET /lookup/ancestries`
+- `GET /lookup/communities`
+- `GET /lookup/domain-cards`
+- `GET /lookup/equipment`
+- `GET /lookup/items`
+- `GET /lookup/consumables`
+- `GET /lookup/inventory-content`
+
+**Characters**
+
+- `GET /characters`
+- `GET /characters/summary`
+- `GET /characters/{character_id}`
+- `POST /characters`
+- `PUT /characters/{character_id}`
+- `PATCH /characters/{character_id}/trackers`
+- `PATCH /characters/{character_id}/sheet-details`
+- `GET /characters/{character_id}/inventory`
+- `POST /characters/{character_id}/inventory`
+- `PATCH /characters/{character_id}/inventory/{entry_id}`
+- `DELETE /characters/{character_id}/inventory/{entry_id}`
+
+**Adversaries**
+
+- `GET /adversaries`
+- `GET /adversaries/{adversary_id}`
+- `POST /adversaries`
+- `PUT /adversaries/{adversary_id}`
+- `DELETE /adversaries/{adversary_id}`
+
+**NPCs**
+
+- `GET /npcs`
+- `GET /npcs/{npc_id}`
+- `POST /npcs`
+- `PUT /npcs/{npc_id}`
+- `DELETE /npcs/{npc_id}`
+
+**Environments**
+
+- `GET /environments`
+- `GET /environments/{environment_id}`
+- `POST /environments`
+- `PUT /environments/{environment_id}`
+- `DELETE /environments/{environment_id}`
+
+**Encounter Board**
+
+- `GET /encounter-board/`
+- `PUT /encounter-board/`
 
 ---
 
