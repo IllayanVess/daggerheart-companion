@@ -34,7 +34,7 @@ This Code of Conduct applies both within project spaces and in public spaces whe
 
 ## Reporting Guidelines
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project maintainers at <your-email@example.com>.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project maintainers at <tgd.companion@gmail.com>.
 
 All complaints will be reviewed and investigated promptly and fairly.
 
