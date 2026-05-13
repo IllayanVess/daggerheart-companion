@@ -35,8 +35,18 @@ def initialize_app_tables() -> None:
             CREATE TABLE IF NOT EXISTS Equipment (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 item_name TEXT NOT NULL UNIQUE,
-                category TEXT,
+                category TEXT NOT NULL,
                 subcategory TEXT,
+                tier INTEGER,
+                trait_name TEXT,
+                range_name TEXT,
+                damage_text TEXT,
+                damage_type TEXT,
+                burden TEXT,
+                thresholds_major INTEGER,
+                thresholds_severe INTEGER,
+                base_score INTEGER,
+                feature_text TEXT,
                 description_text TEXT NOT NULL,
                 source_url TEXT
             );
@@ -44,10 +54,12 @@ def initialize_app_tables() -> None:
             CREATE TABLE IF NOT EXISTS DomainCards (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 card_name TEXT NOT NULL UNIQUE,
-                domain_name TEXT,
-                card_level INTEGER,
-                card_type TEXT,
-                description_text TEXT
+                domain_name TEXT NOT NULL,
+                card_level INTEGER NOT NULL,
+                card_type TEXT NOT NULL,
+                recall_cost INTEGER,
+                card_text TEXT NOT NULL,
+                source_url TEXT
             );
 
             CREATE TABLE IF NOT EXISTS Classes (
@@ -543,6 +555,16 @@ def _seed_inventory_content_tables(connection: sqlite3.Connection) -> None:
             "Equipment.sql",
             "DomainCards.sql",
             "Classes.sql",
+            "Heritage.sql",
+            "Bard.sql",
+            "Druid.sql",
+            "Guardian.sql",
+            "Ranger.sql",
+            "Rogue.sql",
+            "Seraph.sql",
+            "Sorcerer.sql",
+            "Warrior.sql",
+            "Wizard.sql",
         ]
         for sql_file in sql_files:
             sql_path = DATABASE_DIR / sql_file
