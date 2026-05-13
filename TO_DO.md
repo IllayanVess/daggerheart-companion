@@ -26,55 +26,141 @@ TABLE -> USER (user_id       BIGSERIAL    PRIMARY KEY,
 
 TABLE -> characters(character_id                BIGSERIAL    PRIMARY KEY,
                     name                        TEXT         NOT NULL,
-                    class_name                  FOREIGN KEY (classes),
-                    subclass_name               FOREIGN KEY (subclass),
-                    ancestry                    FOREIGN KEY (ancestry),
-                    community                   FOREIGN KEY (community),
-                    level                       INTEGER      NOT NULL,
-                    evasion                     INTEGER      NOT_NULL,
-                    armor                       INTEGER      NOT_NULL,
-                    hit_points                  INTEGER      NOT_NULL,
-                    stress                      INTEGER      NOT_NULL,
-                    hope                        INTEGER      NOT_NULL,
-                    notes                       TEXT         ,
+                    caracter_classe             FOREIGN KEY (caracter_classe), 
+                    ancestry                    FOREIGN KEY (ancestry),            
+                    community                   FOREIGN KEY (community),            
+                    caracters_stats             FOREIGN KEY (caracters_stats),
+                    caracters_equipment         FOREIGN KEY (caracters_equipment),
+                    class_item_choice           FOREIGN KEY (classe_type),
+                    caracters_companion         FOREIGN KEY (caracters_companion),
+                    caracters_info              FOREIGN KEY (caracters_info),
+
+                    prayer_dice_value           INTEGER,
+                    unstoppable_value           INTEGER,
+
                     data_json                   JS           ,
                     created_at                  TIMESTAMPTZ  NOT NULL DEFAULT now(),
                     updated_at                  TIMESTAMPTZ  NOT NULL DEFAULT now(),
-                    pronouns                    TEXT,
-                    description                 TEXT,
-                    heritage_notes              TEXT,
-                    proficiency                 INT          NOT_NULL,
-                    armor_name                  FOREIGN KEY (equipment),
-                    armor_threshold_major       INTEGER      NOT_NULL,
-                    armor_threshold_severe      INTEGER      NOT_NULL,
-                    primary_weapon              FOREIGN KEY (equipment),
-                    secondary_weapon            FOREIGN KEY (equipment),
-                    weapon_notes                TEXT,
-                    potion_choice               FOREIGN KEY (Consumables),
-                    class_item_choice           FOREIGN KEY (CLASS_TYPE),
-                    inventory_notes             TEXT,
-                    background                  TEXT,
-                    connection_notes            TEXT,
-                    gold_handfuls               INTEGER NOT_NULL,
-                    gold_bags                   INTEGER NOT_NULL,
-                    gold_chests                 INTEGER NOT_NULL,
-                    prayer_dice_value           INTEGER,
-                    unstoppable_value           INTEGER,
-                    rally_die_value             INTEGER,
-                    rally_notes                 TEXT,
-                    warrior_notes               TEXT,
-                    companion_name              TEXT,
-                    companion_evasion           INTEGER,
-                    companion_stress            INTEGER,
-                    companion_notes             TEXT)
+)
+
+TABLE -> caracters_stats(caracters_stats_id                 BIGSERIAL    PRIMARY KEY,
+                         caracter_id                        FOREIGN KEY(caracter),
+                         caracters_equipment                FOREIGN KEY(equipment),
+                         character_experiences              FO
+                         lvl                                INTEGER,
+                         health                             INTEGER,
+                         stress                             INTEGER,
+                         hope                               INTEGER,
+                         evasion                            INTEGER,
+                         armor_score                        INTEGER,
+                         armor_threshold_major              INTEGER,
+                         armor_threshold_severe             INTEGER,
+                         hit_points                         INTEGER,
+                         proficiency                        INT          NOT_NULL,
+                         rally_die_value                    INTEGER,
+                         )
+
+TABLE -> caracters_equipment(character_equipment_id         BIGSERIAL    PRIMARY KEY,
+                             armor_name                     FOREIGN KEY(equipment),
+                             primary_weapon                 FOREIGN KEY(equipment),
+                             secondary_weapon               FOREIGN KEY(equipment),
+                             weapon_notes                   TEXT,
 
 
-TABLE -> classes(CLASS_ID (PK),
-                 class_name ,
-                 subclass1_name ,
-                 subclass1_description ,
-                 subclass2_name ,
-                 subclass2_description) ** ALL CLASSES
+TABLE -> caracters_consumable(character_equipment_id         BIGSERIAL    PRIMARY KEY,
+                              class_item                     FOREIGN KEY(equipment),
+                              potion_choice                  FOREIGN KEY (Consumables),
+                              gold_handfuls                  INTEGER NOT_NULL,
+                              gold_bags                      INTEGER NOT_NULL,
+                              gold_chests                    INTEGER NOT_NULL,
+                              inventory_notes                TEXT,
+
+TABLE -> caracters_companion(caracters_companion_id      BIGSERIAL    PRIMARY KEY,
+                             companion_name              TEXT,
+                             companion_evasion           INTEGER,
+                             companion_stress            INTEGER,
+                             companion_range             TEXT,
+                             companion_notes             TEXT,
+                             )
+
+TABLE -> caracter_info(caracter_info_id                 BIGSERIAL      PRIMARY KEY,
+                       pronouns                         TEXT,
+                       notes                            TEXT,
+                       description                      TEXT,
+                       heritage_notes                   TEXT,
+                       background                       TEXT,
+                       connection_notes                 TEXT,
+                       warrior_notes                    TEXT,
+                       rally_notes                      TEXT,
+                       )
+
+
+TABLE -> character_domain_cards(caracters_domain_card_id        BIGSERIAL       PRIMARY KEY,
+                                slot_number                     INT,
+                                card_name                       FOREIGN KEY(card_domain),
+                                caracter_card_level             FOREIGN KEY(card_domain)
+                                )
+
+TABLE -> caracter_class(class_id                               BIGSERIAL PRIMARY KEY,
+                        class_name                             FOREIGN KEY(classes),                 ,
+                        subclass1_name                         FOREIGN KEY(subclass),
+                        subclass2_name                         FOREIGN KEY(subclass),
+                        )
+
+TABLE -> character_experiences(id,
+                               character_id,
+                               slot_number,
+                               experience_name,
+                               modifier_value)
+
+TABLE -> character_traits(id,
+                          character_id,
+                          trait_name,
+                          modifier_text)
+
+TABLE -> classes(class_id                          BIGSERIAL PRIMARY KEY   ,
+                 domain1                           FOREIGN KEY(card_domain),
+                 domain2                           FOREIGN KEY(card_domain),
+                 class_name                        TEXT                    ,
+                 class_description                 TEXT                    ,
+│                class_item1                       TEXT                    ,                   
+│                class_item2                       TEXT                    ,                   
+│                evasion                           INTEGER                 ,
+│                starting_hit_points               INTEGER                 ,
+│                hope_feature                      TEXT                    ,
+│                class_feature                     TEXT                    ,
+                 )
+
+TABLE -> subclass(subclass_id                            BIGSERIAL PRIMARY KEY,
+                  subclass_name                          TEXT                 ,
+                  subclass_description                   TEXT                 ,
+                 )
+
+TABLE -> domain_card (domain_card_id        BIGSERIAL PRIMARY KEY,
+                     card_name              TEXT,
+                     domain_name            TEXT,   
+                     card_level             INTEGER,
+                     card_type              TEXT,
+                     description_text       TEXT)
+
+
+
+************************************************************
+****MAYBE DELETE
+********  TABLE -> character_inventory(id,
+                             character_id,
+                             item_name,
+                             category,
+                             quantity,
+                             equipped,
+                             slot_name,
+                             notes,
+                             created_at) ******
+*************************************************************
+
+
+
+
 
 TABLE -> adversaries(id,
                      name,
@@ -108,30 +194,13 @@ TABLE -> Consumables(id,
                      description_text,
                      source_url)
 
-TABLE -> character_domain_cards(id,
-                                character_id,
-                                slot_number
-                                card_name,
-                                domain_name,
-                                card_level,card_type)
 
 TABLE -> encounter_boards(id,
                           state_json,
                           created_at,
                           updated_at)
 
-TABLE -> DomainCards(id,
-                     card_name,
-                     domain_name,
-                     card_level,
-                     card_type,
-                     description_text)
 
-TABLE -> character_experiences(id,
-                               character_id,
-                               slot_number,
-                               experience_name,
-                               modifier_value)
 
 TABLE -> environments(id,
                       name,tier,
@@ -150,16 +219,6 @@ TABLE -> Equipment(id,
                    subcategory,
                    description_text,
                    source_url)
-
-TABLE -> character_inventory(id,
-                             character_id,
-                             item_name,
-                             category,
-                             quantity,
-                             equipped,
-                             slot_name,
-                             notes,
-                             created_at)
 
 TABLE -> npcs(id,
               name,
@@ -192,10 +251,4 @@ TABLE -> Items(id,
                subcategory,
                description_text,
                source_url)
-
-TABLE -> character_traits(id,
-                          character_id,
-                          trait_name,
-                          modifier_text)
-
 ```
