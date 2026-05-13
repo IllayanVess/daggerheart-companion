@@ -43,10 +43,12 @@ if "%RECREATE_DB%"=="true" (
         call .venv\Scripts\activate.bat 2>nul
         if exist "database\recreate_db.py" (
             python database\recreate_db.py
+            echo Database recreation complete
         ) else (
+            echo WARNING: database\recreate_db.py not found
             python -c "from db import initialize_app_tables; initialize_app_tables()"
+            echo Database initialization complete
         )
-        echo Database recreation complete
         echo.
     )
 )
@@ -81,7 +83,7 @@ echo echo.
 echo echo Press Ctrl+C to stop the server
 echo echo ========================================
 echo echo.
-echo uvicorn main:app --reload --host 127.0.0.1 --port 8000
+echo uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 echo pause
 ) > "%BACKEND_SCRIPT%"
 
