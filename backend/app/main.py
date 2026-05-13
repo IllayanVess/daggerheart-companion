@@ -1,10 +1,19 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.db import initialize_app_tables
 from app.routers import adversaries, characters, encounter_board, environments, lookup, npcs
 
-app = FastAPI(title="Daggerheart Companion API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    initialize_app_tables()
+    yield
+
+
+app = FastAPI(title="Daggerheart Companion API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -13,12 +22,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-def startup() -> None:
-    initialize_app_tables()
-
 
 app.include_router(adversaries.router, prefix="/api")
 app.include_router(characters.router, prefix="/api")
