@@ -17,7 +17,7 @@ ARAGORN_PAYLOAD = {
     "class_name": "Warrior",
     "subclass_name": "Call of the Brave",
     "ancestry": "Human",
-    "community": "Harborfolk",
+    "community": "Loreborne",
     "level": 1,
     "evasion": 10,
     "armor": 12,
