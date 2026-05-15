@@ -49,6 +49,13 @@ CREATE TABLE IF NOT EXISTS campaign_members (
 #### 2 - Create souce data 
 
 ```sql
+
+
+                    *****************
+                    *  Source DATA  *
+                    *****************
+
+
 CREATE TABLE IF NOT EXISTS srd_sources (
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
@@ -176,6 +183,10 @@ CREATE TABLE IF NOT EXISTS srd_consumables (
 ### 3 - Character 
 
 ```sql
+
+                    ***************
+                    *  Character  *
+                    ***************
 
 CREATE TABLE IF NOT EXISTS characters (
     character_id BIGSERIAL PRIMARY KEY,
