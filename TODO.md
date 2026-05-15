@@ -73,8 +73,8 @@ CREATE TABLE IF NOT EXISTS srd_domains (
 CREATE TABLE IF NOT EXISTS srd_classes (
     class_id BIGSERIAL PRIMARY KEY,
 
-    domain1 BIGINT REFERENCES srd_domains(id),
-    domain2 BIGINT REFERENCES srd_domains(id),
+    domain1 TEXT REFERENCES srd_domains(srd_domains_id),
+    domain2 TEXT REFERENCES srd_domains(srd_domains_id),
 
     class_name TEXT,
     class_description TEXT,
@@ -127,12 +127,12 @@ CREATE TABLE IF NOT EXISTS srd_community (
     community_feature_text TEXT,
 
     source_id TEXT REFERENCES srd_sources(id)
-);                       )
+);                       
 
 CREATE TABLE IF NOT EXISTS srd_domain_card (
     domain_card_id BIGSERIAL PRIMARY KEY,
 
-    domains_id BIGINT REFERENCES srd_domains(id),
+    domains_id TEXT REFERENCES srd_domains(srd_domains_id),
 
     card_name TEXT,
     domain_name TEXT,
@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS srd_domain_card (
     description_text TEXT,
 
     source_id TEXT REFERENCES srd_sources(id)
-);
+    );
 
 CREATE TABLE IF NOT EXISTS srd_equipment (
     equipment_id BIGSERIAL PRIMARY KEY,
@@ -193,15 +193,7 @@ CREATE TABLE IF NOT EXISTS characters (
 
     name TEXT NOT NULL,
 
-    character_classe BIGINT REFERENCES srd_classes(class_id),
-    ancestry BIGINT REFERENCES srd_ancestry(ancestry_id),
-    community INTEGER REFERENCES srd_community(community_id),
-
-    characters_stats BIGINT REFERENCES characters_stats(id),
-    characters_equipment BIGINT REFERENCES characters_equipment(id),
     class_item_choice TEXT,
-    characters_companion BIGINT REFERENCES characters_companion(id),
-    characters_info BIGINT REFERENCES characters_info(id),
 
     prayer_dice_value INTEGER,
     unstoppable_value INTEGER,
@@ -212,39 +204,6 @@ CREATE TABLE IF NOT EXISTS characters (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS characters_stats (
-    characters_stats_id BIGSERIAL PRIMARY KEY,
-
-    character_id BIGINT REFERENCES characters(character_id),
-
-    characters_equipment BIGINT REFERENCES characters_equipment(id),
-    character_experiences BIGINT REFERENCES experiences(id),
-
-    level INTEGER,
-
-    agility INTEGER NOT NULL DEFAULT 0,
-    strength INTEGER NOT NULL DEFAULT 0,
-    finesse INTEGER NOT NULL DEFAULT 0,
-    instinct INTEGER NOT NULL DEFAULT 0,
-    presence INTEGER NOT NULL DEFAULT 0,
-    knowledge INTEGER NOT NULL DEFAULT 0,
-
-    health INTEGER,
-    stress INTEGER,
-    hope INTEGER,
-
-    evasion INTEGER,
-    armor_score INTEGER,
-
-    threshold_major INTEGER,
-    threshold_severe INTEGER,
-
-    hit_points INTEGER,
-
-    proficiency INT NOT NULL,
-
-    rally_die_value INTEGER
-);
 
 CREATE TABLE IF NOT EXISTS characters_equipment (
     character_equipment_id BIGSERIAL PRIMARY KEY,
@@ -277,8 +236,8 @@ CREATE TABLE IF NOT EXISTS character_inventory (
     character_inventory_id BIGSERIAL PRIMARY KEY,
 
     character_id BIGINT REFERENCES characters(character_id),
-    item_id BIGINT REFERENCES srd_equipment(equipment_id),
-    item_id BIGINT REFERENCES srd_consumables(consumables_id),
+    item_eq_id BIGINT REFERENCES srd_equipment(equipment_id),
+    item_cons_id BIGINT REFERENCES srd_consumables(consumables_id),
 
     item_name TEXT,
     quantity INTEGER,
@@ -321,21 +280,20 @@ CREATE TABLE IF NOT EXISTS character_domain_cards (
 
     character_id BIGINT REFERENCES characters(character_id),
 
-    card_name TEXT REFERENCES srd_domain_card(card_name),
+    card_id BIGINT REFERENCES srd_domain_card(domain_card_id),
     character_card_level INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS character_class (
-    class_id BIGSERIAL PRIMARY KEY,
+    caracter_class_id BIGSERIAL PRIMARY KEY,
 
     character_id BIGINT REFERENCES characters(character_id),
 
-    class_name TEXT REFERENCES srd_classes(class_name),
+    class_id BIGINT REFERENCES srd_classes(class_id),
 
-    subclass1_name TEXT REFERENCES srd_subclass(subclass_name),
-    subclass2_name TEXT REFERENCES srd_subclass(subclass_name)
+    subclass1_name BIGINT REFERENCES srd_subclass(subclass_id),
+    subclass2_name BIGINT REFERENCES srd_subclass(subclass_id)
 );
-
 
 CREATE TABLE IF NOT EXISTS character_experiences (
     character_experiences_id BIGSERIAL PRIMARY KEY,
@@ -344,6 +302,40 @@ CREATE TABLE IF NOT EXISTS character_experiences (
 
     experience_name TEXT,
     modifier_value INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS characters_stats (
+    characters_stats_id BIGSERIAL PRIMARY KEY,
+
+    character_id BIGINT REFERENCES characters(character_id),
+
+    characters_equipment BIGINT REFERENCES characters_equipment(character_equipment_id),
+    character_experiences BIGINT REFERENCES character_experiences(character_experiences_id),
+
+    level INTEGER,
+
+    agility INTEGER NOT NULL DEFAULT 0,
+    strength INTEGER NOT NULL DEFAULT 0,
+    finesse INTEGER NOT NULL DEFAULT 0,
+    instinct INTEGER NOT NULL DEFAULT 0,
+    presence INTEGER NOT NULL DEFAULT 0,
+    knowledge INTEGER NOT NULL DEFAULT 0,
+
+    health INTEGER,
+    stress INTEGER,
+    hope INTEGER,
+
+    evasion INTEGER,
+    armor_score INTEGER,
+
+    threshold_major INTEGER,
+    threshold_severe INTEGER,
+
+    hit_points INTEGER,
+
+    proficiency INT NOT NULL,
+
+    rally_die_value INTEGER
 );
 
 ```
