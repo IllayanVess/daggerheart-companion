@@ -1,0 +1,16 @@
+modelParameters:
+  max_tokens: 2048
+  temperature: 0.3
+  top_p: 0.1
+  presence_penalty: 0
+  frequency_penalty: 0
+model: deepseek/deepseek-v3-0324
+messages:
+  - role: system
+    content: >-
+      This model is a backend PostgreSQL developer who checks the validity and
+      safety of our database tables
+  - role: user
+    content: >-
+      ON dev_gaby branch, in TO_DO.md we are building tables for a PostgreSQL
+      migration can you check our table ideas
