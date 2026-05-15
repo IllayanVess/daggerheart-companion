@@ -27,14 +27,14 @@ TABLE -> USER (user_id       BIGSERIAL    PRIMARY KEY,
 
 TABLE -> characters(character_id                BIGSERIAL    PRIMARY KEY,
                     name                        TEXT         NOT NULL,
-                    character_classe             FOREIGN KEY (character_classe), 
+                    character_classe            FOREIGN KEY (character_classe), 
                     ancestry                    FOREIGN KEY (ancestry),            
                     community                   FOREIGN KEY (community),            
-                    characters_stats             FOREIGN KEY (characters_stats),
-                    characters_equipment         FOREIGN KEY (characters_equipment),
+                    characters_stats            FOREIGN KEY (characters_stats),
+                    characters_equipment        FOREIGN KEY (characters_equipment),
                     class_item_choice           FOREIGN KEY (classe_type),
-                    characters_companion         FOREIGN KEY (characters_companion),
-                    characters_info              FOREIGN KEY (characters_info),
+                    characters_companion        FOREIGN KEY (characters_companion),
+                    characters_info             FOREIGN KEY (characters_info),
 
                     prayer_dice_value           INTEGER,
                     unstoppable_value           INTEGER,
@@ -62,6 +62,7 @@ TABLE -> characters_stats(characters_stats_id                BIGSERIAL    PRIMAR
                          )
 
 TABLE -> characters_equipment(character_equipment_id         BIGSERIAL    PRIMARY KEY,
+                              character_id                       FOREIGN KEY(character),
                               armor_name                     FOREIGN KEY(equipment),
                               primary_weapon                 FOREIGN KEY(equipment),
                               secondary_weapon               FOREIGN KEY(equipment),
@@ -70,6 +71,7 @@ TABLE -> characters_equipment(character_equipment_id         BIGSERIAL    PRIMAR
 
 
 TABLE -> characters_consumable(character_equipment_id         BIGSERIAL    PRIMARY KEY,
+                               character_id                       FOREIGN KEY(character),
                                class_item                     FOREIGN KEY(equipment),
                                potion_choice                  FOREIGN KEY(Consumables),
                                gold_handfuls                  INTEGER NOT_NULL,
@@ -88,15 +90,16 @@ TABLE -> character_inventory(character_inventory_id           BIGSERIAL     PRIM
                              )
 
 TABLE -> characters_companion(characters_companion_id      BIGSERIAL    PRIMARY KEY,
-                             companion_name              TEXT,
-                             companion_evasion           INTEGER,
-                             companion_stress            INTEGER,
-                             companion_range             TEXT,
-                             companion_notes             TEXT,
+                              character_id                     FOREIGN KEY(character),
+                              companion_name              TEXT,
+                              companion_evasion           INTEGER,
+                              companion_stress            INTEGER,
+                              companion_range             TEXT,
+                              companion_notes             TEXT,
                              )
 
 TABLE -> character_info(character_info_id                BIGSERIAL      PRIMARY KEY,
-                        character_id                     FOREIGN KEY
+                        character_id                     FOREIGN KEY(character),
                         pronouns                         TEXT,
                         notes                            TEXT,
                         description                      TEXT,
@@ -109,15 +112,16 @@ TABLE -> character_info(character_info_id                BIGSERIAL      PRIMARY 
 
 
 TABLE -> character_domain_cards(characters_domain_card_id        BIGSERIAL       PRIMARY KEY,
-                                slot_number                     INT,
+                                character_id                     FOREIGN KEY(character),
                                 card_name                       FOREIGN KEY(card_domain),
                                 character_card_level             FOREIGN KEY(card_domain)
                                 )
 
 TABLE -> character_class(class_id                               BIGSERIAL PRIMARY KEY,
-                        class_name                             FOREIGN KEY(classes),                 ,
-                        subclass1_name                         FOREIGN KEY(subclass),
-                        subclass2_name                         FOREIGN KEY(subclass),
+                         character_id                           FOREIGN KEY(character),
+                         class_name                             FOREIGN KEY(classes),                 ,
+                         subclass1_name                         FOREIGN KEY(subclass),
+                         subclass2_name                         FOREIGN KEY(subclass),
                         )
 
 TABLE -> character_experiences(character_experiences_id        BIGSERIAL PRIMARY KEY,
@@ -138,6 +142,17 @@ TABLE -> classes(class_id                          BIGSERIAL PRIMARY KEY   ,
 │                hope_feature                      TEXT                    ,
 │                class_feature                     TEXT                    ,
                  )
+
+TABLE -> ancestry(ancestry_id BIGSERIAL PRIMARY KEY,
+                  ancestry_name TEXT,
+                  ancestry_feature1 TEXT,
+                  ancestry_feature2 TEXT,
+                  )
+
+TABLE -> community(community_id INTEGER PRIMARY KEY,
+                    community_name TEXT,
+                    community_feature TEXT,
+                    )
 
 TABLE -> subclass(subclass_id                            BIGSERIAL PRIMARY KEY,
                   subclass_name                          TEXT                 ,
