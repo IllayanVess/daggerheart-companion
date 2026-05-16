@@ -64,17 +64,11 @@ CREATE TABLE IF NOT EXISTS srd_sources (
     version TEXT
 );
 
-CREATE TABLE IF NOT EXISTS srd_domains (
-    srd_domains_id TEXT PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE,
-    source_id TEXT REFERENCES srd_sources(id)
-);
-
 CREATE TABLE IF NOT EXISTS srd_classes (
     class_id BIGSERIAL PRIMARY KEY,
 
-    domain1 TEXT REFERENCES srd_domains(srd_domains_id),
-    domain2 TEXT REFERENCES srd_domains(srd_domains_id),
+    domain1 TEXT ,
+    domain2 TEXT ,
 
     class_name TEXT,
     class_description TEXT,
@@ -138,37 +132,68 @@ CREATE TABLE IF NOT EXISTS srd_domain_card (
     domain_name TEXT,
     card_level INTEGER,
     card_type TEXT,
+    recall_cost INTEGER,
     description_text TEXT,
 
     source_id TEXT REFERENCES srd_sources(id)
     );
 
-CREATE TABLE IF NOT EXISTS srd_equipment (
-    equipment_id BIGSERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS srd_armor (
+    armor_id BIGSERIAL PRIMARY KEY,
 
     item_name TEXT,
     category TEXT, -- weapon, armor
 
-    description_text TEXT,
     tier INTEGER,
-    trait TEXT,
 
-    range_name TEXT,
-    damage_die TEXT,
-    damage_type TEXT,
+    thresholds_major TEXT,
+    thresholds_severe TEXT,
+    base_score INTEGER,
 
-    burden TEXT,
-
-    armor_score INTEGER,
     feature_text TEXT,
-
-    thresholds JSONB,
+    description_text TEXT,
 
     source_id TEXT REFERENCES srd_sources(id)
 );
 
+CREATE TABLE IF NOT EXISTS srd_weapon (
+    weapon_id BIGSERIAL PRIMARY KEY,
+
+    item_name TEXT,
+    category TEXT, -- weapon, armor
+    subcategory TEXT,
+
+    tier INTEGER,
+    trait TEXT,
+    range TEXT,
+
+    damage_text TEXT,
+    damage_type TEXT,
+
+    burden TEXT,
+
+    feature_text TEXT,
+    description_text TEXT,
+
+    source_id TEXT REFERENCES srd_sources(id)
+);
+
+
+
 CREATE TABLE IF NOT EXISTS srd_consumables (
     consumables_id BIGSERIAL PRIMARY KEY,
+
+    item_name TEXT,
+    category TEXT,
+
+    description_text TEXT,
+
+    source_id TEXT REFERENCES srd_sources(id)
+);
+
+
+CREATE TABLE IF NOT EXISTS srd_item(
+    item_id BIGSERIAL PRIMARY KEY,
 
     item_name TEXT,
     category TEXT,
@@ -210,35 +235,38 @@ CREATE TABLE IF NOT EXISTS characters_equipment (
 
     character_id BIGINT REFERENCES characters(character_id),
 
-    armor_name BIGINT REFERENCES srd_equipment(equipment_id),
-    primary_weapon BIGINT REFERENCES srd_equipment(equipment_id),
-    secondary_weapon BIGINT REFERENCES srd_equipment(equipment_id),
+    armor_name BIGINT REFERENCES srd_armor(armor_id),
+    primary_weapon BIGINT REFERENCES srd_weapon(weapon_id),
+    secondary_weapon BIGINT REFERENCES srd_equipment(weapon_id),
 
     weapon_notes TEXT
 );
 
 CREATE TABLE IF NOT EXISTS characters_consumable (
-    character_equipment_id BIGSERIAL PRIMARY KEY,
+    characters_consumable_id BIGSERIAL PRIMARY KEY,
 
     character_id BIGINT REFERENCES characters(character_id),
+    consumables_id BIGINT REFERENCES srd_consumables(consumables_id),
 
-    class_item BIGINT REFERENCES srd_equipment(equipment_id),
-    potion_choice BIGINT REFERENCES srd_consumables(consumables_id),
-
-    gold_handfuls INTEGER NOT NULL,
-    gold_bags INTEGER NOT NULL,
-    gold_chests INTEGER NOT NULL,
 
     consumable_notes TEXT
+);
+
+CREATE TABLE IF NOT EXISTS characters_item (
+    character_item_id BIGSERIAL PRIMARY KEY,
+
+    character_id BIGINT REFERENCES characters(character_id),
+    item_id BIGINT REFERENCES srd_item(item_id),
+
+    item_notes TEXT
 );
 
 CREATE TABLE IF NOT EXISTS character_inventory (
     character_inventory_id BIGSERIAL PRIMARY KEY,
 
     character_id BIGINT REFERENCES characters(character_id),
-    item_eq_id BIGINT REFERENCES srd_equipment(equipment_id),
-    item_cons_id BIGINT REFERENCES srd_consumables(consumables_id),
 
+    item_category TEXT,
     item_name TEXT,
     quantity INTEGER,
 
@@ -334,6 +362,10 @@ CREATE TABLE IF NOT EXISTS characters_stats (
     hit_points INTEGER,
 
     proficiency INT NOT NULL,
+
+    gold_handfuls INTEGER NOT NULL,
+    gold_bags INTEGER NOT NULL,
+    gold_chests INTEGER NOT NULL,
 
     rally_die_value INTEGER
 );

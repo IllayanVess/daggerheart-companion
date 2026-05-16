@@ -1,0 +1,952 @@
+2026-05-15 17:36:27.551 CEST [75265] LOG:  starting PostgreSQL 18.4 on aarch64-apple-darwin20.0.0, compiled by clang version 20.1.8, 64-bit
+2026-05-15 17:36:27.552 CEST [75265] LOG:  listening on IPv6 address "::1", port 5432
+2026-05-15 17:36:27.552 CEST [75265] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-05-15 17:36:27.553 CEST [75265] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2026-05-15 17:36:27.555 CEST [75271] LOG:  database system was shut down at 2026-05-15 17:36:09 CEST
+2026-05-15 17:36:27.556 CEST [75265] LOG:  database system is ready to accept connections
+2026-05-15 17:37:37.262 CEST [75286] FATAL:  database "gaby" does not exist
+2026-05-15 17:37:57.443 CEST [75291] FATAL:  database "/Users/gaby/postgresql" does not exist
+2026-05-15 17:38:04.848 CEST [75295] FATAL:  database "/Users/gaby/postgresql/" does not exist
+2026-05-15 17:41:27.548 CEST [75269] LOG:  checkpoint starting: time
+2026-05-15 17:41:32.000 CEST [75269] LOG:  checkpoint complete: wrote 44 buffers (0.3%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=4.449 s, sync=0.002 s, total=4.453 s; sync files=11, longest=0.001 s, average=0.001 s; distance=334 kB, estimate=334 kB; lsn=0/17DE988, redo lsn=0/17DE930
+2026-05-15 17:42:32.400 CEST [75420] FATAL:  database "gaby" does not exist
+2026-05-15 17:43:31.472 CEST [75431] FATAL:  role "postgres" does not exist
+2026-05-15 17:43:36.405 CEST [75435] FATAL:  database "gaby" does not exist
+2026-05-15 17:43:43.278 CEST [75439] FATAL:  role "admin" does not exist
+2026-05-15 17:44:40.198 CEST [75447] FATAL:  database "gaby" does not exist
+2026-05-15 17:46:27.001 CEST [75269] LOG:  checkpoint starting: time
+2026-05-15 17:47:40.937 CEST [75466] ERROR:  syntax error at or near "." at character 1
+2026-05-15 17:47:40.937 CEST [75466] STATEMENT:  .table
+	CREATE TABLE IF NOT EXISTS srd_sources (
+	    id TEXT PRIMARY KEY,
+	    title TEXT NOT NULL,
+	    license TEXT,
+	    source_path TEXT,
+	    version TEXT
+	);
+2026-05-15 17:47:40.943 CEST [75466] ERROR:  relation "srd_sources" does not exist
+2026-05-15 17:47:40.943 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS srd_domains (
+	    srd_domains_id TEXT PRIMARY KEY,
+	    name TEXT NOT NULL UNIQUE,
+	    source_id TEXT REFERENCES srd_sources(id)
+	);
+2026-05-15 17:47:40.949 CEST [75466] ERROR:  relation "srd_domains" does not exist
+2026-05-15 17:47:40.949 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS srd_classes (
+	    class_id BIGSERIAL PRIMARY KEY,
+	
+	    domain1 BIGINT REFERENCES srd_domains(id),
+	    domain2 BIGINT REFERENCES srd_domains(id),
+	
+	    class_name TEXT,
+	    class_description TEXT,
+	
+	    class_item1 TEXT,
+	    class_item2 TEXT,
+	
+	    evasion INTEGER,
+	    starting_hit_points INTEGER,
+	
+	    hope_feature TEXT,
+	    class_feature TEXT,
+	
+	    source_id TEXT REFERENCES srd_sources(id)
+	);
+2026-05-15 17:47:40.953 CEST [75466] ERROR:  relation "srd_classes" does not exist
+2026-05-15 17:47:40.953 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS srd_subclass (
+	    subclass_id BIGSERIAL PRIMARY KEY,
+	
+	    class_id BIGINT NOT NULL REFERENCES srd_classes(class_id),
+	
+	    subclass_name TEXT,
+	    subclass_description TEXT,
+	
+	    foundation_feature TEXT,
+	    specialization_feature TEXT,
+	    spell_cast_feature TEXT,
+	    mastery_feature TEXT,
+	
+	    source_id TEXT REFERENCES srd_sources(id)
+	);
+2026-05-15 17:47:40.957 CEST [75466] ERROR:  relation "srd_sources" does not exist
+2026-05-15 17:47:40.957 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS srd_ancestry (
+	    ancestry_id BIGSERIAL PRIMARY KEY,
+	
+	    ancestry_feature_1_name TEXT,
+	    ancestry_feature_1_text TEXT,
+	
+	    ancestry_feature_2_name TEXT,
+	    ancestry_feature_2_text TEXT,
+	
+	    source_id TEXT REFERENCES srd_sources(id)
+	);
+2026-05-15 17:47:40.959 CEST [75466] ERROR:  relation "srd_sources" does not exist
+2026-05-15 17:47:40.959 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS srd_community (
+	    community_id INTEGER PRIMARY KEY,
+	
+	    community_name TEXT,
+	    community_feature_name TEXT,
+	    community_feature_text TEXT,
+	
+	    source_id TEXT REFERENCES srd_sources(id)
+	);
+2026-05-15 17:47:40.960 CEST [75466] ERROR:  syntax error at or near ")" at character 1
+2026-05-15 17:47:40.960 CEST [75466] STATEMENT:  )
+	
+	CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    domains_id BIGINT REFERENCES srd_domains(id),
+	
+	    card_name TEXT,
+	    domain_name TEXT,
+	    card_level INTEGER,
+	    card_type TEXT,
+	    description_text TEXT,
+	
+	    source_id TEXT REFERENCES srd_sources(id)
+	);
+2026-05-15 17:47:40.962 CEST [75466] ERROR:  relation "srd_sources" does not exist
+2026-05-15 17:47:40.962 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS srd_equipment (
+	    equipment_id BIGSERIAL PRIMARY KEY,
+	
+	    item_name TEXT,
+	    category TEXT, -- weapon, armor
+	
+	    description_text TEXT,
+	    tier INTEGER,
+	    trait TEXT,
+	
+	    range_name TEXT,
+	    damage_die TEXT,
+	    damage_type TEXT,
+	
+	    burden TEXT,
+	
+	    armor_score INTEGER,
+	    feature_text TEXT,
+	
+	    thresholds JSONB,
+	
+	    source_id TEXT REFERENCES srd_sources(id)
+	);
+2026-05-15 17:47:40.965 CEST [75466] ERROR:  relation "srd_sources" does not exist
+2026-05-15 17:47:40.965 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS srd_consumables (
+	    consumables_id BIGSERIAL PRIMARY KEY,
+	
+	    item_name TEXT,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_id TEXT REFERENCES srd_sources(id)
+	);
+2026-05-15 17:48:04.736 CEST [75269] LOG:  checkpoint complete: wrote 965 buffers (5.9%), wrote 1 SLRU buffers; 1 WAL file(s) added, 0 removed, 0 recycled; write=97.707 s, sync=0.018 s, total=97.735 s; sync files=349, longest=0.001 s, average=0.001 s; distance=4448 kB, estimate=4448 kB; lsn=0/1CAB6D0, redo lsn=0/1C36970
+2026-05-15 17:48:29.286 CEST [75466] ERROR:  column "id" referenced in foreign key constraint does not exist
+2026-05-15 17:48:29.286 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS srd_classes (
+	    class_id BIGSERIAL PRIMARY KEY,
+	
+	    domain1 BIGINT REFERENCES srd_domains(id),
+	    domain2 BIGINT REFERENCES srd_domains(id),
+	
+	    class_name TEXT,
+	    class_description TEXT,
+	
+	    class_item1 TEXT,
+	    class_item2 TEXT,
+	
+	    evasion INTEGER,
+	    starting_hit_points INTEGER,
+	
+	    hope_feature TEXT,
+	    class_feature TEXT,
+	
+	    source_id TEXT REFERENCES srd_sources(id)
+	);
+2026-05-15 17:49:07.581 CEST [75466] ERROR:  foreign key constraint "srd_classes_domain1_fkey" cannot be implemented
+2026-05-15 17:49:07.581 CEST [75466] DETAIL:  Key columns "domain1" of the referencing table and "srd_domains_id" of the referenced table are of incompatible types: bigint and text.
+2026-05-15 17:49:07.581 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS srd_classes (
+	    class_id BIGSERIAL PRIMARY KEY,
+	
+	    domain1 BIGINT REFERENCES srd_domains(srd_domains_id),
+	    domain2 BIGINT REFERENCES srd_domains(srd_domains_id),
+	
+	    class_name TEXT,
+	    class_description TEXT,
+	
+	    class_item1 TEXT,
+	    class_item2 TEXT,
+	
+	    evasion INTEGER,
+	    starting_hit_points INTEGER,
+	
+	    hope_feature TEXT,
+	    class_feature TEXT,
+	
+	    source_id TEXT REFERENCES srd_sources(id)
+	);
+2026-05-15 17:50:25.660 CEST [75466] ERROR:  syntax error at or near "VCREATE" at character 1
+2026-05-15 17:50:25.660 CEST [75466] STATEMENT:  VCREATE TABLE IF NOT EXISTS srd_ancestry (
+	    ancestry_id BIGSERIAL PRIMARY KEY,
+	
+	    ancestry_feature_1_name TEXT,
+	    ancestry_feature_1_text TEXT,
+	
+	    ancestry_feature_2_name TEXT,
+	    ancestry_feature_2_text TEXT,
+	
+	    source_id TEXT REFERENCES srd_sources(id)
+	);
+2026-05-15 17:51:03.803 CEST [75466] ERROR:  syntax error at or near ")" at character 1
+2026-05-15 17:51:03.803 CEST [75466] STATEMENT:  )
+	
+	CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    domains_id BIGINT REFERENCES srd_domains(id),
+	
+	    card_name TEXT,
+	    domain_name TEXT,
+	    card_level INTEGER,
+	    card_type TEXT,
+	    description_text TEXT,
+	
+	    source_id TEXT REFERENCES srd_sources(id)
+	);
+2026-05-15 17:51:26.225 CEST [75466] ERROR:  syntax error at or near ")" at character 301
+2026-05-15 17:51:26.225 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    domains_id BIGINT REFERENCES srd_domains(id),
+	
+	    card_name TEXT,
+	    domain_name TEXT,
+	    card_level INTEGER,
+	    card_type TEXT,
+	    description_text TEXT,
+	
+	    source_id TEXT REFERENCES srd_sources(id),
+	);
+2026-05-15 17:51:27.733 CEST [75269] LOG:  checkpoint starting: time
+2026-05-15 17:51:36.447 CEST [75269] LOG:  checkpoint complete: wrote 86 buffers (0.5%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=8.699 s, sync=0.008 s, total=8.714 s; sync files=78, longest=0.001 s, average=0.001 s; distance=710 kB, estimate=4074 kB; lsn=0/1CE8238, redo lsn=0/1CE81A8
+2026-05-15 17:52:14.888 CEST [75466] ERROR:  syntax error at or near ")" at character 305
+2026-05-15 17:52:14.888 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    domains_id BIGINT REFERENCES srd_domains(id),
+	
+	    card_name TEXT,
+	    domain_name TEXT,
+	    card_level INTEGER,
+	    card_type TEXT,
+	    description_text TEXT,
+	
+	    source_id TEXT REFERENCES srd_sources(id),
+	    );
+2026-05-15 17:52:56.211 CEST [75466] ERROR:  column "id" referenced in foreign key constraint does not exist
+2026-05-15 17:52:56.211 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    domains_id BIGINT REFERENCES srd_domains(id),
+	
+	    card_name TEXT,
+	    domain_name TEXT,
+	    card_level INTEGER,
+	    card_type TEXT,
+	    description_text TEXT,
+	
+	    source_id TEXT REFERENCES srd_sources(id)
+	    );
+2026-05-15 17:53:49.266 CEST [75466] ERROR:  foreign key constraint "srd_domain_card_domains_id_fkey" cannot be implemented
+2026-05-15 17:53:49.266 CEST [75466] DETAIL:  Key columns "domains_id" of the referencing table and "srd_domains_id" of the referenced table are of incompatible types: bigint and text.
+2026-05-15 17:53:49.266 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    domains_id BIGINT REFERENCES srd_domains(srd_domains_id),
+	
+	    card_name TEXT,
+	    domain_name TEXT,
+	    card_level INTEGER,
+	    card_type TEXT,
+	    description_text TEXT,
+	
+	    source_id TEXT REFERENCES srd_sources(id)
+	    );
+2026-05-15 17:55:21.029 CEST [75466] ERROR:  syntax error at or near "VCREATE" at character 1
+2026-05-15 17:55:21.029 CEST [75466] STATEMENT:  VCREATE TABLE IF NOT EXISTS characters (
+	    character_id BIGSERIAL PRIMARY KEY,
+	
+	    name TEXT NOT NULL,
+	
+	    character_classe BIGINT REFERENCES srd_classes(class_id),
+	    ancestry BIGINT REFERENCES srd_ancestry(ancestry_id),
+	    community INTEGER REFERENCES srd_community(community_id),
+	
+	    characters_stats BIGINT REFERENCES characters_stats(id),
+	    characters_equipment BIGINT REFERENCES characters_equipment(id),
+	    class_item_choice TEXT,
+	    characters_companion BIGINT REFERENCES characters_companion(id),
+	    characters_info BIGINT REFERENCES characters_info(id),
+	
+	    prayer_dice_value INTEGER,
+	    unstoppable_value INTEGER,
+	
+	    data_json JSONB,
+	
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+2026-05-15 17:55:21.034 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:21.034 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS characters_stats (
+	    characters_stats_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    characters_equipment BIGINT REFERENCES characters_equipment(id),
+	    character_experiences BIGINT REFERENCES experiences(id),
+	
+	    level INTEGER,
+	
+	    agility INTEGER NOT NULL DEFAULT 0,
+	    strength INTEGER NOT NULL DEFAULT 0,
+	    finesse INTEGER NOT NULL DEFAULT 0,
+	    instinct INTEGER NOT NULL DEFAULT 0,
+	    presence INTEGER NOT NULL DEFAULT 0,
+	    knowledge INTEGER NOT NULL DEFAULT 0,
+	
+	    health INTEGER,
+	    stress INTEGER,
+	    hope INTEGER,
+	
+	    evasion INTEGER,
+	    armor_score INTEGER,
+	
+	    threshold_major INTEGER,
+	    threshold_severe INTEGER,
+	
+	    hit_points INTEGER,
+	
+	    proficiency INT NOT NULL,
+	
+	    rally_die_value INTEGER
+	);
+2026-05-15 17:55:21.039 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:21.039 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS characters_equipment (
+	    character_equipment_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    armor_name BIGINT REFERENCES srd_equipment(equipment_id),
+	    primary_weapon BIGINT REFERENCES srd_equipment(equipment_id),
+	    secondary_weapon BIGINT REFERENCES srd_equipment(equipment_id),
+	
+	    weapon_notes TEXT
+	);
+2026-05-15 17:55:21.043 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:21.043 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS characters_consumable (
+	    character_equipment_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_item BIGINT REFERENCES srd_equipment(equipment_id),
+	    potion_choice BIGINT REFERENCES srd_consumables(consumables_id),
+	
+	    gold_handfuls INTEGER NOT NULL,
+	    gold_bags INTEGER NOT NULL,
+	    gold_chests INTEGER NOT NULL,
+	
+	    consumable_notes TEXT
+	);
+2026-05-15 17:55:21.044 CEST [75466] ERROR:  column "item_id" specified more than once
+2026-05-15 17:55:21.044 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_inventory (
+	    character_inventory_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	    item_id BIGINT REFERENCES srd_equipment(equipment_id),
+	    item_id BIGINT REFERENCES srd_consumables(consumables_id),
+	
+	    item_name TEXT,
+	    quantity INTEGER,
+	
+	    notes TEXT,
+	
+	    created_at TIMESTAMPTZ DEFAULT NOW()
+	);
+2026-05-15 17:55:21.048 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:21.048 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS characters_companion (
+	    characters_companion_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    companion_name TEXT,
+	    companion_evasion INTEGER,
+	    companion_stress INTEGER,
+	    companion_range TEXT,
+	    companion_notes TEXT
+	);
+2026-05-15 17:55:21.051 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:21.051 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_info (
+	    character_info_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    pronouns TEXT,
+	    notes TEXT,
+	    description TEXT,
+	
+	    heritage_notes TEXT,
+	    background TEXT,
+	    connection_notes TEXT,
+	    warrior_notes TEXT,
+	    rally_notes TEXT
+	);
+2026-05-15 17:55:21.054 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:21.054 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_domain_cards (
+	    characters_domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    card_name TEXT REFERENCES srd_domain_card(card_name),
+	    character_card_level INTEGER
+	);
+2026-05-15 17:55:21.057 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:21.057 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_class (
+	    class_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_name TEXT REFERENCES srd_classes(class_name),
+	
+	    subclass1_name TEXT REFERENCES srd_subclass(subclass_name),
+	    subclass2_name TEXT REFERENCES srd_subclass(subclass_name)
+	);
+2026-05-15 17:55:21.060 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:21.060 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_experiences (
+	    character_experiences_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    experience_name TEXT,
+	    modifier_value INTEGER
+	);
+2026-05-15 17:55:38.431 CEST [75466] ERROR:  relation "characters_stats" does not exist
+2026-05-15 17:55:38.431 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS characters (
+	    character_id BIGSERIAL PRIMARY KEY,
+	
+	    name TEXT NOT NULL,
+	
+	    character_classe BIGINT REFERENCES srd_classes(class_id),
+	    ancestry BIGINT REFERENCES srd_ancestry(ancestry_id),
+	    community INTEGER REFERENCES srd_community(community_id),
+	
+	    characters_stats BIGINT REFERENCES characters_stats(id),
+	    characters_equipment BIGINT REFERENCES characters_equipment(id),
+	    class_item_choice TEXT,
+	    characters_companion BIGINT REFERENCES characters_companion(id),
+	    characters_info BIGINT REFERENCES characters_info(id),
+	
+	    prayer_dice_value INTEGER,
+	    unstoppable_value INTEGER,
+	
+	    data_json JSONB,
+	
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+2026-05-15 17:55:38.435 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:38.435 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS characters_stats (
+	    characters_stats_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    characters_equipment BIGINT REFERENCES characters_equipment(id),
+	    character_experiences BIGINT REFERENCES experiences(id),
+	
+	    level INTEGER,
+	
+	    agility INTEGER NOT NULL DEFAULT 0,
+	    strength INTEGER NOT NULL DEFAULT 0,
+	    finesse INTEGER NOT NULL DEFAULT 0,
+	    instinct INTEGER NOT NULL DEFAULT 0,
+	    presence INTEGER NOT NULL DEFAULT 0,
+	    knowledge INTEGER NOT NULL DEFAULT 0,
+	
+	    health INTEGER,
+	    stress INTEGER,
+	    hope INTEGER,
+	
+	    evasion INTEGER,
+	    armor_score INTEGER,
+	
+	    threshold_major INTEGER,
+	    threshold_severe INTEGER,
+	
+	    hit_points INTEGER,
+	
+	    proficiency INT NOT NULL,
+	
+	    rally_die_value INTEGER
+	);
+2026-05-15 17:55:38.439 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:38.439 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS characters_equipment (
+	    character_equipment_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    armor_name BIGINT REFERENCES srd_equipment(equipment_id),
+	    primary_weapon BIGINT REFERENCES srd_equipment(equipment_id),
+	    secondary_weapon BIGINT REFERENCES srd_equipment(equipment_id),
+	
+	    weapon_notes TEXT
+	);
+2026-05-15 17:55:38.442 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:38.442 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS characters_consumable (
+	    character_equipment_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_item BIGINT REFERENCES srd_equipment(equipment_id),
+	    potion_choice BIGINT REFERENCES srd_consumables(consumables_id),
+	
+	    gold_handfuls INTEGER NOT NULL,
+	    gold_bags INTEGER NOT NULL,
+	    gold_chests INTEGER NOT NULL,
+	
+	    consumable_notes TEXT
+	);
+2026-05-15 17:55:38.443 CEST [75466] ERROR:  column "item_id" specified more than once
+2026-05-15 17:55:38.443 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_inventory (
+	    character_inventory_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	    item_id BIGINT REFERENCES srd_equipment(equipment_id),
+	    item_id BIGINT REFERENCES srd_consumables(consumables_id),
+	
+	    item_name TEXT,
+	    quantity INTEGER,
+	
+	    notes TEXT,
+	
+	    created_at TIMESTAMPTZ DEFAULT NOW()
+	);
+2026-05-15 17:55:38.446 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:38.446 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS characters_companion (
+	    characters_companion_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    companion_name TEXT,
+	    companion_evasion INTEGER,
+	    companion_stress INTEGER,
+	    companion_range TEXT,
+	    companion_notes TEXT
+	);
+2026-05-15 17:55:38.449 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:38.449 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_info (
+	    character_info_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    pronouns TEXT,
+	    notes TEXT,
+	    description TEXT,
+	
+	    heritage_notes TEXT,
+	    background TEXT,
+	    connection_notes TEXT,
+	    warrior_notes TEXT,
+	    rally_notes TEXT
+	);
+2026-05-15 17:55:38.451 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:38.451 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_domain_cards (
+	    characters_domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    card_name TEXT REFERENCES srd_domain_card(card_name),
+	    character_card_level INTEGER
+	);
+2026-05-15 17:55:38.454 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:38.454 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_class (
+	    class_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_name TEXT REFERENCES srd_classes(class_name),
+	
+	    subclass1_name TEXT REFERENCES srd_subclass(subclass_name),
+	    subclass2_name TEXT REFERENCES srd_subclass(subclass_name)
+	);
+2026-05-15 17:55:38.457 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:55:38.457 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_experiences (
+	    character_experiences_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    experience_name TEXT,
+	    modifier_value INTEGER
+	);
+2026-05-15 17:55:51.027 CEST [75466] ERROR:  relation "characters_stats" does not exist
+2026-05-15 17:55:51.027 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS characters (
+	    character_id BIGSERIAL PRIMARY KEY,
+	
+	    name TEXT NOT NULL,
+	
+	    character_classe BIGINT REFERENCES srd_classes(class_id),
+	    ancestry BIGINT REFERENCES srd_ancestry(ancestry_id),
+	    community INTEGER REFERENCES srd_community(community_id),
+	
+	    characters_stats BIGINT REFERENCES characters_stats(id),
+	    characters_equipment BIGINT REFERENCES characters_equipment(id),
+	    class_item_choice TEXT,
+	    characters_companion BIGINT REFERENCES characters_companion(id),
+	    characters_info BIGINT REFERENCES characters_info(id),
+	
+	    prayer_dice_value INTEGER,
+	    unstoppable_value INTEGER,
+	
+	    data_json JSONB,
+	
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+2026-05-15 17:56:19.510 CEST [75466] ERROR:  relation "characters" does not exist
+2026-05-15 17:56:19.510 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS characters_stats (
+	    characters_stats_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    characters_equipment BIGINT REFERENCES characters_equipment(id),
+	    character_experiences BIGINT REFERENCES experiences(id),
+	
+	    level INTEGER,
+	
+	    agility INTEGER NOT NULL DEFAULT 0,
+	    strength INTEGER NOT NULL DEFAULT 0,
+	    finesse INTEGER NOT NULL DEFAULT 0,
+	    instinct INTEGER NOT NULL DEFAULT 0,
+	    presence INTEGER NOT NULL DEFAULT 0,
+	    knowledge INTEGER NOT NULL DEFAULT 0,
+	
+	    health INTEGER,
+	    stress INTEGER,
+	    hope INTEGER,
+	
+	    evasion INTEGER,
+	    armor_score INTEGER,
+	
+	    threshold_major INTEGER,
+	    threshold_severe INTEGER,
+	
+	    hit_points INTEGER,
+	
+	    proficiency INT NOT NULL,
+	
+	    rally_die_value INTEGER
+	);
+2026-05-15 17:56:27.442 CEST [75269] LOG:  checkpoint starting: time
+2026-05-15 17:56:40.619 CEST [75269] LOG:  checkpoint complete: wrote 130 buffers (0.8%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=13.155 s, sync=0.013 s, total=13.178 s; sync files=163, longest=0.001 s, average=0.001 s; distance=1152 kB, estimate=3782 kB; lsn=0/1E083E0, redo lsn=0/1E08350
+2026-05-15 18:00:28.470 CEST [75466] ERROR:  syntax error at or near "VCREATE" at character 1
+2026-05-15 18:00:28.470 CEST [75466] STATEMENT:  VCREATE TABLE IF NOT EXISTS characters_stats (
+	    characters_stats_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    characters_equipment BIGINT REFERENCES characters_equipment(id),
+	    character_experiences BIGINT REFERENCES experiences(id),
+	
+	    level INTEGER,
+	
+	    agility INTEGER NOT NULL DEFAULT 0,
+	    strength INTEGER NOT NULL DEFAULT 0,
+	    finesse INTEGER NOT NULL DEFAULT 0,
+	    instinct INTEGER NOT NULL DEFAULT 0,
+	    presence INTEGER NOT NULL DEFAULT 0,
+	    knowledge INTEGER NOT NULL DEFAULT 0,
+	
+	    health INTEGER,
+	    stress INTEGER,
+	    hope INTEGER,
+	
+	    evasion INTEGER,
+	    armor_score INTEGER,
+	
+	    threshold_major INTEGER,
+	    threshold_severe INTEGER,
+	
+	    hit_points INTEGER,
+	
+	    proficiency INT NOT NULL,
+	
+	    rally_die_value INTEGER
+	);
+2026-05-15 18:00:33.265 CEST [75466] ERROR:  relation "characters_equipment" does not exist
+2026-05-15 18:00:33.265 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS characters_stats (
+	    characters_stats_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    characters_equipment BIGINT REFERENCES characters_equipment(id),
+	    character_experiences BIGINT REFERENCES experiences(id),
+	
+	    level INTEGER,
+	
+	    agility INTEGER NOT NULL DEFAULT 0,
+	    strength INTEGER NOT NULL DEFAULT 0,
+	    finesse INTEGER NOT NULL DEFAULT 0,
+	    instinct INTEGER NOT NULL DEFAULT 0,
+	    presence INTEGER NOT NULL DEFAULT 0,
+	    knowledge INTEGER NOT NULL DEFAULT 0,
+	
+	    health INTEGER,
+	    stress INTEGER,
+	    hope INTEGER,
+	
+	    evasion INTEGER,
+	    armor_score INTEGER,
+	
+	    threshold_major INTEGER,
+	    threshold_severe INTEGER,
+	
+	    hit_points INTEGER,
+	
+	    proficiency INT NOT NULL,
+	
+	    rally_die_value INTEGER
+	);
+2026-05-15 18:01:00.810 CEST [75466] ERROR:  syntax error at or near "VCREATE" at character 1
+2026-05-15 18:01:00.810 CEST [75466] STATEMENT:  VCREATE TABLE IF NOT EXISTS characters_equipment (
+	    character_equipment_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    armor_name BIGINT REFERENCES srd_equipment(equipment_id),
+	    primary_weapon BIGINT REFERENCES srd_equipment(equipment_id),
+	    secondary_weapon BIGINT REFERENCES srd_equipment(equipment_id),
+	
+	    weapon_notes TEXT
+	);
+2026-05-15 18:01:27.614 CEST [75269] LOG:  checkpoint starting: time
+2026-05-15 18:01:36.038 CEST [75269] LOG:  checkpoint complete: wrote 83 buffers (0.5%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=8.414 s, sync=0.007 s, total=8.425 s; sync files=61, longest=0.001 s, average=0.001 s; distance=571 kB, estimate=3461 kB; lsn=0/1EC9A48, redo lsn=0/1E97328
+2026-05-15 18:01:53.264 CEST [75466] ERROR:  column "item_id" specified more than once
+2026-05-15 18:01:53.264 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_inventory (
+	    character_inventory_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	    item_id BIGINT REFERENCES srd_equipment(equipment_id),
+	    item_id BIGINT REFERENCES srd_consumables(consumables_id),
+	
+	    item_name TEXT,
+	    quantity INTEGER,
+	
+	    notes TEXT,
+	
+	    created_at TIMESTAMPTZ DEFAULT NOW()
+	);
+2026-05-15 18:03:54.804 CEST [75466] ERROR:  there is no unique constraint matching given keys for referenced table "srd_domain_card"
+2026-05-15 18:03:54.804 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_domain_cards (
+	    characters_domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    card_name TEXT REFERENCES srd_domain_card(card_name),
+	    character_card_level INTEGER
+	);
+2026-05-15 18:03:54.809 CEST [75466] ERROR:  there is no unique constraint matching given keys for referenced table "srd_classes"
+2026-05-15 18:03:54.809 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_class (
+	    class_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_name TEXT REFERENCES srd_classes(class_name),
+	
+	    subclass1_name TEXT REFERENCES srd_subclass(subclass_name),
+	    subclass2_name TEXT REFERENCES srd_subclass(subclass_name)
+	);
+2026-05-15 18:04:02.181 CEST [75466] ERROR:  there is no unique constraint matching given keys for referenced table "srd_domain_card"
+2026-05-15 18:04:02.181 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_domain_cards (
+	    characters_domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    card_name TEXT REFERENCES srd_domain_card(card_name),
+	    character_card_level INTEGER
+	);
+2026-05-15 18:04:40.189 CEST [75466] ERROR:  relation "srd_domains_card" does not exist
+2026-05-15 18:04:40.189 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_domain_cards (
+	    characters_domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    card_name TEXT REFERENCES srd_domains_card(card_name),
+	    character_card_level INTEGER
+	);
+2026-05-15 18:05:41.093 CEST [75466] ERROR:  foreign key constraint "character_domain_cards_card_name_fkey" cannot be implemented
+2026-05-15 18:05:41.093 CEST [75466] DETAIL:  Key columns "card_name" of the referencing table and "domain_card_id" of the referenced table are of incompatible types: text and bigint.
+2026-05-15 18:05:41.093 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_domain_cards (
+	    characters_domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    card_name TEXT REFERENCES srd_domain_card(domain_card_id),
+	    character_card_level INTEGER
+	);
+2026-05-15 18:06:21.310 CEST [75466] ERROR:  there is no unique constraint matching given keys for referenced table "srd_classes"
+2026-05-15 18:06:21.310 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_class (
+	    class_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_name TEXT REFERENCES srd_classes(class_name),
+	
+	    subclass1_name TEXT REFERENCES srd_subclass(subclass_name),
+	    subclass2_name TEXT REFERENCES srd_subclass(subclass_name)
+	);
+2026-05-15 18:06:27.040 CEST [75269] LOG:  checkpoint starting: time
+2026-05-15 18:06:38.316 CEST [75269] LOG:  checkpoint complete: wrote 111 buffers (0.7%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=11.263 s, sync=0.009 s, total=11.276 s; sync files=97, longest=0.001 s, average=0.001 s; distance=809 kB, estimate=3195 kB; lsn=0/1F61B28, redo lsn=0/1F61AD0
+2026-05-15 18:06:54.565 CEST [75466] ERROR:  column "class_id" specified more than once
+2026-05-15 18:06:54.565 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_class (
+	    class_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_id TEXT REFERENCES srd_classes(class_id),
+	
+	    subclass1_name TEXT REFERENCES srd_subclass(subclass_name),
+	    subclass2_name TEXT REFERENCES srd_subclass(subclass_name)
+	);
+2026-05-15 18:07:12.774 CEST [75466] ERROR:  foreign key constraint "character_class_class_id_fkey" cannot be implemented
+2026-05-15 18:07:12.774 CEST [75466] DETAIL:  Key columns "class_id" of the referencing table and "class_id" of the referenced table are of incompatible types: text and bigint.
+2026-05-15 18:07:12.774 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_class (
+	    caracter_class_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_id TEXT REFERENCES srd_classes(class_id),
+	
+	    subclass1_name TEXT REFERENCES srd_subclass(subclass_name),
+	    subclass2_name TEXT REFERENCES srd_subclass(subclass_name)
+	);
+2026-05-15 18:07:30.898 CEST [75466] ERROR:  there is no unique constraint matching given keys for referenced table "srd_subclass"
+2026-05-15 18:07:30.898 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_class (
+	    caracter_class_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_id BIGINT REFERENCES srd_classes(class_id),
+	
+	    subclass1_name TEXT REFERENCES srd_subclass(subclass_name),
+	    subclass2_name TEXT REFERENCES srd_subclass(subclass_name)
+	);
+2026-05-15 18:08:51.619 CEST [75466] ERROR:  column "srd_class_id" referenced in foreign key constraint does not exist
+2026-05-15 18:08:51.619 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_class (
+	    caracter_class_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_id BIGINT REFERENCES srd_classes(srd_class_id),
+	
+	    subclass1_name TEXT REFERENCES srd_subclass(subclass_name),
+	    subclass2_name TEXT REFERENCES srd_subclass(subclass_name)
+	);
+2026-05-15 18:09:07.171 CEST [75466] ERROR:  there is no unique constraint matching given keys for referenced table "srd_subclass"
+2026-05-15 18:09:07.171 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_class (
+	    caracter_class_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_id BIGINT REFERENCES srd_classes(class_id),
+	
+	    subclass1_name TEXT REFERENCES srd_subclass(subclass_name),
+	    subclass2_name TEXT REFERENCES srd_subclass(subclass_name)
+	);
+2026-05-15 18:09:34.541 CEST [75466] ERROR:  foreign key constraint "character_class_subclass1_name_fkey" cannot be implemented
+2026-05-15 18:09:34.541 CEST [75466] DETAIL:  Key columns "subclass1_name" of the referencing table and "subclass_id" of the referenced table are of incompatible types: text and bigint.
+2026-05-15 18:09:34.541 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS character_class (
+	    caracter_class_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_id BIGINT REFERENCES srd_classes(class_id),
+	
+	    subclass1_name TEXT REFERENCES srd_subclass(subclass_id),
+	    subclass2_name TEXT REFERENCES srd_subclass(subclass_id)
+	);
+2026-05-15 18:11:11.785 CEST [75466] ERROR:  column "id" referenced in foreign key constraint does not exist
+2026-05-15 18:11:11.785 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS characters_stats (
+	    characters_stats_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    characters_equipment BIGINT REFERENCES characters_equipment(id),
+	    character_experiences BIGINT REFERENCES character_experiences(character_experiences_id),
+	
+	    level INTEGER,
+	
+	    agility INTEGER NOT NULL DEFAULT 0,
+	    strength INTEGER NOT NULL DEFAULT 0,
+	    finesse INTEGER NOT NULL DEFAULT 0,
+	    instinct INTEGER NOT NULL DEFAULT 0,
+	    presence INTEGER NOT NULL DEFAULT 0,
+	    knowledge INTEGER NOT NULL DEFAULT 0,
+	
+	    health INTEGER,
+	    stress INTEGER,
+	    hope INTEGER,
+	
+	    evasion INTEGER,
+	    armor_score INTEGER,
+	
+	    threshold_major INTEGER,
+	    threshold_severe INTEGER,
+	
+	    hit_points INTEGER,
+	
+	    proficiency INT NOT NULL,
+	
+	    rally_die_value INTEGER
+	);
+2026-05-15 18:11:27.310 CEST [75269] LOG:  checkpoint starting: time
+2026-05-15 18:11:35.518 CEST [75269] LOG:  checkpoint complete: wrote 81 buffers (0.5%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=8.194 s, sync=0.010 s, total=8.208 s; sync files=75, longest=0.001 s, average=0.001 s; distance=622 kB, estimate=2938 kB; lsn=0/1FFD580, redo lsn=0/1FFD4F0
+2026-05-15 18:11:36.290 CEST [75466] ERROR:  column "characters_equipment_id" referenced in foreign key constraint does not exist
+2026-05-15 18:11:36.290 CEST [75466] STATEMENT:  CREATE TABLE IF NOT EXISTS characters_stats (
+	    characters_stats_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    characters_equipment BIGINT REFERENCES characters_equipment(characters_equipment_id),
+	    character_experiences BIGINT REFERENCES character_experiences(character_experiences_id),
+	
+	    level INTEGER,
+	
+	    agility INTEGER NOT NULL DEFAULT 0,
+	    strength INTEGER NOT NULL DEFAULT 0,
+	    finesse INTEGER NOT NULL DEFAULT 0,
+	    instinct INTEGER NOT NULL DEFAULT 0,
+	    presence INTEGER NOT NULL DEFAULT 0,
+	    knowledge INTEGER NOT NULL DEFAULT 0,
+	
+	    health INTEGER,
+	    stress INTEGER,
+	    hope INTEGER,
+	
+	    evasion INTEGER,
+	    armor_score INTEGER,
+	
+	    threshold_major INTEGER,
+	    threshold_severe INTEGER,
+	
+	    hit_points INTEGER,
+	
+	    proficiency INT NOT NULL,
+	
+	    rally_die_value INTEGER
+	);
+2026-05-15 18:16:27.513 CEST [75269] LOG:  checkpoint starting: time
+2026-05-15 18:16:34.321 CEST [75269] LOG:  checkpoint complete: wrote 67 buffers (0.4%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 1 recycled; write=6.801 s, sync=0.004 s, total=6.808 s; sync files=44, longest=0.001 s, average=0.001 s; distance=436 kB, estimate=2688 kB; lsn=0/206A5E0, redo lsn=0/206A588
+2026-05-15 18:18:02.675 CEST [75265] LOG:  received fast shutdown request
+2026-05-15 18:18:02.675 CEST [75265] LOG:  aborting any active transactions
+2026-05-15 18:18:02.678 CEST [75265] LOG:  background worker "logical replication launcher" (PID 75274) exited with exit code 1
+2026-05-15 18:18:02.678 CEST [75269] LOG:  shutting down
+2026-05-15 18:18:02.678 CEST [75269] LOG:  checkpoint starting: shutdown immediate
+2026-05-15 18:18:02.680 CEST [75269] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.002 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=2419 kB; lsn=0/206A690, redo lsn=0/206A690
+2026-05-15 18:18:02.683 CEST [75265] LOG:  database system is shut down
