@@ -60,7 +60,11 @@ If any of these return "command not found", install that tool before continuing.
 
 ---
 
-## Quick setup
+## Quick start
+
+There are two scripts to know: **`setup`** (run once after cloning) and **`launch`** (run every time you want to use the app).
+
+### Step 1 — Setup (once)
 
 **Windows — run in PowerShell or Command Prompt:**
 
@@ -71,36 +75,47 @@ If any of these return "command not found", install that tool before continuing.
 **Mac/Linux — run in Terminal:**
 
 ```bash
-chmod +x setup.sh start-backend.sh start-frontend.sh
+chmod +x setup.sh
 ./setup.sh
 ```
 
-This will check your prerequisites, set up the Python virtual environment, install
-backend dependencies, install frontend packages, and create your `.env.local` file
-automatically.
+`setup` does the following:
 
-If you prefer to set up manually, follow the steps below.
+1. Checks that Python and Node.js are installed.
+2. Creates the Python virtual environment (`backend/.venv`).
+3. Installs Python dependencies from `backend/requirements.txt`.
+4. Seeds the database with initial data (skipped safely if data already exists).
+5. Creates `frontend/.env.local` with the correct API URL.
+6. Installs frontend npm dependencies.
+
+You only need to run this once. Re-running it is safe — it skips steps that are already done (e.g. it will not overwrite an existing database).
+
+### Step 2 — Launch (every time)
+
+**Windows:**
+
+```bat
+.\launch.bat
+```
+
+**Mac/Linux:**
+
+```bash
+./launch.sh
+```
+
+`launch` starts both the backend and frontend together. The app will be available at:
+
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:8000/api`
+
+Keep the terminal open while you use the app.
 
 ---
 
-## Current app features
+## Manual setup
 
-| Route                        | Screen                                | Key Components                                           |
-| ---------------------------- | ------------------------------------- | -------------------------------------------------------- |
-| `#/`                         | Home                                  | `Layout/`, `Navigation/`, `PageHero/`, `ActionCardGrid/` |
-| `#/characters`               | Character roster + sheet              | `Characters/` (roster), `CharacterSheet/` (detail view)  |
-| `#/builder`                  | Character builder (9-step flow)       | `CharacterForm/`                                         |
-| `#/gm-tools`                 | GM tools hub                          | `GM/GmToolsHub.tsx`                                      |
-| `#/gm-tools/adversaries`     | Adversary library + builder           | `AdversaryForm/`                                         |
-| `#/gm-tools/npcs`            | NPC library + builder                 | `NpcForm/`                                               |
-| `#/gm-tools/environments`    | Environment library + builder         | `EnvironmentForm/`                                       |
-| `#/gm-tools/encounter-board` | 30x30 tactical encounter grid         | `EncounterBoard/` (900 cells, drag-drop tokens)          |
-| `#/gm-tools/dice`            | Dice roller (supports 2d12 Hope/Fear) | `DiceRoller/`                                            |
-| `#/gm-tools/session-tracker` | Session tracker (Fear, HP, Stress)    | `GM/SessionTrackerBoard/`                                |
-
----
-
-## Setup
+If you prefer to set up each part individually, follow the steps below.
 
 ### Backend
 
@@ -148,7 +163,9 @@ Set the local API URL in `frontend/.env.local`:
 VITE_API_BASE_URL=http://localhost:8000/api
 ```
 
-### Start the app
+### Start manually
+
+If you need to start the backend and frontend separately, use the individual start scripts.
 
 Open two separate terminals from the project root:
 
@@ -182,14 +199,29 @@ Mac/Linux:
 
 Both need to stay open while you use the app.
 
-The frontend runs on `http://localhost:5173` and calls the backend at `http://localhost:8000/api`.
-
 ### Production build
 
 ```powershell
 cd frontend
 npm run build
 ```
+
+---
+
+## Current app features
+
+| Route                        | Screen                                | Key Components                                           |
+| ---------------------------- | ------------------------------------- | -------------------------------------------------------- |
+| `#/`                         | Home                                  | `Layout/`, `Navigation/`, `PageHero/`, `ActionCardGrid/` |
+| `#/characters`               | Character roster + sheet              | `Characters/` (roster), `CharacterSheet/` (detail view)  |
+| `#/builder`                  | Character builder (9-step flow)       | `CharacterForm/`                                         |
+| `#/gm-tools`                 | GM tools hub                          | `GM/GmToolsHub.tsx`                                      |
+| `#/gm-tools/adversaries`     | Adversary library + builder           | `AdversaryForm/`                                         |
+| `#/gm-tools/npcs`            | NPC library + builder                 | `NpcForm/`                                               |
+| `#/gm-tools/environments`    | Environment library + builder         | `EnvironmentForm/`                                       |
+| `#/gm-tools/encounter-board` | 30x30 tactical encounter grid         | `EncounterBoard/` (900 cells, drag-drop tokens)          |
+| `#/gm-tools/dice`            | Dice roller (supports 2d12 Hope/Fear) | `DiceRoller/`                                            |
+| `#/gm-tools/session-tracker` | Session tracker (Fear, HP, Stress)    | `GM/SessionTrackerBoard/`                                |
 
 ---
 
@@ -279,10 +311,10 @@ The backend exposes these endpoint groups (all under `/api`):
 | `python: command not found` on Windows          | Install Python from https://python.org/downloads                                                                                                     |
 | `python: command not found` on Mac              | Use `python3` instead of `python`                                                                                                                    |
 | `.venv\Scripts\activate` gives a security error | Run `Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force` in the same PowerShell window, then try again. Or use `.\setup.bat` instead. |
-| `permission denied: ./setup.sh` on Mac/Linux    | Run `chmod +x setup.sh start-backend.sh start-frontend.sh` once, then try again.                                                                     |
+| `permission denied: ./setup.sh` on Mac/Linux    | Run `chmod +x setup.sh` once, then try again.                                                                                                        |
 | Frontend shows blank page or API errors         | Confirm `frontend/.env.local` exists and contains `VITE_API_BASE_URL=http://localhost:8000/api`                                                      |
 | Backend won't start                             | Confirm the virtual environment is activated before starting.                                                                                        |
-| Characters not showing                          | Make sure both the backend and frontend terminals are running at the same time.                                                                      |
+| Characters not showing                          | Make sure both the backend and frontend are running at the same time.                                                                                |
 
 ---
 
@@ -291,7 +323,7 @@ The backend exposes these endpoint groups (all under `/api`):
 - No tests are included currently.
 - This repository is intended for local use, with each user running their own backend and frontend.
 - `backend/database/` is not ignored wholesale — only generated SQLite files are excluded.
-- `.env.local` is excluded by `.gitignore` and must be created locally from `.env.example`.
+- `.env.local` is excluded by `.gitignore` and must be created locally from `.env.example` (or by running `setup`).
 
 For contribution guidelines, see `CONTRIBUTING.md`.
 

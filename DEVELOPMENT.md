@@ -38,90 +38,129 @@ If any return "command not found", install that tool before continuing.
 
 ---
 
-## Backend
+## Setup script
+
+Run `setup` once after cloning. It handles everything needed to get the project ready.
 
 **Windows:**
 
-1. Open PowerShell or Command Prompt.
-2. `cd backend`
-3. `python -m venv .venv`
-4. `.\.venv\Scripts\activate`
-5. `python -m pip install -r requirements.txt`
+```bat
+.\setup.bat
+```
 
 **Mac/Linux:**
 
-1. Open Terminal.
-2. `cd backend`
-3. `python3 -m venv .venv`
-4. `source .venv/bin/activate`
-5. `pip install -r requirements.txt`
+```bash
+chmod +x setup.sh
+./setup.sh
+```
 
-### Start backend
+### What `setup` does
+
+1. **Checks prerequisites** — verifies Python and Node.js are available and prints their versions.
+2. **Creates the Python virtual environment** — runs `python3 -m venv .venv` inside `backend/` if it does not already exist.
+3. **Installs Python dependencies** — runs `pip install -r requirements.txt` inside the activated venv.
+4. **Seeds the database** — runs `backend/database/recreate_db.py` to populate initial reference data (classes, ancestries, domain cards, equipment, etc.). This step is skipped safely if the database already contains data, so re-running setup will not wipe your characters or custom content. To force a full database reset, run `launch --recreate-db` (see below).
+5. **Creates `frontend/.env.local`** — writes `VITE_API_BASE_URL=http://localhost:8000/api` so the frontend knows where to reach the backend. This file is overwritten each time setup runs to ensure the URL is correct.
+6. **Installs npm dependencies** — runs `npm install` inside `frontend/`.
+
+Re-running setup is safe at any time (for example, after pulling new dependencies).
+
+---
+
+## Launch script
+
+Run `launch` each time you want to use the app. It starts both the backend and frontend together.
+
+**Windows:**
+
+```bat
+.\launch.bat
+```
+
+**Mac/Linux:**
+
+```bash
+./launch.sh
+```
+
+### What `launch` does
+
+- Activates the Python virtual environment.
+- Starts the FastAPI backend (equivalent to `uvicorn` from `backend/app/main.py`).
+- Starts the Vite dev server for the frontend.
+- Both processes run together; closing the terminal (or pressing Ctrl+C) stops them.
+
+### Resetting the database
+
+To drop and recreate the database from scratch (this deletes all characters and custom content):
+
+**Windows:**
+
+```bat
+.\launch.bat --recreate-db
+```
+
+**Mac/Linux:**
+
+```bash
+./launch.sh --recreate-db
+```
+
+---
+
+## Manual startup (without launch script)
+
+If you need to run the backend and frontend separately, use the individual start scripts.
+
+### Backend
 
 Run from the project root:
 
-Windows:
+**Windows:**
 
 ```bat
 .\start-backend.bat
 ```
 
-Mac/Linux:
+**Mac/Linux:**
 
 ```bash
 ./start-backend.sh
 ```
 
-Or double-click `start-backend.bat` on Windows.
+- Activates the virtual environment and starts the FastAPI server.
+- The API will be available at `http://localhost:8000`.
+- The frontend expects `VITE_API_BASE_URL=http://localhost:8000/api`.
 
-- The API will be available at `http://localhost:8000`
-- The frontend expects `VITE_API_BASE_URL=http://localhost:8000/api`
+### Frontend
 
-### Local-only backend
-
-- Each clone should use its own local backend.
-- Do not commit `frontend/.env.local` or any local SQLite files.
-- Generated database files (`*.db`, `*.db-shm`, `*.db-wal`) are already excluded by `.gitignore`.
-
----
-
-## Frontend
+Open a second terminal and run from the project root:
 
 **Windows:**
-
-1. Open a second PowerShell or Command Prompt window.
-2. `cd frontend`
-3. `npm install`
-4. Copy `frontend\.env.example` to `frontend\.env.local`
-
-**Mac/Linux:**
-
-1. Open a second Terminal window.
-2. `cd frontend`
-3. `npm install`
-4. `cp frontend/.env.example frontend/.env.local`
-
-Set the API URL in `.env.local`:
-
-```text
-VITE_API_BASE_URL=http://localhost:8000/api
-```
-
-Run from the project root:
-
-Windows:
 
 ```bat
 .\start-frontend.bat
 ```
 
-Mac/Linux:
+**Mac/Linux:**
 
 ```bash
 ./start-frontend.sh
 ```
 
-The frontend runs at `http://localhost:5173`.
+- Starts the Vite dev server.
+- The frontend will be available at `http://localhost:5173`.
+
+Both terminals need to stay open while you use the app.
+
+---
+
+## Local-only backend
+
+- Each clone should use its own local backend.
+- Do not commit `frontend/.env.local` or any local SQLite files.
+- Generated database files (`*.db`, `*.db-shm`, `*.db-wal`) are already excluded by `.gitignore`.
 
 ---
 
@@ -150,7 +189,7 @@ This repository includes a CI workflow that installs dependencies and verifies t
 | `python: command not found` on Windows          | Install Python from https://python.org/downloads                                                                                                     |
 | `python: command not found` on Mac              | Use `python3` instead of `python`                                                                                                                    |
 | `.venv\Scripts\activate` gives a security error | Run `Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force` in the same PowerShell window, then try again. Or use `.\setup.bat` instead. |
-| `permission denied: ./setup.sh` on Mac/Linux    | Run `chmod +x setup.sh start-backend.sh start-frontend.sh` once, then try again.                                                                     |
+| `permission denied: ./setup.sh` on Mac/Linux    | Run `chmod +x setup.sh` once, then try again.                                                                                                        |
 | Frontend shows blank page or API errors         | Confirm `frontend/.env.local` exists and contains `VITE_API_BASE_URL=http://localhost:8000/api`                                                      |
 | Backend won't start                             | Confirm the virtual environment is activated before starting.                                                                                        |
-| Characters not showing                          | Make sure both the backend and frontend terminals are running at the same time.                                                                      |
+| Characters not showing                          | Make sure both the backend and frontend are running at the same time.                                                                                |
