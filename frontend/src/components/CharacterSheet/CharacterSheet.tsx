@@ -89,7 +89,7 @@ function asSourceList(value: unknown): string[] {
     : [];
 }
 
-function renderBoxes(count: number, activeCount: number, onToggle: (index: number) => void) {
+function renderBoxes(count: number, activeCount: number, onToggle: (index: number) => void, label = "slot") {
   return (
     <div className={styles.trackerRow}>
       {Array.from({ length: count }, (_, index) => {
@@ -97,6 +97,8 @@ function renderBoxes(count: number, activeCount: number, onToggle: (index: numbe
         return (
           <button
             key={index}
+            aria-label={`${label} ${index + 1}`}
+            aria-pressed={checked}
             className={`${styles.trackerBox} ${checked ? styles.checked : ""}`}
             onClick={() => onToggle(index)}
             type="button"
@@ -179,7 +181,7 @@ function splitFeatureSections(text: string): FeatureSection[] {
   return sections.length ? sections : [{ heading: "Class Feature", body: text }];
 }
 
-function renderFeatureBoxes(count: number, activeCount: number, onToggle: (index: number) => void, circle = false) {
+function renderFeatureBoxes(count: number, activeCount: number, onToggle: (index: number) => void, circle = false, label = "slot") {
   return (
     <div className={`${styles.trackerRow} ${circle ? styles.circleTrackerRow : ""}`}>
       {Array.from({ length: count }, (_, index) => {
@@ -187,6 +189,8 @@ function renderFeatureBoxes(count: number, activeCount: number, onToggle: (index
         return (
           <button
             key={index}
+            aria-label={`${label} ${index + 1}`}
+            aria-pressed={checked}
             className={`${styles.trackerBox} ${checked ? styles.checked : ""} ${circle ? styles.circleBox : ""}`}
             onClick={() => onToggle(index)}
             type="button"
@@ -398,6 +402,26 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
     } catch {}
   }
 
+  async function persistClassNotes() {
+    if (!character) {
+      return;
+    }
+
+    try {
+      const updatedCharacter = await updateCharacterSheetDetails(character.id, {
+        rally_die_value: rallyDieValue,
+        rally_notes: rallyNotes,
+        warrior_notes: warriorNotes,
+        inventory_notes: inventoryNotes,
+        // Keep companion fields as-is so they aren't overwritten with defaults
+        companion_name: companionName,
+        companion_evasion: companionEvasion,
+        companion_notes: companionNotes,
+      });
+      onUpdated?.(updatedCharacter);
+    } catch {}
+  }
+
   async function handleAddInventory(itemName: string) {
     if (!character) {
       return;
@@ -543,6 +567,7 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
               void persistPrayerDice(nextPrayerDice);
             },
             true,
+            "Prayer die",
           )}
           <p className="muted">Track the prayer dice you have ready on this sheet.</p>
         </article>
@@ -561,6 +586,7 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
               void persistUnstoppableValue(nextUnstoppableValue);
             },
             true,
+            "Unstoppable die",
           )}
           <p className="muted">Track the current face/value of your Unstoppable die.</p>
         </article>
@@ -586,7 +612,7 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
               <textarea rows={4} value={rallyNotes} onChange={(event) => setRallyNotes(event.target.value)} />
             </label>
           </div>
-          <button className="secondary-button" onClick={() => void persistCompanionDetails()} type="button">
+          <button className="secondary-button" onClick={() => void persistClassNotes()} type="button">
             Save Bard Notes
           </button>
         </article>
@@ -604,7 +630,7 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
             onChange={(event) => setWarriorNotes(event.target.value)}
             placeholder="Track attack of opportunity reminders, combat training notes, or slayer-style cues."
           />
-          <button className="secondary-button" onClick={() => void persistCompanionDetails()} type="button">
+          <button className="secondary-button" onClick={() => void persistClassNotes()} type="button">
             Save Warrior Notes
           </button>
         </article>
@@ -675,7 +701,7 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
               <button className="secondary-button" onClick={() => setActiveDialog("edit")} type="button">
                 Edit Sheet
               </button>
-              <button className={`secondary-button ${styles.sheetDangerButton}`} onClick={() => setActiveDialog("level-up")} type="button">
+              <button className={`secondary-button ${styles.sheetLevelUpButton}`} onClick={() => setActiveDialog("level-up")} type="button">
                 Level Up
               </button>
             </div>
@@ -743,7 +769,7 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
               {renderBoxes(maxHitPoints, clampTracker(trackerState.hp, maxHitPoints), (index) => {
                 const hp = getNextMarkedValue(trackerState.hp, index);
                 void persistTrackers({ ...trackerState, hp });
-              })}
+              }, "HP slot")}
             </div>
 
             <div className={styles.trackerBlock}>
@@ -751,7 +777,7 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
               {renderBoxes(maxStress, clampTracker(trackerState.stress, maxStress), (index) => {
                 const stress = getNextMarkedValue(trackerState.stress, index);
                 void persistTrackers({ ...trackerState, stress });
-              })}
+              }, "Stress slot")}
             </div>
 
             <div className={styles.trackerBlock}>
@@ -759,7 +785,7 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
               {renderBoxes(6, trackerState.hope, (index) => {
                 const hope = getNextMarkedValue(trackerState.hope, index);
                 void persistTrackers({ ...trackerState, hope });
-              })}
+              }, "Hope slot")}
             </div>
             {hopeFeature ? <p className={styles.sheetFeatureCopy}>{hopeFeature}</p> : null}
           </article>
@@ -825,7 +851,7 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
               {renderBoxes(6, trackerState.armorSlots, (index) => {
                 const armorSlots = getNextMarkedValue(trackerState.armorSlots, index);
                 void persistTrackers({ ...trackerState, armorSlots });
-              })}
+              }, "Armor slot")}
             </div>
           </article>
 
@@ -863,21 +889,21 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
                 {renderBoxes(10, trackerState.goldHandfuls, (index) => {
                   const goldHandfuls = getNextMarkedValue(trackerState.goldHandfuls, index);
                   void persistTrackers({ ...trackerState, ...normalizeGold(goldHandfuls, trackerState.goldBags, trackerState.goldChests) });
-                })}
+                }, "Gold handful")}
               </div>
               <div className={styles.trackerBlock}>
                 <p className={styles.sheetLabel}>Bags</p>
                 {renderBoxes(10, trackerState.goldBags, (index) => {
                   const goldBags = getNextMarkedValue(trackerState.goldBags, index);
                   void persistTrackers({ ...trackerState, ...normalizeGold(trackerState.goldHandfuls, goldBags, trackerState.goldChests) });
-                })}
+                }, "Gold bag")}
               </div>
               <div className={styles.trackerBlock}>
                 <p className={styles.sheetLabel}>Chest</p>
                 {renderBoxes(1, trackerState.goldChests, (index) => {
                   const goldChests = getNextMarkedValue(trackerState.goldChests, index);
                   void persistTrackers({ ...trackerState, ...normalizeGold(trackerState.goldHandfuls, trackerState.goldBags, goldChests) });
-                })}
+                }, "Gold chest")}
               </div>
             </div>
           </article>

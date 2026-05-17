@@ -6,27 +6,28 @@
  * Full license: https://darringtonpress.com/license/
  * SRD reference: https://daggerheartsrd.com/
  */
-/* CharacterForm.module.css */
-/* CharacterForm.module.css – no :global() styles, local classes only */
+
+/* CharacterForm.module.css – fully self-contained, no global dependencies */
 
 .root {
-  /* Default (light parchment) theme via CSS custom properties */
-  --cf-text: #23160f;
-  --cf-bg: linear-gradient(180deg, rgba(250, 245, 237, 0.98), rgba(239, 228, 214, 0.98));
-  --cf-border: 1px solid rgba(84, 53, 31, 0.16);
+  /* Light parchment theme – high contrast by default */
+  --cf-text: #1f140c;
+  --cf-bg: linear-gradient(180deg, #faf3e8, #f0e4d4);
+  --cf-border: 1px solid rgba(60, 40, 25, 0.25);
   --cf-shadow: 0 22px 64px rgba(36, 18, 5, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.45);
-  --cf-input-bg: rgba(255, 250, 244, 0.92);
-  --cf-input-border: rgba(92, 58, 30, 0.16);
-  --cf-input-focus-outline: 2px solid rgba(123, 72, 36, 0.3);
-  --cf-surface-bg: rgba(121, 84, 46, 0.08);
-  --cf-surface-border: rgba(92, 58, 30, 0.12);
-  --cf-muted: rgba(76, 45, 24, 0.72);
-  --cf-accent: rgba(75, 0, 130, 0.12);
-  --cf-accent-border: rgba(75, 0, 130, 0.3);
-  --cf-button-bg: rgba(255, 250, 244, 0.9);
-  --cf-button-color: #3d2415;
-  --cf-button-hover-bg: rgba(248, 239, 228, 0.98);
-  --cf-primary-color: #fff6ef;
+  --cf-input-bg: #ffffff;
+  --cf-input-border: #7a5a3e;
+  --cf-input-focus-outline: 2px solid #4b2e1a;
+  --cf-surface-bg: #f4ede3;
+  --cf-surface-border: #cbbca8;
+  --cf-muted: #4a3a2a;
+  --cf-accent: #e6d9c8;
+  --cf-accent-border: #b29a7a;
+  --cf-button-bg: #f0e8de;
+  --cf-button-color: #2c1a0e;
+  --cf-button-hover-bg: #e4d8ca;
+  --cf-primary-color: #ffffff;
+  --cf-primary-bg: #4b2e1a;
 
   padding: 24px;
   border-radius: 24px;
@@ -36,26 +37,29 @@
   box-shadow: var(--cf-shadow);
 }
 
-/* Focus mode – overrides variables only */
+/* Focus mode – dark background with good contrast */
 .focus {
-  --cf-text: var(--color-surface);
-  --cf-bg: radial-gradient(circle at top, rgba(75, 0, 130, 0.18), transparent 32%), linear-gradient(180deg, rgba(47, 47, 47, 0.98), rgba(0, 0, 0, 0.94));
-  --cf-border: 1px solid var(--border-soft);
-  --cf-shadow: 0 1.5rem 4.5rem rgba(0, 0, 0, 0.26);
-  --cf-input-bg: rgba(224, 224, 224, 0.04);
-  --cf-input-border: var(--border-soft);
-  --cf-input-focus-outline: 2px solid rgba(224, 224, 224, 0.3);
-  --cf-surface-bg: rgba(224, 224, 224, 0.05);
-  --cf-surface-border: var(--border-soft);
-  --cf-muted: var(--text-soft-on-dark);
-  --cf-accent: rgba(75, 0, 130, 0.18);
-  --cf-accent-border: rgba(224, 224, 224, 0.22);
-  --cf-button-bg: rgba(224, 224, 224, 0.05);
-  --cf-button-color: var(--color-surface);
-  --cf-button-hover-bg: rgba(224, 224, 224, 0.08);
-  --cf-primary-color: var(--color-surface);
+  --cf-text: #ece8e0;
+  --cf-bg: radial-gradient(circle at top, rgba(90, 50, 20, 0.3), transparent 32%),
+            linear-gradient(180deg, #2a241e, #16120e);
+  --cf-border: 1px solid rgba(200, 180, 150, 0.3);
+  --cf-shadow: 0 1.5rem 4.5rem rgba(0, 0, 0, 0.4);
+  --cf-input-bg: #2c241e;
+  --cf-input-border: #9c8568;
+  --cf-input-focus-outline: 2px solid #e0b070;
+  --cf-surface-bg: rgba(210, 180, 140, 0.12);
+  --cf-surface-border: rgba(200, 170, 130, 0.35);
+  --cf-muted: #c0b09a;
+  --cf-accent: rgba(160, 120, 70, 0.25);
+  --cf-accent-border: rgba(210, 170, 110, 0.5);
+  --cf-button-bg: #3a2c20;
+  --cf-button-color: #f0e4d4;
+  --cf-button-hover-bg: #4e3b2a;
+  --cf-primary-color: #ffffff;
+  --cf-primary-bg: #a06030;
 }
 
+/* Base typography */
 .root p,
 .root li,
 .root span,
@@ -70,9 +74,34 @@
   color: var(--cf-text);
 }
 
-/* Panel header (inherit global .panel-header but scoped) */
-.root .panelHeader {
+/* Panel header */
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 20px;
+}
+
+/* Eyebrow text */
+.eyebrow {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+  color: var(--cf-muted);
+  margin-bottom: 4px;
+}
+
+/* Status message */
+.statusText {
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  border-radius: 40px;
+  background: var(--cf-surface-bg);
+  border: 1px solid var(--cf-surface-border);
+  color: var(--cf-text);
 }
 
 /* Intro card */
@@ -104,7 +133,7 @@
   border: 1px solid var(--cf-surface-border);
   border-radius: 999px;
   background: var(--cf-button-bg);
-  color: var(--cf-text);
+  color: var(--cf-button-color);
   cursor: pointer;
   transition: all 140ms ease;
 }
@@ -115,6 +144,7 @@
 .activeChip {
   background: var(--cf-accent);
   border-color: var(--cf-accent-border);
+  font-weight: bold;
 }
 
 /* Builder shell layout */
@@ -125,7 +155,6 @@
   margin-top: 18px;
 }
 
-/* Focus mode overrides layout */
 .focus .builderShell {
   grid-template-columns: minmax(0, 1.8fr) minmax(260px, 0.72fr);
 }
@@ -158,8 +187,8 @@
 .gridForm {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 18px;
+  gap: 5px;
+  margin-top: 0px;
 }
 .gridForm label {
   display: grid;
@@ -184,12 +213,20 @@
   outline-offset: 2px;
 }
 
+/* Ensure dropdown options are legible in light/dark mode */
+select option {
+  background: var(--cf-input-bg);
+  color: var(--cf-text);
+}
+
 .wide {
   grid-column: 1 / -1;
 }
 
 /* Detail card */
 .detailCard {
+  padding: 16px 18px;
+  border-radius: 16px;
   border: 1px solid var(--cf-surface-border);
   background: var(--cf-surface-bg);
   color: var(--cf-text);
@@ -249,9 +286,13 @@
   margin: 0;
 }
 
-/* Status text */
+/* Status text variants */
 .successText {
-  color: #a6d98c;
+  color: #2f6b2f;
+  font-weight: 500;
+}
+.focus .successText {
+  color: #a0d68e;
 }
 .muted {
   color: var(--cf-muted);
@@ -283,11 +324,16 @@
   border-top: 1px solid var(--cf-surface-border);
 }
 
+/* Secondary button (Previous, Next, Cancel) */
 .secondaryButtonLocal {
   padding: 12px 18px;
-  border-color: var(--cf-surface-border);
+  border: 1px solid var(--cf-surface-border);
+  border-radius: 40px;
   background: var(--cf-button-bg);
   color: var(--cf-button-color);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 140ms ease;
 }
 .secondaryButtonLocal:hover:not(:disabled) {
   transform: translateY(-1px);
@@ -297,21 +343,44 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+/* Prevent navigation buttons from stretching */
+.builderActions {
+  justify-content: flex-start;  /* align buttons to the left */
+  align-items: center;
+}
 
+.builderActions button {
+  flex: 0 0 auto;               /* do not grow or shrink – keep natural width */
+  width: auto;                  /* override any global width:100% */
+  min-width: min(100px, 100%);  /* optional: ensure they don’t become too narrow on mobile */
+}
+
+/* Optional: keep buttons from becoming huge on small screens */
+@media (max-width: 600px) {
+  .builderActions button {
+    flex: 1 1 auto;            /* allow them to share space on very narrow screens */
+    text-align: center;
+  }
+}
+
+/* Primary button (Save) */
 .primaryButtonLocal {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 40px;
+  background: var(--cf-primary-bg);
   color: var(--cf-primary-color);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 140ms ease;
 }
-
-.focus :global(.secondary-button) {
-  background: rgba(224, 224, 224, 0.05);
-  color: var(--color-surface);
-  border-color: var(--border-soft);
+.primaryButtonLocal:hover:not(:disabled) {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
 }
-.focus :global(.secondary-button):hover:not(:disabled) {
-  background: rgba(224, 224, 224, 0.08);
-}
-.focus :global(.primary-button) {
-  color: var(--color-surface);
+.primaryButtonLocal:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Responsive */

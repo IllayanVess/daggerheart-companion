@@ -422,21 +422,23 @@ export function CharacterForm({
       return;
     }
 
+    const editing = Boolean(initialCharacter);
+
     Promise.all([fetchClassDetail(builder.className), fetchDomainCards(builder.className, 1)])
       .then(([detail, cards]) => {
         setClassDetail(detail);
         setDomainCards(cards);
         setBuilder((current) => ({
           ...current,
-          evasion: isEditing ? current.evasion : detail.starting_evasion,
-          hitPoints: isEditing ? current.hitPoints : detail.starting_hit_points,
+          evasion: editing ? current.evasion : detail.starting_evasion,
+          hitPoints: editing ? current.hitPoints : detail.starting_hit_points,
           classItemChoice: current.classItemChoice || detail.class_items[0] || "",
         }));
       })
       .catch(() => {
         setStatus("Could not load the selected class details or domain cards.");
       });
-  }, [builder.className]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [builder.className, initialCharacter]);
 
   useEffect(() => {
     if (!builder.subclassName) {
@@ -639,13 +641,13 @@ export function CharacterForm({
   // ---------------------------------------------------------------------------
 
   return (
-    <section className={`panel ${styles.root} ${focusMode ? styles.focus : ""}`}>
-      <div className="panel-header">
+    <section className={`${styles.root} ${focusMode ? styles.focus : ""}`}>
+      <div className={styles.panelHeader}>
         <div>
-          <p className="eyebrow">Character Builder</p>
+          <p className={styles.eyebrow}>Character Builder</p>
           <h2>Follow the official creation flow</h2>
         </div>
-        <p className="status" aria-live="polite">
+        <p className={styles.statusText} aria-live="polite">
           {status}
         </p>
       </div>
@@ -653,7 +655,7 @@ export function CharacterForm({
       {focusMode ? (
         <section className={styles.introCard}>
           <div>
-            <p className="eyebrow">Focused Creation</p>
+            <p className={styles.eyebrow}>Focused Creation</p>
             <h3>Build one hero at a time.</h3>
           </div>
           <p className={styles.muted}>
@@ -667,6 +669,7 @@ export function CharacterForm({
         {STEPS.map((step, index) => (
           <button
             key={step}
+            aria-current={index === activeStep ? "step" : undefined}
             className={`${styles.stepChip} ${index === activeStep ? styles.activeChip : ""}`}
             onClick={() => setActiveStep(index)}
             type="button"
@@ -678,7 +681,6 @@ export function CharacterForm({
 
       <section className={styles.builderShell}>
         <div className={styles.builderMain}>
-
           {/* ── Step 1: Class ── */}
           {activeStep === 0 ? (
             <div className={styles.stepSection}>
@@ -876,9 +878,7 @@ export function CharacterForm({
                   </label>
                 ))}
               </div>
-              <p
-                className={`status ${builderCompletion.traitAssignmentValid ? styles.successText : ""}`}
-              >
+              <p className={builderCompletion.traitAssignmentValid ? styles.successText : styles.statusText}>
                 {builderCompletion.traitAssignmentValid
                   ? "Trait spread is valid."
                   : "Finish assigning all six modifiers."}
@@ -1263,7 +1263,7 @@ export function CharacterForm({
           {/* ── Navigation ── */}
           <div className={styles.builderActions}>
             <button
-              className="secondary-button"
+              className={styles.secondaryButtonLocal}
               disabled={activeStep === 0}
               onClick={() => setActiveStep((current) => Math.max(0, current - 1))}
               type="button"
@@ -1271,7 +1271,7 @@ export function CharacterForm({
               Previous
             </button>
             <button
-              className="secondary-button"
+              className={styles.secondaryButtonLocal}
               disabled={activeStep === STEPS.length - 1}
               onClick={() => setActiveStep((current) => Math.min(STEPS.length - 1, current + 1))}
               type="button"
@@ -1281,12 +1281,12 @@ export function CharacterForm({
             {activeStep === STEPS.length - 1 ? (
               <>
                 {onCancel ? (
-                  <button className="secondary-button" onClick={onCancel} type="button">
+                  <button className={styles.secondaryButtonLocal} onClick={onCancel} type="button">
                     Cancel
                   </button>
                 ) : null}
                 <button
-                  className="primary-button"
+                  className={styles.primaryButtonLocal}
                   disabled={!builderCompletion.complete || isSubmitting}
                   onClick={handleSave}
                   type="button"
