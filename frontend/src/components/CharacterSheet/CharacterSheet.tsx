@@ -89,7 +89,7 @@ function asSourceList(value: unknown): string[] {
     : [];
 }
 
-function renderBoxes(count: number, activeCount: number, onToggle: (index: number) => void) {
+function renderBoxes(count: number, activeCount: number, onToggle: (index: number) => void, label = "slot") {
   return (
     <div className={styles.trackerRow}>
       {Array.from({ length: count }, (_, index) => {
@@ -97,6 +97,8 @@ function renderBoxes(count: number, activeCount: number, onToggle: (index: numbe
         return (
           <button
             key={index}
+            aria-label={`${label} ${index + 1}`}
+            aria-pressed={checked}
             className={`${styles.trackerBox} ${checked ? styles.checked : ""}`}
             onClick={() => onToggle(index)}
             type="button"
@@ -179,7 +181,7 @@ function splitFeatureSections(text: string): FeatureSection[] {
   return sections.length ? sections : [{ heading: "Class Feature", body: text }];
 }
 
-function renderFeatureBoxes(count: number, activeCount: number, onToggle: (index: number) => void, circle = false) {
+function renderFeatureBoxes(count: number, activeCount: number, onToggle: (index: number) => void, circle = false, label = "slot") {
   return (
     <div className={`${styles.trackerRow} ${circle ? styles.circleTrackerRow : ""}`}>
       {Array.from({ length: count }, (_, index) => {
@@ -187,6 +189,8 @@ function renderFeatureBoxes(count: number, activeCount: number, onToggle: (index
         return (
           <button
             key={index}
+            aria-label={`${label} ${index + 1}`}
+            aria-pressed={checked}
             className={`${styles.trackerBox} ${checked ? styles.checked : ""} ${circle ? styles.circleBox : ""}`}
             onClick={() => onToggle(index)}
             type="button"
@@ -199,6 +203,34 @@ function renderFeatureBoxes(count: number, activeCount: number, onToggle: (index
 
 export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterSheetProps) {
   const [activeDialog, setActiveDialog] = useState<"edit" | "level-up" | null>(null);
+  const [collapsedCards, setCollapsedCards] = useState<Set<string>>(new Set());
+  function toggleCard(id: string) {
+    setCollapsedCards((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function CardHeader({ id, label }: { id: string; label: string }) {
+    const collapsed = collapsedCards.has(id);
+    return (
+      <div className={styles.cardHeader} onClick={() => toggleCard(id)}>
+        <p className={styles.sheetLabel}>{label}</p>
+        <button
+          type="button"
+          className={styles.cardMinimizer}
+          aria-label={collapsed ? `Expand ${label}` : `Collapse ${label}`}
+          aria-expanded={!collapsed}
+          onClick={(e) => { e.stopPropagation(); toggleCard(id); }}
+        >
+          {collapsed ? "▸" : "▾"}
+        </button>
+      </div>
+    );
+  }
+
   const [trackerState, setTrackerState] = useState<TrackerState>({
     hp: 0,
     stress: 0,
@@ -398,6 +430,25 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
     } catch {}
   }
 
+  async function persistClassNotes() {
+    if (!character) {
+      return;
+    }
+
+    try {
+      const updatedCharacter = await updateCharacterSheetDetails(character.id, {
+        rally_die_value: rallyDieValue,
+        rally_notes: rallyNotes,
+        warrior_notes: warriorNotes,
+        inventory_notes: inventoryNotes,
+        companion_name: companionName,
+        companion_evasion: companionEvasion,
+        companion_notes: companionNotes,
+      });
+      onUpdated?.(updatedCharacter);
+    } catch {}
+  }
+
   async function handleAddInventory(itemName: string) {
     if (!character) {
       return;
@@ -534,17 +585,22 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
     if (normalizedClass === "seraph") {
       return (
         <article className={`${styles.card} ${styles.classSpecialCard}`}>
-          <p className={styles.sheetLabel}>Prayer Dice</p>
-          {renderFeatureBoxes(
-            6,
-            prayerDice,
-            (index) => {
-              const nextPrayerDice = getNextMarkedValue(prayerDice, index);
-              void persistPrayerDice(nextPrayerDice);
-            },
-            true,
+          <CardHeader id="class-module" label="Prayer Dice" />
+          {!collapsedCards.has("class-module") && (
+            <>
+              {renderFeatureBoxes(
+                6,
+                prayerDice,
+                (index) => {
+                  const nextPrayerDice = getNextMarkedValue(prayerDice, index);
+                  void persistPrayerDice(nextPrayerDice);
+                },
+                true,
+                "Prayer die",
+              )}
+              <p className="muted">Track the prayer dice you have ready on this sheet.</p>
+            </>
           )}
-          <p className="muted">Track the prayer dice you have ready on this sheet.</p>
         </article>
       );
     }
@@ -552,17 +608,22 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
     if (normalizedClass === "guardian") {
       return (
         <article className={`${styles.card} ${styles.classSpecialCard}`}>
-          <p className={styles.sheetLabel}>Unstoppable Die</p>
-          {renderFeatureBoxes(
-            6,
-            unstoppableValue,
-            (index) => {
-              const nextUnstoppableValue = getNextMarkedValue(unstoppableValue, index);
-              void persistUnstoppableValue(nextUnstoppableValue);
-            },
-            true,
+          <CardHeader id="class-module" label="Unstoppable Die" />
+          {!collapsedCards.has("class-module") && (
+            <>
+              {renderFeatureBoxes(
+                6,
+                unstoppableValue,
+                (index) => {
+                  const nextUnstoppableValue = getNextMarkedValue(unstoppableValue, index);
+                  void persistUnstoppableValue(nextUnstoppableValue);
+                },
+                true,
+                "Unstoppable die",
+              )}
+              <p className="muted">Track the current face/value of your Unstoppable die.</p>
+            </>
           )}
-          <p className="muted">Track the current face/value of your Unstoppable die.</p>
         </article>
       );
     }
@@ -570,25 +631,29 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
     if (normalizedClass === "bard") {
       return (
         <article className={`${styles.card} ${styles.classSpecialCard}`}>
-          <p className={styles.sheetLabel}>Rally Die</p>
-          <div className={`${styles.gridForm} ${styles.inventoryCompactGrid}`}>
-            <label>
-              Rally Die
-              <select value={rallyDieValue} onChange={(event) => setRallyDieValue(event.target.value)}>
-                <option value="">Choose die</option>
-                <option value="d6">d6</option>
-                <option value="d8">d8</option>
-                <option value="d10">d10</option>
-              </select>
-            </label>
-            <label className={styles.wide}>
-              Rally Notes
-              <textarea rows={4} value={rallyNotes} onChange={(event) => setRallyNotes(event.target.value)} />
-            </label>
-          </div>
-          <button className="secondary-button" onClick={() => void persistCompanionDetails()} type="button">
-            Save Bard Notes
-          </button>
+          <CardHeader id="class-module" label="Rally Die" />
+          {!collapsedCards.has("class-module") && (
+            <>
+              <div className={`${styles.gridForm} ${styles.inventoryCompactGrid}`}>
+                <label>
+                  Rally Die
+                  <select value={rallyDieValue} onChange={(event) => setRallyDieValue(event.target.value)}>
+                    <option value="">Choose die</option>
+                    <option value="d6">d6</option>
+                    <option value="d8">d8</option>
+                    <option value="d10">d10</option>
+                  </select>
+                </label>
+                <label className={styles.wide}>
+                  Rally Notes
+                  <textarea rows={4} value={rallyNotes} onChange={(event) => setRallyNotes(event.target.value)} />
+                </label>
+              </div>
+              <button className="secondary-button" onClick={() => void persistClassNotes()} type="button">
+                Save Bard Notes
+              </button>
+            </>
+          )}
         </article>
       );
     }
@@ -596,17 +661,21 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
     if (normalizedClass === "warrior") {
       return (
         <article className={`${styles.card} ${styles.classSpecialCard}`}>
-          <p className={styles.sheetLabel}>Combat Notes</p>
-          <textarea
-            className={styles.sheetTextarea}
-            rows={6}
-            value={warriorNotes}
-            onChange={(event) => setWarriorNotes(event.target.value)}
-            placeholder="Track attack of opportunity reminders, combat training notes, or slayer-style cues."
-          />
-          <button className="secondary-button" onClick={() => void persistCompanionDetails()} type="button">
-            Save Warrior Notes
-          </button>
+          <CardHeader id="class-module" label="Combat Notes" />
+          {!collapsedCards.has("class-module") && (
+            <>
+              <textarea
+                className={styles.sheetTextarea}
+                rows={6}
+                value={warriorNotes}
+                onChange={(event) => setWarriorNotes(event.target.value)}
+                placeholder="Track attack of opportunity reminders, combat training notes, or slayer-style cues."
+              />
+              <button className="secondary-button" onClick={() => void persistClassNotes()} type="button">
+                Save Warrior Notes
+              </button>
+            </>
+          )}
         </article>
       );
     }
@@ -614,38 +683,42 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
     if (normalizedClass === "ranger") {
       return (
         <article className={`${styles.card} ${styles.classSpecialCard} ${styles.rangerCompanionCard}`}>
-          <p className={styles.sheetLabel}>Companion</p>
-          <div className={`${styles.gridForm} ${styles.inventoryCompactGrid}`}>
-            <label>
-              Companion Name
-              <input value={companionName} onChange={(event) => setCompanionName(event.target.value)} />
-            </label>
-            <label>
-              Companion Evasion
-              <input
-                type="number"
-                min="0"
-                value={companionEvasion}
-                onChange={(event) => setCompanionEvasion(Number(event.target.value) || 0)}
-              />
-            </label>
-            <label className={styles.wide}>
-              Companion Notes
-              <textarea rows={4} value={companionNotes} onChange={(event) => setCompanionNotes(event.target.value)} />
-            </label>
-            <label className={styles.wide}>
-              Companion Experiences
-              <textarea
-                rows={3}
-                value={rallyNotes}
-                onChange={(event) => setRallyNotes(event.target.value)}
-                placeholder="Use this field for companion experiences or training notes for now."
-              />
-            </label>
-          </div>
-          <button className="secondary-button" onClick={() => void persistCompanionDetails()} type="button">
-            Save Companion
-          </button>
+          <CardHeader id="class-module" label="Companion" />
+          {!collapsedCards.has("class-module") && (
+            <>
+              <div className={`${styles.gridForm} ${styles.inventoryCompactGrid}`}>
+                <label>
+                  Companion Name
+                  <input value={companionName} onChange={(event) => setCompanionName(event.target.value)} />
+                </label>
+                <label>
+                  Companion Evasion
+                  <input
+                    type="number"
+                    min="0"
+                    value={companionEvasion}
+                    onChange={(event) => setCompanionEvasion(Number(event.target.value) || 0)}
+                  />
+                </label>
+                <label className={styles.wide}>
+                  Companion Notes
+                  <textarea rows={4} value={companionNotes} onChange={(event) => setCompanionNotes(event.target.value)} />
+                </label>
+                <label className={styles.wide}>
+                  Companion Experiences
+                  <textarea
+                    rows={3}
+                    value={rallyNotes}
+                    onChange={(event) => setRallyNotes(event.target.value)}
+                    placeholder="Use this field for companion experiences or training notes for now."
+                  />
+                </label>
+              </div>
+              <button className="secondary-button" onClick={() => void persistCompanionDetails()} type="button">
+                Save Companion
+              </button>
+            </>
+          )}
         </article>
       );
     }
@@ -675,16 +748,41 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
               <button className="secondary-button" onClick={() => setActiveDialog("edit")} type="button">
                 Edit Sheet
               </button>
-              <button className={`secondary-button ${styles.sheetDangerButton}`} onClick={() => setActiveDialog("level-up")} type="button">
+              <button className={`secondary-button ${styles.sheetLevelUpButton}`} onClick={() => setActiveDialog("level-up")} type="button">
                 Level Up
               </button>
             </div>
           </div>
         </section>
 
+        {/* Traits strip — horizontal, between banner and grid */}
+        <div className={`${styles.card} ${styles.traitsStrip}`}>
+          <CardHeader id="traits" label="Traits" />
+          {!collapsedCards.has("traits") && (
+            <div className={styles.traitsRow}>
+              {Object.entries(traits).map(([trait, modifier]) => (
+                <div key={trait} className={styles.traitChip}>
+                  <span className={styles.traitChipName}>{trait}</span>
+                  <strong className={styles.traitChipValue}>{modifier}</strong>
+                  {traitSources[trait]?.length ? (
+                    <span className={styles.traitChipSources}>
+                      {traitSources[trait].join(", ")}
+                    </span>
+                  ) : null}
+                </div>
+              ))}
+              {Object.keys(traits).length === 0 && (
+                <p className="muted">No trait assignment saved yet.</p>
+              )}
+            </div>
+          )}
+        </div>
+
         <section className={styles.sheetGrid}>
+          {/* Identity Card – now includes Active Armor */}
           <article className={`${styles.card} ${styles.identityCard}`}>
-            <div className={styles.topline}>
+            <CardHeader id="identity" label="Identity" />
+            {!collapsedCards.has("identity") && (<><div className={styles.topline}>
               <div>
                 <p className={styles.sheetLabel}>Class</p>
                 <h3>
@@ -709,9 +807,37 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
                 <p>{typeof payload.description === "string" && payload.description ? payload.description : "-"}</p>
               </div>
             </div>
+
+            {/* Active Armor embedded here */}
+            <div className={styles.armorSection}>
+              <p className={styles.sheetLabel}>Active Armor</p>
+              <div className={styles.armorDetails}>
+                <div>
+                  <span>Armor:</span>
+                  <strong>{typeof payload.armor_name === "string" && payload.armor_name ? payload.armor_name : "-"}</strong>
+                </div>
+                <div>
+                  <span>Thresholds:</span>
+                  <strong>
+                    {typeof payload.armor_threshold_major === "string" ? payload.armor_threshold_major : "-"} /{" "}
+                    {typeof payload.armor_threshold_severe === "string" ? payload.armor_threshold_severe : "-"}
+                  </strong>
+                </div>
+              </div>
+              <div className={styles.trackerBlockCompact}>
+                <p className={styles.sheetLabel}>Armor Slots</p>
+                {renderBoxes(6, trackerState.armorSlots, (index) => {
+                  const armorSlots = getNextMarkedValue(trackerState.armorSlots, index);
+                  void persistTrackers({ ...trackerState, armorSlots });
+                }, "Armor slot")}
+              </div>
+            </div>
+            </>)}
           </article>
 
           <article className={`${styles.card} ${styles.trackerCard}`}>
+            <CardHeader id="trackers" label="Trackers" />
+            {!collapsedCards.has("trackers") && (<>
             <div className={styles.statBadges}>
               <div className={styles.statBadge}>
                 <span>Evasion</span>
@@ -743,7 +869,7 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
               {renderBoxes(maxHitPoints, clampTracker(trackerState.hp, maxHitPoints), (index) => {
                 const hp = getNextMarkedValue(trackerState.hp, index);
                 void persistTrackers({ ...trackerState, hp });
-              })}
+              }, "HP slot")}
             </div>
 
             <div className={styles.trackerBlock}>
@@ -751,7 +877,7 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
               {renderBoxes(maxStress, clampTracker(trackerState.stress, maxStress), (index) => {
                 const stress = getNextMarkedValue(trackerState.stress, index);
                 void persistTrackers({ ...trackerState, stress });
-              })}
+              }, "Stress slot")}
             </div>
 
             <div className={styles.trackerBlock}>
@@ -759,78 +885,46 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
               {renderBoxes(6, trackerState.hope, (index) => {
                 const hope = getNextMarkedValue(trackerState.hope, index);
                 void persistTrackers({ ...trackerState, hope });
-              })}
+              }, "Hope slot")}
             </div>
             {hopeFeature ? <p className={styles.sheetFeatureCopy}>{hopeFeature}</p> : null}
+            </>)}
           </article>
 
           <article className={styles.card}>
-            <p className={styles.sheetLabel}>Traits</p>
-            <div className={styles.sheetTraits}>
-              {Object.entries(traits).map(([trait, modifier]) => (
-                <div key={trait} className={styles.traitSourceCard}>
-                  <div className={styles.traitPill}>
-                    <span>{trait}</span>
-                    <strong>{modifier}</strong>
-                  </div>
-                  {traitSources[trait]?.length ? (
-                    <div className={styles.sourcePillRow}>
-                      {traitSources[trait].map((source) => (
-                        <span key={`${trait}-${source}`} className={styles.sourcePill}>
-                          {source}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              ))}
-              {Object.keys(traits).length === 0 ? <p className="muted">No trait assignment saved yet.</p> : null}
-            </div>
+            <CardHeader id="weapons" label="Active Weapons" />
+            {!collapsedCards.has("weapons") && (
+              <>
+                {(() => {
+                  const equippedPrimary = inventoryEntries.find((e) => e.equipped && e.slot_name === "primary");
+                  const equippedSecondary = inventoryEntries.find((e) => e.equipped && e.slot_name === "secondary");
+                  const fallbackPrimary = typeof payload.primary_weapon === "string" && payload.primary_weapon ? payload.primary_weapon : null;
+                  const fallbackSecondary = typeof payload.secondary_weapon === "string" && payload.secondary_weapon ? payload.secondary_weapon : null;
+                  return (
+                    <>
+                      <div className="sheet-entry">
+                        <span>Primary</span>
+                        <strong>{equippedPrimary ? equippedPrimary.item_name : (fallbackPrimary ?? "-")}</strong>
+                      </div>
+                      <div className="sheet-entry">
+                        <span>Secondary</span>
+                        <strong>{equippedSecondary ? equippedSecondary.item_name : (fallbackSecondary ?? "-")}</strong>
+                      </div>
+                    </>
+                  );
+                })()}
+                <p className="muted">
+                  {typeof payload.weapon_notes === "string" && payload.weapon_notes ? payload.weapon_notes : "No weapon notes yet."}
+                </p>
+              </>
+            )}
           </article>
 
-          <article className={styles.card}>
-            <p className={styles.sheetLabel}>Active Weapons</p>
-            <div className="sheet-entry">
-              <span>Primary</span>
-              <strong>{typeof payload.primary_weapon === "string" && payload.primary_weapon ? payload.primary_weapon : "-"}</strong>
-            </div>
-            <div className="sheet-entry">
-              <span>Secondary</span>
-              <strong>
-                {typeof payload.secondary_weapon === "string" && payload.secondary_weapon
-                  ? payload.secondary_weapon
-                  : "-"}
-              </strong>
-            </div>
-            <p className="muted">
-              {typeof payload.weapon_notes === "string" && payload.weapon_notes ? payload.weapon_notes : "No weapon notes yet."}
-            </p>
-          </article>
+          {/* The separate Active Armor card has been removed */}
 
           <article className={styles.card}>
-            <p className={styles.sheetLabel}>Active Armor</p>
-            <div className="sheet-entry">
-              <span>Armor</span>
-              <strong>{typeof payload.armor_name === "string" && payload.armor_name ? payload.armor_name : "-"}</strong>
-            </div>
-            <div className="sheet-entry">
-              <span>Thresholds</span>
-              <strong>
-                {typeof payload.armor_threshold_major === "string" ? payload.armor_threshold_major : "-"} /{" "}
-                {typeof payload.armor_threshold_severe === "string" ? payload.armor_threshold_severe : "-"}
-              </strong>
-            </div>
-            <div className={styles.trackerBlock}>
-              <p className={styles.sheetLabel}>Armor Slots</p>
-              {renderBoxes(6, trackerState.armorSlots, (index) => {
-                const armorSlots = getNextMarkedValue(trackerState.armorSlots, index);
-                void persistTrackers({ ...trackerState, armorSlots });
-              })}
-            </div>
-          </article>
-
-          <article className={styles.card}>
-            <p className={styles.sheetLabel}>Experience</p>
+            <CardHeader id="experience" label="Experience" />
+            {!collapsedCards.has("experience") && (
             <div className="sheet-list">
               {experiences.map((experience) => (
                 <div key={experience.name} className="sheet-entry">
@@ -840,10 +934,12 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
               ))}
               {experiences.length === 0 ? <p className="muted">No experiences saved yet.</p> : null}
             </div>
+            )}
           </article>
 
           <article className={styles.card}>
-            <p className={styles.sheetLabel}>Domains and Cards</p>
+            <CardHeader id="domains" label="Domains and Cards" />
+            {!collapsedCards.has("domains") && (<>
             <p className="muted">Domains: {domains.length ? domains.join(" / ") : "No class domains saved."}</p>
             <div className="sheet-list">
               {domainCards.map((card) => (
@@ -853,37 +949,41 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
               ))}
               {domainCards.length === 0 ? <p className="muted">No domain cards saved yet.</p> : null}
             </div>
+            </>)}
           </article>
 
           <article className={styles.card}>
-            <p className={styles.sheetLabel}>Gold</p>
+            <CardHeader id="gold" label="Gold" />
+            {!collapsedCards.has("gold") && (
             <div className={styles.goldTrackerGrid}>
               <div className={styles.trackerBlock}>
                 <p className={styles.sheetLabel}>Handfuls</p>
                 {renderBoxes(10, trackerState.goldHandfuls, (index) => {
                   const goldHandfuls = getNextMarkedValue(trackerState.goldHandfuls, index);
                   void persistTrackers({ ...trackerState, ...normalizeGold(goldHandfuls, trackerState.goldBags, trackerState.goldChests) });
-                })}
+                }, "Gold handful")}
               </div>
               <div className={styles.trackerBlock}>
                 <p className={styles.sheetLabel}>Bags</p>
                 {renderBoxes(10, trackerState.goldBags, (index) => {
                   const goldBags = getNextMarkedValue(trackerState.goldBags, index);
                   void persistTrackers({ ...trackerState, ...normalizeGold(trackerState.goldHandfuls, goldBags, trackerState.goldChests) });
-                })}
+                }, "Gold bag")}
               </div>
               <div className={styles.trackerBlock}>
                 <p className={styles.sheetLabel}>Chest</p>
                 {renderBoxes(1, trackerState.goldChests, (index) => {
                   const goldChests = getNextMarkedValue(trackerState.goldChests, index);
                   void persistTrackers({ ...trackerState, ...normalizeGold(trackerState.goldHandfuls, trackerState.goldBags, goldChests) });
-                })}
+                }, "Gold chest")}
               </div>
             </div>
+            )}
           </article>
 
           <article className={`${styles.card} ${styles.wideCard} ${styles.classFeatureCard}`}>
-            <p className={styles.sheetLabel}>Class Feature</p>
+            <CardHeader id="classfeature" label="Class Feature" />
+            {!collapsedCards.has("classfeature") && (
             <div className={styles.featureSectionList}>
               {featureSections.length ? (
                 featureSections.map((section, index) => (
@@ -896,12 +996,14 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
                 <p>No class feature text loaded yet.</p>
               )}
             </div>
+            )}
           </article>
 
           {renderClassSpecificModule()}
 
           <article className={styles.card}>
-            <p className={styles.sheetLabel}>Inventory</p>
+            <CardHeader id="inventory" label="Inventory" />
+            {!collapsedCards.has("inventory") && (<>
             <div className={styles.inventoryToolbar}>
               <input
                 value={inventorySearch}
@@ -1055,20 +1157,24 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
             </label>
             <p className="muted">Potion: {typeof payload.potion_choice === "string" ? payload.potion_choice : "-"}</p>
             <p className="muted">Class Items: {classItems.length ? classItems.join(" / ") : "-"}</p>
+            </>)}
           </article>
 
           <article className={`${styles.card} ${styles.wideCard}`}>
-            <p className={styles.sheetLabel}>Background and Connections</p>
+            <CardHeader id="background" label="Background and Connections" />
+            {!collapsedCards.has("background") && (<>
             <p>{typeof payload.background === "string" && payload.background ? payload.background : "No background notes yet."}</p>
             <p className="muted">
               {typeof payload.connection_notes === "string" && payload.connection_notes
                 ? payload.connection_notes
                 : "No connection notes yet."}
             </p>
+            </>)}
           </article>
           {Array.isArray(payload.level_up_log) && payload.level_up_log.length ? (
             <article className={`${styles.card} ${styles.wideCard}`}>
-              <p className={styles.sheetLabel}>Level-Up Log</p>
+              <CardHeader id="levellog" label="Level-Up Log" />
+              {!collapsedCards.has("levellog") && (
               <div className="sheet-list">
                 {payload.level_up_log.map((entry) =>
                   typeof entry === "string" ? (
@@ -1078,6 +1184,7 @@ export function CharacterSheet({ character, sheetRef, onUpdated }: CharacterShee
                   ) : null,
                 )}
               </div>
+              )}
             </article>
           ) : null}
         </section>

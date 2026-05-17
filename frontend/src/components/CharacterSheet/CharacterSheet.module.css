@@ -9,6 +9,14 @@
 /* CharacterSheet.module.css – no :global(), theming via data-sheet-theme */
 
 .root {
+  /* Colour palette tokens (from design system) */
+  --color-accent: #4b0082;
+  --color-danger: #8b0000;
+  --color-neutral-dark: #2f2f2f;
+  --color-surface: #e0e0e0;
+  --border-soft: rgba(139, 0, 0, 0.28);
+  --text-soft-on-dark: rgba(224, 224, 224, 0.72);
+
   /* Default theme variables */
   --sheet-banner: #3f332d;
   --sheet-banner-accent: #baa08b;
@@ -16,8 +24,8 @@
   --sheet-card-bg-bottom: rgba(242, 231, 216, 0.96);
   --sheet-soft: rgba(137, 87, 49, 0.12);
 
-  padding: 24px;
-  border-radius: 24px;
+  padding: 16px;
+  border-radius: 20px;
   color: #23160f;
   background: linear-gradient(180deg, rgba(250, 245, 237, 0.98), rgba(239, 228, 214, 0.98));
   border: 1px solid rgba(84, 53, 31, 0.16);
@@ -39,7 +47,48 @@
   --sheet-card-bg-bottom: rgba(226, 236, 213, 0.96);
   --sheet-soft: rgba(92, 123, 73, 0.16);
 }
-/* ... add the rest of the theme maps exactly as before, but using attribute selectors ... */
+.root[data-sheet-theme="guardian"] {
+  --sheet-banner: #3a3528;
+  --sheet-banner-accent: #c8b87a;
+  --sheet-card-bg-top: rgba(255, 252, 242, 0.98);
+  --sheet-card-bg-bottom: rgba(240, 232, 208, 0.96);
+  --sheet-soft: rgba(140, 118, 58, 0.14);
+}
+.root[data-sheet-theme="ranger"] {
+  --sheet-banner: #2c3d2e;
+  --sheet-banner-accent: #90b878;
+  --sheet-card-bg-top: rgba(245, 250, 242, 0.98);
+  --sheet-card-bg-bottom: rgba(220, 234, 210, 0.96);
+  --sheet-soft: rgba(72, 110, 58, 0.15);
+}
+.root[data-sheet-theme="seraph"] {
+  --sheet-banner: #3a2e45;
+  --sheet-banner-accent: #c4a8e0;
+  --sheet-card-bg-top: rgba(250, 246, 255, 0.98);
+  --sheet-card-bg-bottom: rgba(232, 220, 248, 0.96);
+  --sheet-soft: rgba(100, 72, 150, 0.13);
+}
+.root[data-sheet-theme="warrior"] {
+  --sheet-banner: #3b2828;
+  --sheet-banner-accent: #c08080;
+  --sheet-card-bg-top: rgba(255, 247, 245, 0.98);
+  --sheet-card-bg-bottom: rgba(240, 220, 216, 0.96);
+  --sheet-soft: rgba(140, 60, 60, 0.13);
+}
+.root[data-sheet-theme="rogue"] {
+  --sheet-banner: #252530;
+  --sheet-banner-accent: #9898c8;
+  --sheet-card-bg-top: rgba(246, 246, 254, 0.98);
+  --sheet-card-bg-bottom: rgba(222, 220, 240, 0.96);
+  --sheet-soft: rgba(70, 68, 130, 0.13);
+}
+.root[data-sheet-theme="wizard"] {
+  --sheet-banner: #2a2a40;
+  --sheet-banner-accent: #a0a8e0;
+  --sheet-card-bg-top: rgba(244, 245, 255, 0.98);
+  --sheet-card-bg-bottom: rgba(218, 220, 245, 0.96);
+  --sheet-soft: rgba(60, 65, 160, 0.12);
+}
 
 .root p,
 .root li,
@@ -59,8 +108,8 @@
 .banner {
   display: grid;
   grid-template-columns: minmax(240px, 0.7fr) minmax(0, 1fr);
-  gap: 18px;
-  margin-bottom: 18px;
+  gap: 14px;
+  margin-bottom: 14px;
   overflow: hidden;
   border-radius: 22px;
   border: 1px solid rgba(81, 52, 31, 0.14);
@@ -68,13 +117,13 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 .bannerMain {
-  padding: 24px 22px;
+  padding: 16px 18px;
   background: linear-gradient(135deg, var(--sheet-banner), color-mix(in srgb, var(--sheet-banner) 74%, black 26%));
   color: #fff8ef;
 }
 .bannerClass {
   margin: 0;
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
   line-height: 0.95;
   text-transform: uppercase;
 }
@@ -87,9 +136,9 @@
 .bannerDetails {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   align-items: flex-start;
-  padding: 20px 22px;
+  padding: 14px 16px;
   background: linear-gradient(180deg, rgba(255, 248, 240, 0.78), rgba(244, 233, 219, 0.88));
 }
 .bannerActions {
@@ -103,13 +152,14 @@
 .sheetGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 18px;
+  gap: 10px;
+  margin-top: 12px;
+  grid-auto-rows: minmax(min-content, auto); 
 }
 
 .card {
-  padding: 18px;
-  border-radius: 20px;
+  padding: 12px 14px;
+  border-radius: 16px;
   color: #23160f;
   border: 1px solid rgba(92, 58, 30, 0.14);
   background: linear-gradient(180deg, var(--sheet-card-bg-top), var(--sheet-card-bg-bottom));
@@ -120,10 +170,13 @@
 }
 
 /* Special cards */
-.identityCard,
 .trackerCard,
 .classSpecialCard {
   min-height: 100%;
+}
+.identityCard {
+  align-self: start;
+  margin-bottom: 0;
 }
 .classFeatureCard {
   border-style: solid;
@@ -170,12 +223,12 @@
 .statBadges {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 16px;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 .statBadge {
-  padding: 12px;
-  border-radius: 16px;
+  padding: 8px;
+  border-radius: 12px;
   background: var(--sheet-soft);
   border: 1px solid rgba(92, 58, 30, 0.12);
   text-align: center;
@@ -189,8 +242,8 @@
 }
 .statBadge strong {
   display: block;
-  margin-top: 4px;
-  font-size: 1.3rem;
+  margin-top: 2px;
+  font-size: 1.1rem;
   color: #23160f;
 }
 
@@ -218,7 +271,7 @@
 
 /* Tracker blocks */
 .trackerBlock {
-  margin-top: 14px;
+  margin-top: 8px;
 }
 .trackerRow {
   display: flex;
@@ -229,9 +282,9 @@
   gap: 12px;
 }
 .trackerBox {
-  width: 22px;
-  height: 22px;
-  border-radius: 7px;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
   border: 1px solid rgba(91, 57, 29, 0.28);
   background: rgba(102, 68, 39, 0.08);
   cursor: pointer;
@@ -250,8 +303,8 @@
   outline-offset: 2px;
 }
 .circleBox {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   border-radius: 999px;
 }
 
@@ -264,7 +317,49 @@
   border: 1px solid rgba(92, 58, 30, 0.1);
 }
 
-/* Traits */
+/* Traits strip — horizontal bar between banner and grid */
+.traitsStrip {
+  margin-top: 10px;
+}
+
+.traitsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.traitChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--sheet-soft);
+  border: 1px solid rgba(92, 58, 30, 0.14);
+}
+
+.traitChipName {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(76, 45, 24, 0.72);
+}
+
+.traitChipValue {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #23160f;
+}
+
+.traitChipSources {
+  font-size: 0.7rem;
+  color: rgba(76, 45, 24, 0.55);
+  border-left: 1px solid rgba(92, 58, 30, 0.2);
+  padding-left: 6px;
+}
+
+/* Traits (old — kept for reference, now replaced by strip above) */
 .sheetTraits {
   display: grid;
   gap: 10px;
@@ -390,6 +485,45 @@
   margin-top: 14px;
 }
 
+/* Grid form layout (used inside class-specific modules and inventory edit) */
+.gridForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.gridForm label {
+  display: grid;
+  gap: 6px;
+}
+.gridForm input,
+.gridForm select,
+.gridForm textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(92, 58, 30, 0.16);
+  border-radius: 12px;
+  background: rgba(255, 250, 244, 0.92);
+  color: #23160f;
+  font: inherit;
+}
+.gridForm input:focus,
+.gridForm select:focus,
+.gridForm textarea:focus {
+  outline: 2px solid rgba(123, 72, 36, 0.3);
+  outline-offset: 2px;
+}
+/* Full-width item inside a gridForm */
+.wide {
+  grid-column: 1 / -1;
+}
+
+/* Level Up button — progression, not destructive */
+.sheetLevelUpButton {
+  border-color: rgba(75, 0, 130, 0.36);
+  background: rgba(75, 0, 130, 0.12);
+  color: #2e0060;
+}
+
 /* Danger button */
 .sheetDangerButton {
   border-color: rgba(139, 0, 0, 0.32);
@@ -430,12 +564,73 @@
   overflow: auto;
 }
 
+/* Active Armor inside identity card */
+.armorSection {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(92, 58, 30, 0.16);
+}
+
+.armorDetails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 8px 0 12px;
+}
+
+.armorDetails div {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.trackerBlockCompact {
+  margin-top: 8px;
+}
+
+/* Card header with minimizer */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.cardHeader .sheetLabel {
+  margin: 0;
+}
+.cardMinimizer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid rgba(92, 58, 30, 0.18);
+  border-radius: 6px;
+  background: rgba(121, 84, 46, 0.08);
+  color: rgba(76, 45, 24, 0.72);
+  font-size: 0.75rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 120ms ease, color 120ms ease;
+}
+.cardMinimizer:hover {
+  background: rgba(121, 84, 46, 0.18);
+  color: #23160f;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .banner,
   .sheetGrid,
-  .statBadges {
+  .statBadges,
+  .gridForm {
     grid-template-columns: 1fr;
+  }
+  .wide {
+    grid-column: 1;
   }
   .bannerDetails,
   .bannerActions {
