@@ -1,0 +1,10 @@
+id, class_name, subclass1_name, subclass1_description, subclass2_name, subclass2_description
+1, 'Bard'; 'Troubadour'; 'Play the Troubadour if you want to play music to bolster your allies'; 'Wordsmith'; 'Play the Wordsmith if you want to use clever wordplay and captivate crowds'
+2, 'Druid'; 'Warden of the Elements'; 'Play the Warden of the Elements if you want to embody the natural elements of the wild'; 'Warden of Renewal'; 'Play the Warden of Renewal if you want to use powerful magic to heal your party'
+3, 'Guardian'; 'Stalwart'; 'Play the Stalwart if you want to take heavy blows and keep fighting'; 'Vengeance'; 'Play the Vengeance if you want to strike down enemies who harm you or your allies'
+4, 'Ranger'; 'Beastbound'; 'Play the Beastbound if you want to form a deep bond with an animal ally'; 'Wayfinder'; 'Play the Wayfinder if you want to hunt your prey and strike with deadly force'
+5, 'Rogue'; 'Nightwalker'; 'Play the Nightwalker if you want to manipulate shadows to maneuver through the environment'; 'Syndicate'; 'Play the Syndicate if you want to have a web of contacts everywhere you go'
+6, 'Seraph'; 'Winged Sentinel'; 'Play the Winged Sentinel if you want to take flight and strike crushing blows from the sky'; 'Divine Wielder'; 'Play the Divine Wielder if you want to dominate the battlefield with a legendary weapon'
+7, 'Sorcerer'; 'Elemental Origin'; 'Play the Elemental Origin if you want to channel the raw power of a particular element'; 'Primal Origin'; 'Play the Primal Origin if you want to extend the versatility of your spells in powerful ways'
+8, 'Warrior'; 'Call of the Brave'; 'Play the Call of the Brave if you want to use the might of your enemies to fuel your own power'; 'Call of the Slayer'; 'Play the Call of the Slayer if you want to strike down adversaries with immense force'
+9, 'Wizard'; 'School of Knowledge'; 'Play the School of Knowledge if you want a keen understanding of the world around you'; 'School of War'; 'Play the School of War if you want to utilize trained magic for violence'
