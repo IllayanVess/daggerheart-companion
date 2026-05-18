@@ -92,13 +92,14 @@ CREATE TABLE IF NOT EXISTS srd_subclass (
 
     subclass_name TEXT,
     subclass_description TEXT,
+    spellcast_trait_type TEXT,
+    spellcast_trait TEXT,
 
     foundation_feature TEXT,
     specialization_feature TEXT,
-    spell_cast_feature TEXT,
     mastery_feature TEXT,
 
-    source_id TEXT REFERENCES srd_sources(id)
+    source_id TEXT REFERENCES srd_sources(id)   
 );
 
 CREATE TABLE IF NOT EXISTS srd_ancestry (
