@@ -39,3 +39,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 prompt.md
+
+# The DB
+backend/database/postgresql/

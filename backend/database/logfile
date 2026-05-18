@@ -1,0 +1,2196 @@
+2026-05-18 21:33:44.260 CEST [98723] LOG:  starting PostgreSQL 17.9 on aarch64-apple-darwin20.0.0, compiled by clang version 20.1.8, 64-bit
+2026-05-18 21:33:44.261 CEST [98723] LOG:  listening on IPv6 address "::1", port 5432
+2026-05-18 21:33:44.261 CEST [98723] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-05-18 21:33:44.261 CEST [98723] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2026-05-18 21:33:44.263 CEST [98726] LOG:  database system was shut down at 2026-05-18 21:33:30 CEST
+2026-05-18 21:33:44.265 CEST [98723] LOG:  database system is ready to accept connections
+2026-05-18 21:36:37.644 CEST [99150] FATAL:  role "my_user" does not exist
+2026-05-18 21:37:00.761 CEST [99244] ERROR:  syntax error at or near ")" at character 1839
+2026-05-18 21:37:00.761 CEST [99244] STATEMENT:  /*
+	This is the sql Scheme its in 3 part :
+	
+	-> User and campain handle
+	-> SRD table tables scrap from daggetheart
+	-> In game tables with a character and all its stats 
+	
+	*/
+	
+	
+	
+	/*
+	                    ***************************
+	                    *    USER AUTH SESSION    *
+	                    ***************************
+	*/
+	
+	-- For user auth
+	CREATE TABLE IF NOT EXISTS profiles (
+	    user_id UUID PRIMARY KEY,
+	    username VARCHAR(50) UNIQUE,
+	    display_name TEXT,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For gaming session
+	CREATE TABLE IF NOT EXISTS campaigns (
+	    campaign_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    owner_user_id UUID NOT NULL REFERENCES profiles(user_id),
+	    name TEXT NOT NULL,
+	    description TEXT,
+	    settings JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For character in session
+	CREATE TABLE IF NOT EXISTS campaign_members (
+	    campaign_id UUID REFERENCES campaigns(campaign_id) ON DELETE CASCADE,
+	    user_id UUID REFERENCES profiles(user_id) ON DELETE CASCADE,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    PRIMARY KEY (campaign_id, user_id)
+	);
+	
+	
+	/*
+	                    ************************
+	                    *    SRD SCRAP DATA    *
+	                    ************************
+	*/
+	
+	CREATE TABLE IF NOT EXISTS srd_classes (
+	    class_name TEXT PRIMARY KEY,
+	    class_description TEXT,
+	
+	    domain1 TEXT,
+	    domain2 TEXT,
+	
+	    class_item1 TEXT,
+	    class_item2 TEXT,
+	
+	    evasion INTEGER,
+	    starting_hit_points INTEGER,
+	
+	    hope_feature TEXT,
+	    class_feature TEXT,
+	
+	    source_url TEXT,
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_subclass (
+	    subclass_name TEXT PRIMARY KEY,
+	    class_name TEXT NOT NULL REFERENCES srd_classes(class_name),
+	
+	    subclass_description TEXT,
+	    spellcast_trait_type TEXT,
+	    spellcast_trait TEXT,
+	
+	    foundation_feature TEXT,
+	    specialization_feature TEXT,
+	    mastery_feature TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_ancestry (
+	    ancestry_name TEXT PRIMARY KEY,
+	
+	    ancestry_feature_1_name TEXT,
+	    ancestry_feature_1_description TEXT,
+	
+	    ancestry_feature_2_name TEXT,
+	    ancestry_feature_2_description TEXT,
+	    
+	    source_url TEXT;   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_community (
+	    community_name TEXT PRIMARY KEY,
+	
+	    community_feature_name TEXT,
+	    community_feature_text TEXT,
+	
+	    source_url TEXT;   
+	);                       
+	
+	CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_name TEXT PRIMARY KEY,
+	
+	    domains_name TEXT REFERENCES srd_classes(domain1),
+	
+	    card_level INTEGER,
+	    card_type TEXT,
+	    recall_cost INTEGER,
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	    );
+	
+	CREATE TABLE IF NOT EXISTS srd_armor (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    thresholds_major INTEGER,
+	    thresholds_severe INTEGER,
+	    base_score INTEGER,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_weapon (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    trait TEXT,
+	    range TEXT,
+	
+	    damage_text TEXT,
+	    damage_type TEXT,
+	
+	    burden TEXT,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_consumables (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	
+	CREATE TABLE IF NOT EXISTS srd_item(
+	    item_nam TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	
+2026-05-18 21:38:04.394 CEST [99321] ERROR:  SELECT * with no tables specified is not valid at character 8
+2026-05-18 21:38:04.394 CEST [99321] STATEMENT:  select *;
+2026-05-18 21:38:44.256 CEST [98724] LOG:  checkpoint starting: time
+2026-05-18 21:40:24.300 CEST [98724] LOG:  checkpoint complete: wrote 991 buffers (6.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=100.013 s, sync=0.029 s, total=100.045 s; sync files=311, longest=0.001 s, average=0.001 s; distance=4627 kB, estimate=4627 kB; lsn=0/199D570, redo lsn=0/199D4E0
+2026-05-18 21:42:11.221 CEST [99537] ERROR:  relation "db_table" does not exist at character 15
+2026-05-18 21:42:11.221 CEST [99537] STATEMENT:  SELECT * FROM DB_table WHERE id = 1
+2026-05-18 21:42:32.569 CEST [99619] ERROR:  syntax error at or near "\" at character 1
+2026-05-18 21:42:32.569 CEST [99619] STATEMENT:  \db+
+2026-05-18 21:42:48.183 CEST [99700] ERROR:  syntax error at or near "\" at character 1
+2026-05-18 21:42:48.183 CEST [99700] STATEMENT:  \db+
+2026-05-18 21:43:03.112 CEST [99781] ERROR:  syntax error at or near "db" at character 1
+2026-05-18 21:43:03.112 CEST [99781] STATEMENT:  db+
+2026-05-18 21:43:27.012 CEST [99785] ERROR:  syntax error at or near "*" at character 15
+2026-05-18 21:43:27.012 CEST [99785] STATEMENT:  select * from *;
+2026-05-18 21:52:34.678 CEST [531] ERROR:  syntax error at or near ")" at character 1839
+2026-05-18 21:52:34.678 CEST [531] STATEMENT:  /*
+	This is the sql Scheme its in 3 part :
+	
+	-> User and campain handle
+	-> SRD table tables scrap from daggetheart
+	-> In game tables with a character and all its stats 
+	
+	*/
+	
+	
+	
+	/*
+	                    ***************************
+	                    *    USER AUTH SESSION    *
+	                    ***************************
+	*/
+	
+	-- For user auth
+	CREATE TABLE IF NOT EXISTS profiles (
+	    user_id UUID PRIMARY KEY,
+	    username VARCHAR(50) UNIQUE,
+	    display_name TEXT,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For gaming session
+	CREATE TABLE IF NOT EXISTS campaigns (
+	    campaign_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    owner_user_id UUID NOT NULL REFERENCES profiles(user_id),
+	    name TEXT NOT NULL,
+	    description TEXT,
+	    settings JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For character in session
+	CREATE TABLE IF NOT EXISTS campaign_members (
+	    campaign_id UUID REFERENCES campaigns(campaign_id) ON DELETE CASCADE,
+	    user_id UUID REFERENCES profiles(user_id) ON DELETE CASCADE,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    PRIMARY KEY (campaign_id, user_id)
+	);
+	
+	
+	/*
+	                    ************************
+	                    *    SRD SCRAP DATA    *
+	                    ************************
+	*/
+	
+	CREATE TABLE IF NOT EXISTS srd_classes (
+	    class_name TEXT PRIMARY KEY,
+	    class_description TEXT,
+	
+	    domain1 TEXT,
+	    domain2 TEXT,
+	
+	    class_item1 TEXT,
+	    class_item2 TEXT,
+	
+	    evasion INTEGER,
+	    starting_hit_points INTEGER,
+	
+	    hope_feature TEXT,
+	    class_feature TEXT,
+	
+	    source_url TEXT,
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_subclass (
+	    subclass_name TEXT PRIMARY KEY,
+	    class_name TEXT NOT NULL REFERENCES srd_classes(class_name),
+	
+	    subclass_description TEXT,
+	    spellcast_trait_type TEXT,
+	    spellcast_trait TEXT,
+	
+	    foundation_feature TEXT,
+	    specialization_feature TEXT,
+	    mastery_feature TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_ancestry (
+	    ancestry_name TEXT PRIMARY KEY,
+	
+	    ancestry_feature_1_name TEXT,
+	    ancestry_feature_1_description TEXT,
+	
+	    ancestry_feature_2_name TEXT,
+	    ancestry_feature_2_description TEXT,
+	    
+	    source_url TEXT;   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_community (
+	    community_name TEXT PRIMARY KEY,
+	
+	    community_feature_name TEXT,
+	    community_feature_text TEXT,
+	
+	    source_url TEXT;   
+	);                       
+	
+	CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_name TEXT PRIMARY KEY,
+	
+	    domains_name TEXT REFERENCES srd_classes(domain1),
+	
+	    card_level INTEGER,
+	    card_type TEXT,
+	    recall_cost INTEGER,
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	    );
+	
+	CREATE TABLE IF NOT EXISTS srd_armor (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    thresholds_major INTEGER,
+	    thresholds_severe INTEGER,
+	    base_score INTEGER,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_weapon (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    trait TEXT,
+	    range TEXT,
+	
+	    damage_text TEXT,
+	    damage_type TEXT,
+	
+	    burden TEXT,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_consumables (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	
+	CREATE TABLE IF NOT EXISTS srd_item(
+	    item_nam TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	
+2026-05-18 21:53:40.789 CEST [1064] ERROR:  syntax error at or near ")" at character 1839
+2026-05-18 21:53:40.789 CEST [1064] STATEMENT:  /*
+	This is the sql Scheme its in 3 part :
+	
+	-> User and campain handle
+	-> SRD table tables scrap from daggetheart
+	-> In game tables with a character and all its stats 
+	
+	*/
+	
+	
+	
+	/*
+	                    ***************************
+	                    *    USER AUTH SESSION    *
+	                    ***************************
+	*/
+	
+	-- For user auth
+	CREATE TABLE IF NOT EXISTS profiles (
+	    user_id UUID PRIMARY KEY,
+	    username VARCHAR(50) UNIQUE,
+	    display_name TEXT,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For gaming session
+	CREATE TABLE IF NOT EXISTS campaigns (
+	    campaign_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    owner_user_id UUID NOT NULL REFERENCES profiles(user_id),
+	    name TEXT NOT NULL,
+	    description TEXT,
+	    settings JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For character in session
+	CREATE TABLE IF NOT EXISTS campaign_members (
+	    campaign_id UUID REFERENCES campaigns(campaign_id) ON DELETE CASCADE,
+	    user_id UUID REFERENCES profiles(user_id) ON DELETE CASCADE,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    PRIMARY KEY (campaign_id, user_id)
+	);
+	
+	
+	/*
+	                    ************************
+	                    *    SRD SCRAP DATA    *
+	                    ************************
+	*/
+	
+	CREATE TABLE IF NOT EXISTS srd_classes (
+	    class_name TEXT PRIMARY KEY,
+	    class_description TEXT,
+	
+	    domain1 TEXT,
+	    domain2 TEXT,
+	
+	    class_item1 TEXT,
+	    class_item2 TEXT,
+	
+	    evasion INTEGER,
+	    starting_hit_points INTEGER,
+	
+	    hope_feature TEXT,
+	    class_feature TEXT,
+	
+	    source_url TEXT,
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_subclass (
+	    subclass_name TEXT PRIMARY KEY,
+	    class_name TEXT NOT NULL REFERENCES srd_classes(class_name),
+	
+	    subclass_description TEXT,
+	    spellcast_trait_type TEXT,
+	    spellcast_trait TEXT,
+	
+	    foundation_feature TEXT,
+	    specialization_feature TEXT,
+	    mastery_feature TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_ancestry (
+	    ancestry_name TEXT PRIMARY KEY,
+	
+	    ancestry_feature_1_name TEXT,
+	    ancestry_feature_1_description TEXT,
+	
+	    ancestry_feature_2_name TEXT,
+	    ancestry_feature_2_description TEXT,
+	    
+	    source_url TEXT;   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_community (
+	    community_name TEXT PRIMARY KEY,
+	
+	    community_feature_name TEXT,
+	    community_feature_text TEXT,
+	
+	    source_url TEXT;   
+	);                       
+	
+	CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_name TEXT PRIMARY KEY,
+	
+	    domains_name TEXT REFERENCES srd_classes(domain1),
+	
+	    card_level INTEGER,
+	    card_type TEXT,
+	    recall_cost INTEGER,
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	    );
+	
+	CREATE TABLE IF NOT EXISTS srd_armor (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    thresholds_major INTEGER,
+	    thresholds_severe INTEGER,
+	    base_score INTEGER,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_weapon (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    trait TEXT,
+	    range TEXT,
+	
+	    damage_text TEXT,
+	    damage_type TEXT,
+	
+	    burden TEXT,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_consumables (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	
+	CREATE TABLE IF NOT EXISTS srd_item(
+	    item_nam TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT;   
+	);
+	
+	
+2026-05-18 21:56:10.982 CEST [1266] ERROR:  there is no unique constraint matching given keys for referenced table "srd_classes"
+2026-05-18 21:56:10.982 CEST [1266] STATEMENT:  /*
+	This is the sql Scheme its in 3 part :
+	
+	-> User and campain handle
+	-> SRD table tables scrap from daggetheart
+	-> In game tables with a character and all its stats 
+	
+	*/
+	
+	
+	
+	/*
+	                    ***************************
+	                    *    USER AUTH SESSION    *
+	                    ***************************
+	*/
+	
+	-- For user auth
+	CREATE TABLE IF NOT EXISTS profiles (
+	    user_id UUID PRIMARY KEY,
+	    username VARCHAR(50) UNIQUE,
+	    display_name TEXT,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For gaming session
+	CREATE TABLE IF NOT EXISTS campaigns (
+	    campaign_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    owner_user_id UUID NOT NULL REFERENCES profiles(user_id),
+	    name TEXT NOT NULL,
+	    description TEXT,
+	    settings JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For character in session
+	CREATE TABLE IF NOT EXISTS campaign_members (
+	    campaign_id UUID REFERENCES campaigns(campaign_id) ON DELETE CASCADE,
+	    user_id UUID REFERENCES profiles(user_id) ON DELETE CASCADE,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    PRIMARY KEY (campaign_id, user_id)
+	);
+	
+	
+	/*
+	                    ************************
+	                    *    SRD SCRAP DATA    *
+	                    ************************
+	*/
+	
+	CREATE TABLE IF NOT EXISTS srd_classes (
+	    class_name TEXT PRIMARY KEY,
+	    class_description TEXT,
+	
+	    domain1 TEXT,
+	    domain2 TEXT,
+	
+	    class_item1 TEXT,
+	    class_item2 TEXT,
+	
+	    evasion INTEGER,
+	    starting_hit_points INTEGER,
+	
+	    hope_feature TEXT,
+	    class_feature TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_subclass (
+	    subclass_name TEXT PRIMARY KEY,
+	    class_name TEXT NOT NULL REFERENCES srd_classes(class_name),
+	
+	    subclass_description TEXT,
+	    spellcast_trait_type TEXT,
+	    spellcast_trait TEXT,
+	
+	    foundation_feature TEXT,
+	    specialization_feature TEXT,
+	    mastery_feature TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_ancestry (
+	    ancestry_name TEXT PRIMARY KEY,
+	
+	    ancestry_feature_1_name TEXT,
+	    ancestry_feature_1_description TEXT,
+	
+	    ancestry_feature_2_name TEXT,
+	    ancestry_feature_2_description TEXT,
+	    
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_community (
+	    community_name TEXT PRIMARY KEY,
+	
+	    community_feature_name TEXT,
+	    community_feature_text TEXT,
+	
+	    source_url TEXT
+	);                       
+	
+	CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_name TEXT PRIMARY KEY,
+	
+	    domains_name TEXT REFERENCES srd_classes(domain1),
+	
+	    card_level INTEGER,
+	    card_type TEXT,
+	    recall_cost INTEGER,
+	    description_text TEXT,
+	
+	    source_url TEXT
+	    );
+	
+	CREATE TABLE IF NOT EXISTS srd_armor (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    thresholds_major INTEGER,
+	    thresholds_severe INTEGER,
+	    base_score INTEGER,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_weapon (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    trait TEXT,
+	    range TEXT,
+	
+	    damage_text TEXT,
+	    damage_type TEXT,
+	
+	    burden TEXT,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_consumables (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT   
+	);
+	
+	
+	CREATE TABLE IF NOT EXISTS srd_item(
+	    item_nam TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT
+	);
+	
+2026-05-18 21:57:58.251 CEST [1416] ERROR:  there is no unique constraint matching given keys for referenced table "srd_classes"
+2026-05-18 21:57:58.251 CEST [1416] STATEMENT:  /*
+	This is the sql Scheme its in 3 part :
+	
+	-> User and campain handle
+	-> SRD table tables scrap from daggetheart
+	-> In game tables with a character and all its stats 
+	
+	*/
+	
+	
+	
+	/*
+	                    ***************************
+	                    *    USER AUTH SESSION    *
+	                    ***************************
+	*/
+	
+	-- For user auth
+	CREATE TABLE IF NOT EXISTS profiles (
+	    user_id UUID PRIMARY KEY,
+	    username VARCHAR(50) UNIQUE,
+	    display_name TEXT,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For gaming session
+	CREATE TABLE IF NOT EXISTS campaigns (
+	    campaign_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    owner_user_id UUID NOT NULL REFERENCES profiles(user_id),
+	    name TEXT NOT NULL,
+	    description TEXT,
+	    settings JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For character in session
+	CREATE TABLE IF NOT EXISTS campaign_members (
+	    campaign_id UUID REFERENCES campaigns(campaign_id) ON DELETE CASCADE,
+	    user_id UUID REFERENCES profiles(user_id) ON DELETE CASCADE,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    PRIMARY KEY (campaign_id, user_id)
+	);
+	
+	
+	/*
+	                    ************************
+	                    *    SRD SCRAP DATA    *
+	                    ************************
+	*/
+	
+	CREATE TABLE IF NOT EXISTS srd_classes (
+	    class_name TEXT PRIMARY KEY,
+	    class_description TEXT,
+	
+	    domain1 TEXT,
+	    domain2 TEXT,
+	
+	    class_item1 TEXT,
+	    class_item2 TEXT,
+	
+	    evasion INTEGER,
+	    starting_hit_points INTEGER,
+	
+	    hope_feature TEXT,
+	    class_feature TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_subclass (
+	    subclass_name TEXT PRIMARY KEY,
+	    class_name TEXT REFERENCES srd_classes(class_name),
+	
+	    subclass_description TEXT,
+	    spellcast_trait_type TEXT,
+	    spellcast_trait TEXT,
+	
+	    foundation_feature TEXT,
+	    specialization_feature TEXT,
+	    mastery_feature TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_ancestry (
+	    ancestry_name TEXT PRIMARY KEY,
+	
+	    ancestry_feature_1_name TEXT,
+	    ancestry_feature_1_description TEXT,
+	
+	    ancestry_feature_2_name TEXT,
+	    ancestry_feature_2_description TEXT,
+	    
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_community (
+	    community_name TEXT PRIMARY KEY,
+	
+	    community_feature_name TEXT,
+	    community_feature_text TEXT,
+	
+	    source_url TEXT
+	);                       
+	
+	CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_name TEXT PRIMARY KEY,
+	
+	    domains_name TEXT REFERENCES srd_classes(domain1),
+	
+	    card_level INTEGER,
+	    card_type TEXT,
+	    recall_cost INTEGER,
+	    description_text TEXT,
+	
+	    source_url TEXT
+	    );
+	
+	CREATE TABLE IF NOT EXISTS srd_armor (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    thresholds_major INTEGER,
+	    thresholds_severe INTEGER,
+	    base_score INTEGER,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_weapon (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    trait TEXT,
+	    range TEXT,
+	
+	    damage_text TEXT,
+	    damage_type TEXT,
+	
+	    burden TEXT,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_consumables (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT   
+	);
+	
+	
+	CREATE TABLE IF NOT EXISTS srd_item(
+	    item_nam TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT
+	);
+	
+2026-05-18 21:58:44.275 CEST [98724] LOG:  checkpoint starting: time
+2026-05-18 21:58:54.116 CEST [98724] LOG:  checkpoint complete: wrote 98 buffers (0.6%); 0 WAL file(s) added, 0 removed, 0 recycled; write=9.820 s, sync=0.013 s, total=9.842 s; sync files=108, longest=0.001 s, average=0.001 s; distance=474 kB, estimate=4211 kB; lsn=0/1A13E58, redo lsn=0/1A13E00
+2026-05-18 22:03:30.408 CEST [1476] FATAL:  role "postgres" does not exist
+2026-05-18 22:05:27.582 CEST [1598] ERROR:  there is no unique constraint matching given keys for referenced table "srd_classes"
+2026-05-18 22:05:27.582 CEST [1598] STATEMENT:  /*
+	This is the sql Scheme its in 3 part :
+	
+	-> User and campain handle
+	-> SRD table tables scrap from daggetheart
+	-> In game tables with a character and all its stats 
+	
+	*/
+	
+	
+	
+	/*
+	                    ***************************
+	                    *    USER AUTH SESSION    *
+	                    ***************************
+	*/
+	
+	-- For user auth
+	CREATE TABLE IF NOT EXISTS profiles (
+	    user_id UUID PRIMARY KEY,
+	    username VARCHAR(50) UNIQUE,
+	    display_name TEXT,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For gaming session
+	CREATE TABLE IF NOT EXISTS campaigns (
+	    campaign_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    owner_user_id UUID NOT NULL REFERENCES profiles(user_id),
+	    name TEXT NOT NULL,
+	    description TEXT,
+	    settings JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For character in session
+	CREATE TABLE IF NOT EXISTS campaign_members (
+	    campaign_id UUID REFERENCES campaigns(campaign_id) ON DELETE CASCADE,
+	    user_id UUID REFERENCES profiles(user_id) ON DELETE CASCADE,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    PRIMARY KEY (campaign_id, user_id)
+	);
+	
+	
+	/*
+	                    ************************
+	                    *    SRD SCRAP DATA    *
+	                    ************************
+	*/
+	
+	CREATE TABLE IF NOT EXISTS srd_classes (
+	    class_name TEXT PRIMARY KEY,
+	    class_description TEXT,
+	
+	    domain1 TEXT,
+	    domain2 TEXT,
+	
+	    class_item1 TEXT,
+	    class_item2 TEXT,
+	
+	    evasion INTEGER,
+	    starting_hit_points INTEGER,
+	
+	    hope_feature TEXT,
+	    class_feature TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_subclass (
+	    subclass_name TEXT PRIMARY KEY,
+	    class_name TEXT REFERENCES srd_classes(class_name),
+	
+	    subclass_description TEXT,
+	    spellcast_trait_type TEXT,
+	    spellcast_trait TEXT,
+	
+	    foundation_feature TEXT,
+	    specialization_feature TEXT,
+	    mastery_feature TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_ancestry (
+	    ancestry_name TEXT PRIMARY KEY,
+	
+	    ancestry_feature_1_name TEXT,
+	    ancestry_feature_1_description TEXT,
+	
+	    ancestry_feature_2_name TEXT,
+	    ancestry_feature_2_description TEXT,
+	    
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_community (
+	    community_name TEXT PRIMARY KEY,
+	
+	    community_feature_name TEXT,
+	    community_feature_text TEXT,
+	
+	    source_url TEXT
+	);                       
+	
+	CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_name TEXT PRIMARY KEY,
+	
+	    domains_name TEXT REFERENCES srd_classes(domain1),
+	
+	    card_level INTEGER,
+	    card_type TEXT,
+	    recall_cost INTEGER,
+	    description_text TEXT,
+	
+	    source_url TEXT
+	    );
+	
+	CREATE TABLE IF NOT EXISTS srd_armor (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    thresholds_major INTEGER,
+	    thresholds_severe INTEGER,
+	    base_score INTEGER,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_weapon (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    trait TEXT,
+	    range TEXT,
+	
+	    damage_text TEXT,
+	    damage_type TEXT,
+	
+	    burden TEXT,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_consumables (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT   
+	);
+	
+	
+	CREATE TABLE IF NOT EXISTS srd_item(
+	    item_nam TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT
+	);
+	
+2026-05-18 22:08:44.108 CEST [98724] LOG:  checkpoint starting: time
+2026-05-18 22:08:50.260 CEST [1918] ERROR:  relation "srd_consumable" does not exist
+2026-05-18 22:08:50.260 CEST [1918] STATEMENT:  TRUNCATE TABLE srd_consumable RESTART IDENTITY CASCADE;
+2026-05-18 22:08:52.647 CEST [98724] LOG:  checkpoint complete: wrote 84 buffers (0.5%); 0 WAL file(s) added, 0 removed, 0 recycled; write=8.519 s, sync=0.016 s, total=8.540 s; sync files=120, longest=0.001 s, average=0.001 s; distance=558 kB, estimate=3846 kB; lsn=0/1A9F800, redo lsn=0/1A9F770
+2026-05-18 22:09:36.465 CEST [1959] ERROR:  column "class_item_1" of relation "srd_classes" does not exist
+2026-05-18 22:09:36.465 CEST [1959] STATEMENT:  
+	    COPY srd_classes (class_name, class_description, domain1, domain2, class_item_1, class_item_2, evasion, starting_hit_points, hope_feature, class_feature)
+	    FROM STDIN WITH CSV
+	    
+2026-05-18 22:11:38.099 CEST [2234] ERROR:  column "item_name" of relation "srd_item" does not exist
+2026-05-18 22:11:38.099 CEST [2234] STATEMENT:  
+	    COPY srd_item (item_name, category, description_text, source_url)
+	    FROM STDIN WITH CSV
+	    
+2026-05-18 22:11:59.659 CEST [2315] ERROR:  column "item_name" of relation "srd_item" does not exist
+2026-05-18 22:11:59.659 CEST [2315] STATEMENT:  
+	    COPY srd_item (item_name, category, description_text, source_url)
+	    FROM STDIN WITH CSV
+	    
+2026-05-18 22:12:44.502 CEST [2320] ERROR:  syntax error at or near "*" at character 12
+2026-05-18 22:12:44.502 CEST [2320] STATEMENT:  drop table *
+	drop table srd_item
+	drop table srd_item;
+2026-05-18 22:13:14.097 CEST [2320] ERROR:  syntax error at or near "DROP" at character 8
+2026-05-18 22:13:14.097 CEST [2320] STATEMENT:  commit
+	DROP TABLE IF EXISTS public.srd_item;
+2026-05-18 22:13:32.134 CEST [2333] ERROR:  relation "srd_domain_cards" does not exist
+2026-05-18 22:13:32.134 CEST [2333] STATEMENT:  TRUNCATE TABLE srd_domain_cards RESTART IDENTITY CASCADE;
+2026-05-18 22:13:44.641 CEST [98724] LOG:  checkpoint starting: time
+2026-05-18 22:13:52.660 CEST [98724] LOG:  checkpoint complete: wrote 80 buffers (0.5%); 0 WAL file(s) added, 0 removed, 0 recycled; write=7.997 s, sync=0.013 s, total=8.019 s; sync files=105, longest=0.001 s, average=0.001 s; distance=389 kB, estimate=3500 kB; lsn=0/1B00C08, redo lsn=0/1B00BB0
+2026-05-18 22:13:52.894 CEST [2343] ERROR:  syntax error at or near "*" at character 29
+2026-05-18 22:13:52.894 CEST [2343] STATEMENT:  DROP TABLE IF EXISTS public.*;
+2026-05-18 22:14:27.947 CEST [2424] ERROR:  column "domain_name" of relation "srd_domain_card" does not exist
+2026-05-18 22:14:27.947 CEST [2424] STATEMENT:  
+	    COPY srd_domain_card (domain_card_name, domain_name, card_level, card_type, description_text, source_url)
+	    FROM STDIN WITH CSV
+	    
+2026-05-18 22:15:07.810 CEST [2562] ERROR:  column "domain_name" of relation "srd_domain_card" does not exist
+2026-05-18 22:15:07.810 CEST [2562] STATEMENT:  
+	    COPY srd_domain_card (domain_card_name, domain_name, card_level, card_type, description_text, source_url)
+	    FROM STDIN WITH CSV
+	    
+2026-05-18 22:15:42.423 CEST [2731] ERROR:  column "domain1" of relation "srd_domain_card" does not exist
+2026-05-18 22:15:42.423 CEST [2731] STATEMENT:  
+	    COPY srd_domain_card (domain_card_name, domain1, card_level, card_type, description_text, source_url)
+	    FROM STDIN WITH CSV
+	    
+2026-05-18 22:17:06.641 CEST [3010] ERROR:  column "domain_name" of relation "srd_domain_card" does not exist
+2026-05-18 22:17:06.641 CEST [3010] STATEMENT:  
+	    COPY srd_domain_card (domain_card_name, domain_name, card_level, card_type, description_text, source_url)
+	    FROM STDIN WITH CSV
+	    
+2026-05-18 22:17:35.132 CEST [3030] ERROR:  column "community_feature_description" of relation "srd_community" does not exist
+2026-05-18 22:17:35.132 CEST [3030] STATEMENT:  
+	    COPY srd_community (community_name, community_feature_name, community_feature_description)
+	    FROM STDIN WITH CSV
+	    
+2026-05-18 22:18:44.063 CEST [3209] ERROR:  column "subclass" of relation "srd_subclass" does not exist
+2026-05-18 22:18:44.063 CEST [3209] STATEMENT:  
+	    COPY srd_subclass (class_name, subclass, subclass_description, spellcast_trait_type, spellcast_trait, foundation_feature, specialization_feature, mastery_feature)
+	    FROM STDIN WITH CSV
+	    
+2026-05-18 22:18:44.654 CEST [98724] LOG:  checkpoint starting: time
+2026-05-18 22:18:59.260 CEST [98724] LOG:  checkpoint complete: wrote 145 buffers (0.9%); 0 WAL file(s) added, 0 removed, 0 recycled; write=14.574 s, sync=0.019 s, total=14.606 s; sync files=186, longest=0.001 s, average=0.001 s; distance=854 kB, estimate=3236 kB; lsn=0/1BD6500, redo lsn=0/1BD64A8
+2026-05-18 22:19:26.019 CEST [3376] ERROR:  invalid input syntax for type integer: "'Instinct'"
+2026-05-18 22:19:26.019 CEST [3376] CONTEXT:  COPY srd_weapon, line 35, column tier: "'Instinct'"
+2026-05-18 22:19:26.019 CEST [3376] STATEMENT:  
+	    COPY srd_weapon (item_name, category, tier, trait, range, damage_text, damage_type, burden, feature_text, description_text, source_url)
+	    FROM STDIN WITH CSV
+	    
+2026-05-18 22:23:44.250 CEST [98724] LOG:  checkpoint starting: time
+2026-05-18 22:23:51.761 CEST [98724] LOG:  checkpoint complete: wrote 75 buffers (0.5%); 1 WAL file(s) added, 0 removed, 0 recycled; write=7.492 s, sync=0.007 s, total=7.512 s; sync files=61, longest=0.001 s, average=0.001 s; distance=323 kB, estimate=2944 kB; lsn=0/1C272E8, redo lsn=0/1C27290
+2026-05-18 22:24:46.456 CEST [3543] ERROR:  invalid input syntax for type integer: "'Instinct'"
+2026-05-18 22:24:46.456 CEST [3543] CONTEXT:  COPY srd_weapon, line 35, column tier: "'Instinct'"
+2026-05-18 22:24:46.456 CEST [3543] STATEMENT:  
+	    COPY srd_weapon (item_name, category, tier, trait, range, damage_text, damage_type, burden, feature_text, description_text, source_url)
+	    FROM STDIN WITH CSV
+	    
+2026-05-18 22:28:44.755 CEST [98724] LOG:  checkpoint starting: time
+2026-05-18 22:28:58.560 CEST [98724] LOG:  checkpoint complete: wrote 137 buffers (0.8%); 0 WAL file(s) added, 0 removed, 0 recycled; write=13.764 s, sync=0.026 s, total=13.806 s; sync files=225, longest=0.001 s, average=0.001 s; distance=1475 kB, estimate=2797 kB; lsn=0/1D98200, redo lsn=0/1D98170
+2026-05-18 22:33:28.149 CEST [4120] ERROR:  foreign key constraint "characters_equipment_armor_name_fkey" cannot be implemented
+2026-05-18 22:33:28.149 CEST [4120] DETAIL:  Key columns "armor_name" and "item_name" are of incompatible types: bigint and text.
+2026-05-18 22:33:28.149 CEST [4120] STATEMENT:  /*
+	This is the sql Scheme its in 3 part :
+	
+	-> User and campain handle
+	-> SRD table tables scrap from daggetheart
+	-> In game tables with a character and all its stats 
+	
+	*/
+	
+	
+	
+	/*
+	                    ***************************
+	                    *    USER AUTH SESSION    *
+	                    ***************************
+	*/
+	
+	-- For user auth
+	CREATE TABLE IF NOT EXISTS profiles (
+	    user_id UUID PRIMARY KEY,
+	    username VARCHAR(50) UNIQUE,
+	    display_name TEXT,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For gaming session
+	CREATE TABLE IF NOT EXISTS campaigns (
+	    campaign_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    owner_user_id UUID NOT NULL REFERENCES profiles(user_id),
+	    name TEXT NOT NULL,
+	    description TEXT,
+	    settings JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For character in session
+	CREATE TABLE IF NOT EXISTS campaign_members (
+	    campaign_id UUID REFERENCES campaigns(campaign_id) ON DELETE CASCADE,
+	    user_id UUID REFERENCES profiles(user_id) ON DELETE CASCADE,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    PRIMARY KEY (campaign_id, user_id)
+	);
+	
+	
+	/*
+	                    ************************
+	                    *    SRD SCRAP DATA    *
+	                    ************************
+	*/
+	
+	CREATE TABLE IF NOT EXISTS srd_classes (
+	    class_name TEXT PRIMARY KEY,
+	    class_description TEXT,
+	
+	    domain1 TEXT UNIQUE,
+	    domain2 TEXT UNIQUE,
+	
+	    class_item1 TEXT,
+	    class_item2 TEXT,
+	
+	    evasion INTEGER,
+	    starting_hit_points INTEGER,
+	
+	    hope_feature TEXT,
+	    class_feature TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_subclass (
+	    subclass_name TEXT PRIMARY KEY,
+	    class_name TEXT REFERENCES srd_classes(class_name),
+	
+	    subclass_description TEXT,
+	    spellcast_trait_type TEXT,
+	    spellcast_trait TEXT,
+	
+	    foundation_feature TEXT,
+	    specialization_feature TEXT,
+	    mastery_feature TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_ancestry (
+	    ancestry_name TEXT PRIMARY KEY,
+	
+	    ancestry_feature_1_name TEXT,
+	    ancestry_feature_1_description TEXT,
+	
+	    ancestry_feature_2_name TEXT,
+	    ancestry_feature_2_description TEXT,
+	    
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_community (
+	    community_name TEXT PRIMARY KEY,
+	
+	    community_feature_name TEXT,
+	    community_feature_text TEXT,
+	
+	    source_url TEXT
+	);                       
+	
+	CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_name TEXT PRIMARY KEY,
+	
+	    domain_name TEXT REFERENCES srd_classes(domain1),
+	
+	    card_level INTEGER,
+	    card_type TEXT,
+	    recall_cost INTEGER,
+	    description_text TEXT,
+	
+	    source_url TEXT
+	    );
+	
+	CREATE TABLE IF NOT EXISTS srd_armor (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    thresholds_major INTEGER,
+	    thresholds_severe INTEGER,
+	    base_score INTEGER,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_weapon (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    trait TEXT,
+	    range TEXT,
+	
+	    damage_text TEXT,
+	    damage_type TEXT,
+	
+	    burden TEXT,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_consumables (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT   
+	);
+	
+	
+	CREATE TABLE IF NOT EXISTS srd_item(
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT
+	);
+	
+	/*
+	                    ***************
+	                    *  Character  *
+	                    ***************
+	*/
+	
+	CREATE TABLE IF NOT EXISTS characters (
+	    character_id BIGSERIAL PRIMARY KEY,
+	
+	    name TEXT NOT NULL,
+	
+	    class_item_choice TEXT,
+	
+	    prayer_dice_value INTEGER,
+	    unstoppable_value INTEGER,
+	
+	    data_json JSONB,
+	
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	
+	CREATE TABLE IF NOT EXISTS characters_equipment (
+	    character_equipment_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    armor_name BIGINT REFERENCES srd_armor(item_name),
+	    primary_weapon BIGINT REFERENCES srd_weapon(item_name),
+	    secondary_weapon BIGINT REFERENCES srd_weapon(item_name),
+	
+	    weapon_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS characters_consumable (
+	    characters_consumable_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	    consumables_id BIGINT REFERENCES srd_consumables(item_name),
+	
+	    consumable_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS characters_item (
+	    character_item_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	    item_id BIGINT REFERENCES srd_item(item_name),
+	
+	    item_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_inventory (
+	    character_inventory_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    item_category TEXT,
+	    item_name TEXT,
+	    quantity INTEGER,
+	
+	    notes TEXT,
+	
+	    created_at TIMESTAMPTZ DEFAULT NOW()
+	);
+	
+	CREATE TABLE IF NOT EXISTS characters_companion (
+	    characters_companion_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    companion_name TEXT,
+	    companion_evasion INTEGER,
+	    companion_stress INTEGER,
+	    companion_range TEXT,
+	    companion_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_info (
+	    character_info_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    pronouns TEXT,
+	    notes TEXT,
+	    description TEXT,
+	
+	    heritage_notes TEXT,
+	    background TEXT,
+	    connection_notes TEXT,
+	    warrior_notes TEXT,
+	    rally_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_domain_cards (
+	    characters_domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    card_id BIGINT REFERENCES srd_domain_card(domain_card_name),
+	    character_card_level INTEGER
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_class (
+	    caracter_class_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_id BIGINT REFERENCES srd_classes(class_name),
+	
+	    subclass1_name BIGINT REFERENCES srd_subclass(subclass_name),
+	    subclass2_name BIGINT REFERENCES srd_subclass(subclass_name)
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_experiences (
+	    character_experiences_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    experience_name TEXT,
+	    modifier_value INTEGER
+	);
+	
+	CREATE TABLE IF NOT EXISTS characters_stats (
+	    characters_stats_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    characters_equipment BIGINT REFERENCES characters_equipment(character_equipment_id),
+	    character_experiences BIGINT REFERENCES character_experiences(character_experiences_id),
+	
+	    level INTEGER,
+	
+	    agility INTEGER NOT NULL DEFAULT 0,
+	    strength INTEGER NOT NULL DEFAULT 0,
+	    finesse INTEGER NOT NULL DEFAULT 0,
+	    instinct INTEGER NOT NULL DEFAULT 0,
+	    presence INTEGER NOT NULL DEFAULT 0,
+	    knowledge INTEGER NOT NULL DEFAULT 0,
+	
+	    health INTEGER,
+	    stress INTEGER,
+	    hope INTEGER,
+	
+	    evasion INTEGER,
+	    armor_score INTEGER,
+	
+	    threshold_major INTEGER,
+	    threshold_severe INTEGER,
+	
+	    hit_points INTEGER,
+	
+	    proficiency INT NOT NULL,
+	
+	    gold_handfuls INTEGER NOT NULL,
+	    gold_bags INTEGER NOT NULL,
+	    gold_chests INTEGER NOT NULL,
+	
+	    rally_die_value INTEGER
+	);
+	
+	
+2026-05-18 22:33:44.554 CEST [98724] LOG:  checkpoint starting: time
+2026-05-18 22:33:49.729 CEST [98724] LOG:  checkpoint complete: wrote 52 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=5.166 s, sync=0.005 s, total=5.175 s; sync files=47, longest=0.001 s, average=0.001 s; distance=213 kB, estimate=2539 kB; lsn=0/1DCD740, redo lsn=0/1DCD6B0
+2026-05-18 22:35:05.119 CEST [4227] ERROR:  foreign key constraint "character_domain_cards_card_id_fkey" cannot be implemented
+2026-05-18 22:35:05.119 CEST [4227] DETAIL:  Key columns "card_id" and "domain_card_name" are of incompatible types: bigint and text.
+2026-05-18 22:35:05.119 CEST [4227] STATEMENT:  /*
+	This is the sql Scheme its in 3 part :
+	
+	-> User and campain handle
+	-> SRD table tables scrap from daggetheart
+	-> In game tables with a character and all its stats 
+	
+	*/
+	
+	
+	
+	/*
+	                    ***************************
+	                    *    USER AUTH SESSION    *
+	                    ***************************
+	*/
+	
+	-- For user auth
+	CREATE TABLE IF NOT EXISTS profiles (
+	    user_id UUID PRIMARY KEY,
+	    username VARCHAR(50) UNIQUE,
+	    display_name TEXT,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For gaming session
+	CREATE TABLE IF NOT EXISTS campaigns (
+	    campaign_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    owner_user_id UUID NOT NULL REFERENCES profiles(user_id),
+	    name TEXT NOT NULL,
+	    description TEXT,
+	    settings JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For character in session
+	CREATE TABLE IF NOT EXISTS campaign_members (
+	    campaign_id UUID REFERENCES campaigns(campaign_id) ON DELETE CASCADE,
+	    user_id UUID REFERENCES profiles(user_id) ON DELETE CASCADE,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    PRIMARY KEY (campaign_id, user_id)
+	);
+	
+	
+	/*
+	                    ************************
+	                    *    SRD SCRAP DATA    *
+	                    ************************
+	*/
+	
+	CREATE TABLE IF NOT EXISTS srd_classes (
+	    class_name TEXT PRIMARY KEY,
+	    class_description TEXT,
+	
+	    domain1 TEXT UNIQUE,
+	    domain2 TEXT UNIQUE,
+	
+	    class_item1 TEXT,
+	    class_item2 TEXT,
+	
+	    evasion INTEGER,
+	    starting_hit_points INTEGER,
+	
+	    hope_feature TEXT,
+	    class_feature TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_subclass (
+	    subclass_name TEXT PRIMARY KEY,
+	    class_name TEXT REFERENCES srd_classes(class_name),
+	
+	    subclass_description TEXT,
+	    spellcast_trait_type TEXT,
+	    spellcast_trait TEXT,
+	
+	    foundation_feature TEXT,
+	    specialization_feature TEXT,
+	    mastery_feature TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_ancestry (
+	    ancestry_name TEXT PRIMARY KEY,
+	
+	    ancestry_feature_1_name TEXT,
+	    ancestry_feature_1_description TEXT,
+	
+	    ancestry_feature_2_name TEXT,
+	    ancestry_feature_2_description TEXT,
+	    
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_community (
+	    community_name TEXT PRIMARY KEY,
+	
+	    community_feature_name TEXT,
+	    community_feature_text TEXT,
+	
+	    source_url TEXT
+	);                       
+	
+	CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_name TEXT PRIMARY KEY,
+	
+	    domain_name TEXT REFERENCES srd_classes(domain1),
+	
+	    card_level INTEGER,
+	    card_type TEXT,
+	    recall_cost INTEGER,
+	    description_text TEXT,
+	
+	    source_url TEXT
+	    );
+	
+	CREATE TABLE IF NOT EXISTS srd_armor (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    thresholds_major INTEGER,
+	    thresholds_severe INTEGER,
+	    base_score INTEGER,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_weapon (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    trait TEXT,
+	    range TEXT,
+	
+	    damage_text TEXT,
+	    damage_type TEXT,
+	
+	    burden TEXT,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_consumables (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT   
+	);
+	
+	
+	CREATE TABLE IF NOT EXISTS srd_item(
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT
+	);
+	
+	/*
+	                    ***************
+	                    *  Character  *
+	                    ***************
+	*/
+	
+	CREATE TABLE IF NOT EXISTS characters (
+	    character_id BIGSERIAL PRIMARY KEY,
+	
+	    name TEXT NOT NULL,
+	
+	    class_item_choice TEXT,
+	
+	    prayer_dice_value INTEGER,
+	    unstoppable_value INTEGER,
+	
+	    data_json JSONB,
+	
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	
+	CREATE TABLE IF NOT EXISTS characters_equipment (
+	    character_equipment_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    armor_name TEXT REFERENCES srd_armor(item_name),
+	    primary_weapon TEXT REFERENCES srd_weapon(item_name),
+	    secondary_weapon TEXT REFERENCES srd_weapon(item_name),
+	
+	    weapon_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS characters_consumable (
+	    characters_consumable_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	    consumables_name TEXT REFERENCES srd_consumables(item_name),
+	
+	    consumable_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS characters_item (
+	    character_item_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	    item_name TEXT REFERENCES srd_item(item_name),
+	
+	    item_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_inventory (
+	    character_inventory_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    item_category TEXT,
+	    item_name TEXT,
+	    quantity INTEGER,
+	
+	    notes TEXT,
+	
+	    created_at TIMESTAMPTZ DEFAULT NOW()
+	);
+	
+	CREATE TABLE IF NOT EXISTS characters_companion (
+	    characters_companion_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    companion_name TEXT,
+	    companion_evasion INTEGER,
+	    companion_stress INTEGER,
+	    companion_range TEXT,
+	    companion_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_info (
+	    character_info_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    pronouns TEXT,
+	    notes TEXT,
+	    description TEXT,
+	
+	    heritage_notes TEXT,
+	    background TEXT,
+	    connection_notes TEXT,
+	    warrior_notes TEXT,
+	    rally_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_domain_cards (
+	    characters_domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    card_id BIGINT REFERENCES srd_domain_card(domain_card_name),
+	    character_card_level INTEGER
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_class (
+	    caracter_class_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_id BIGINT REFERENCES srd_classes(class_name),
+	
+	    subclass1_name BIGINT REFERENCES srd_subclass(subclass_name),
+	    subclass2_name BIGINT REFERENCES srd_subclass(subclass_name)
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_experiences (
+	    character_experiences_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    experience_name TEXT,
+	    modifier_value INTEGER
+	);
+	
+	CREATE TABLE IF NOT EXISTS characters_stats (
+	    characters_stats_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    characters_equipment BIGINT REFERENCES characters_equipment(character_equipment_id),
+	    character_experiences BIGINT REFERENCES character_experiences(character_experiences_id),
+	
+	    level INTEGER,
+	
+	    agility INTEGER NOT NULL DEFAULT 0,
+	    strength INTEGER NOT NULL DEFAULT 0,
+	    finesse INTEGER NOT NULL DEFAULT 0,
+	    instinct INTEGER NOT NULL DEFAULT 0,
+	    presence INTEGER NOT NULL DEFAULT 0,
+	    knowledge INTEGER NOT NULL DEFAULT 0,
+	
+	    health INTEGER,
+	    stress INTEGER,
+	    hope INTEGER,
+	
+	    evasion INTEGER,
+	    armor_score INTEGER,
+	
+	    threshold_major INTEGER,
+	    threshold_severe INTEGER,
+	
+	    hit_points INTEGER,
+	
+	    proficiency INT NOT NULL,
+	
+	    gold_handfuls INTEGER NOT NULL,
+	    gold_bags INTEGER NOT NULL,
+	    gold_chests INTEGER NOT NULL,
+	
+	    rally_die_value INTEGER
+	);
+	
+	
+2026-05-18 22:35:39.519 CEST [4331] ERROR:  foreign key constraint "character_class_class_id_fkey" cannot be implemented
+2026-05-18 22:35:39.519 CEST [4331] DETAIL:  Key columns "class_id" and "class_name" are of incompatible types: bigint and text.
+2026-05-18 22:35:39.519 CEST [4331] STATEMENT:  /*
+	This is the sql Scheme its in 3 part :
+	
+	-> User and campain handle
+	-> SRD table tables scrap from daggetheart
+	-> In game tables with a character and all its stats 
+	
+	*/
+	
+	
+	
+	/*
+	                    ***************************
+	                    *    USER AUTH SESSION    *
+	                    ***************************
+	*/
+	
+	-- For user auth
+	CREATE TABLE IF NOT EXISTS profiles (
+	    user_id UUID PRIMARY KEY,
+	    username VARCHAR(50) UNIQUE,
+	    display_name TEXT,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For gaming session
+	CREATE TABLE IF NOT EXISTS campaigns (
+	    campaign_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    owner_user_id UUID NOT NULL REFERENCES profiles(user_id),
+	    name TEXT NOT NULL,
+	    description TEXT,
+	    settings JSONB NOT NULL DEFAULT '{}'::jsonb,
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	-- For character in session
+	CREATE TABLE IF NOT EXISTS campaign_members (
+	    campaign_id UUID REFERENCES campaigns(campaign_id) ON DELETE CASCADE,
+	    user_id UUID REFERENCES profiles(user_id) ON DELETE CASCADE,
+	    role TEXT NOT NULL DEFAULT 'player',
+	    PRIMARY KEY (campaign_id, user_id)
+	);
+	
+	
+	/*
+	                    ************************
+	                    *    SRD SCRAP DATA    *
+	                    ************************
+	*/
+	
+	CREATE TABLE IF NOT EXISTS srd_classes (
+	    class_name TEXT PRIMARY KEY,
+	    class_description TEXT,
+	
+	    domain1 TEXT UNIQUE,
+	    domain2 TEXT UNIQUE,
+	
+	    class_item1 TEXT,
+	    class_item2 TEXT,
+	
+	    evasion INTEGER,
+	    starting_hit_points INTEGER,
+	
+	    hope_feature TEXT,
+	    class_feature TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_subclass (
+	    subclass_name TEXT PRIMARY KEY,
+	    class_name TEXT REFERENCES srd_classes(class_name),
+	
+	    subclass_description TEXT,
+	    spellcast_trait_type TEXT,
+	    spellcast_trait TEXT,
+	
+	    foundation_feature TEXT,
+	    specialization_feature TEXT,
+	    mastery_feature TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_ancestry (
+	    ancestry_name TEXT PRIMARY KEY,
+	
+	    ancestry_feature_1_name TEXT,
+	    ancestry_feature_1_description TEXT,
+	
+	    ancestry_feature_2_name TEXT,
+	    ancestry_feature_2_description TEXT,
+	    
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_community (
+	    community_name TEXT PRIMARY KEY,
+	
+	    community_feature_name TEXT,
+	    community_feature_text TEXT,
+	
+	    source_url TEXT
+	);                       
+	
+	CREATE TABLE IF NOT EXISTS srd_domain_card (
+	    domain_card_name TEXT PRIMARY KEY,
+	
+	    domain_name TEXT REFERENCES srd_classes(domain1),
+	
+	    card_level INTEGER,
+	    card_type TEXT,
+	    recall_cost INTEGER,
+	    description_text TEXT,
+	
+	    source_url TEXT
+	    );
+	
+	CREATE TABLE IF NOT EXISTS srd_armor (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    thresholds_major INTEGER,
+	    thresholds_severe INTEGER,
+	    base_score INTEGER,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_weapon (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    tier INTEGER,
+	    trait TEXT,
+	    range TEXT,
+	
+	    damage_text TEXT,
+	    damage_type TEXT,
+	
+	    burden TEXT,
+	
+	    feature_text TEXT,
+	    description_text TEXT,
+	
+	    source_url TEXT   
+	);
+	
+	CREATE TABLE IF NOT EXISTS srd_consumables (
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT   
+	);
+	
+	
+	CREATE TABLE IF NOT EXISTS srd_item(
+	    item_name TEXT PRIMARY KEY,
+	    category TEXT,
+	
+	    description_text TEXT,
+	
+	    source_url TEXT
+	);
+	
+	/*
+	                    ***************
+	                    *  Character  *
+	                    ***************
+	*/
+	
+	CREATE TABLE IF NOT EXISTS characters (
+	    character_id BIGSERIAL PRIMARY KEY,
+	
+	    name TEXT NOT NULL,
+	
+	    class_item_choice TEXT,
+	
+	    prayer_dice_value INTEGER,
+	    unstoppable_value INTEGER,
+	
+	    data_json JSONB,
+	
+	    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+	
+	
+	CREATE TABLE IF NOT EXISTS characters_equipment (
+	    character_equipment_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    armor_name TEXT REFERENCES srd_armor(item_name),
+	    primary_weapon TEXT REFERENCES srd_weapon(item_name),
+	    secondary_weapon TEXT REFERENCES srd_weapon(item_name),
+	
+	    weapon_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS characters_consumable (
+	    characters_consumable_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	    consumables_name TEXT REFERENCES srd_consumables(item_name),
+	
+	    consumable_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS characters_item (
+	    character_item_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	    item_name TEXT REFERENCES srd_item(item_name),
+	
+	    item_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_inventory (
+	    character_inventory_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    item_category TEXT,
+	    item_name TEXT,
+	    quantity INTEGER,
+	
+	    notes TEXT,
+	
+	    created_at TIMESTAMPTZ DEFAULT NOW()
+	);
+	
+	CREATE TABLE IF NOT EXISTS characters_companion (
+	    characters_companion_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    companion_name TEXT,
+	    companion_evasion INTEGER,
+	    companion_stress INTEGER,
+	    companion_range TEXT,
+	    companion_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_info (
+	    character_info_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    pronouns TEXT,
+	    notes TEXT,
+	    description TEXT,
+	
+	    heritage_notes TEXT,
+	    background TEXT,
+	    connection_notes TEXT,
+	    warrior_notes TEXT,
+	    rally_notes TEXT
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_domain_cards (
+	    characters_domain_card_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    domain_card_name name REFERENCES srd_domain_card(domain_card_name),
+	    character_card_level INTEGER
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_class (
+	    caracter_class_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    class_id BIGINT REFERENCES srd_classes(class_name),
+	
+	    subclass1_name BIGINT REFERENCES srd_subclass(subclass_name),
+	    subclass2_name BIGINT REFERENCES srd_subclass(subclass_name)
+	);
+	
+	CREATE TABLE IF NOT EXISTS character_experiences (
+	    character_experiences_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    experience_name TEXT,
+	    modifier_value INTEGER
+	);
+	
+	CREATE TABLE IF NOT EXISTS characters_stats (
+	    characters_stats_id BIGSERIAL PRIMARY KEY,
+	
+	    character_id BIGINT REFERENCES characters(character_id),
+	
+	    characters_equipment BIGINT REFERENCES characters_equipment(character_equipment_id),
+	    character_experiences BIGINT REFERENCES character_experiences(character_experiences_id),
+	
+	    level INTEGER,
+	
+	    agility INTEGER NOT NULL DEFAULT 0,
+	    strength INTEGER NOT NULL DEFAULT 0,
+	    finesse INTEGER NOT NULL DEFAULT 0,
+	    instinct INTEGER NOT NULL DEFAULT 0,
+	    presence INTEGER NOT NULL DEFAULT 0,
+	    knowledge INTEGER NOT NULL DEFAULT 0,
+	
+	    health INTEGER,
+	    stress INTEGER,
+	    hope INTEGER,
+	
+	    evasion INTEGER,
+	    armor_score INTEGER,
+	
+	    threshold_major INTEGER,
+	    threshold_severe INTEGER,
+	
+	    hit_points INTEGER,
+	
+	    proficiency INT NOT NULL,
+	
+	    gold_handfuls INTEGER NOT NULL,
+	    gold_bags INTEGER NOT NULL,
+	    gold_chests INTEGER NOT NULL,
+	
+	    rally_die_value INTEGER
+	);
+	
+	
+2026-05-18 22:38:44.727 CEST [98724] LOG:  checkpoint starting: time
+2026-05-18 22:39:11.081 CEST [98724] LOG:  checkpoint complete: wrote 261 buffers (1.6%); 0 WAL file(s) added, 0 removed, 0 recycled; write=26.309 s, sync=0.031 s, total=26.355 s; sync files=278, longest=0.001 s, average=0.001 s; distance=1694 kB, estimate=2454 kB; lsn=0/1F75158, redo lsn=0/1F750C8
